@@ -20,7 +20,7 @@ router.get("/models", async (req, res) => {
 
     const cursorChecksum = req.headers['x-cursor-checksum'] 
       ?? generateCursorChecksum(authToken.trim());
-    const cursorClientVersion = "0.48.7"
+    const cursorClientVersion = "2.3.41"
 
     const availableModelsResponse = await fetch("https://api2.cursor.sh/aiserver.v1.AiService/AvailableModels", {
       method: 'POST',
@@ -32,8 +32,12 @@ router.get("/models", async (req, res) => {
         'user-agent': 'connect-es/1.6.1',
         'x-cursor-checksum': cursorChecksum,
         'x-cursor-client-version': cursorClientVersion,
+        'x-cursor-client-type': 'ide',
+        'x-cursor-client-os': process.platform,
+        'x-cursor-client-arch': process.arch,
+        'x-cursor-client-device-type': 'desktop',
         'x-cursor-config-version': uuidv4(),
-        'x-cursor-timezone': 'Asia/Shanghai',
+        'x-cursor-timezone': Intl.DateTimeFormat().resolvedOptions().timeZone,
         'x-ghost-mode': 'true',
         'Host': 'api2.cursor.sh',
       },
@@ -92,8 +96,9 @@ router.post('/chat/completions', async (req, res) => {
 
     const sessionid = uuidv5(authToken,  uuidv5.DNS);
     const clientKey = generateHashed64Hex(authToken)
-    const cursorClientVersion = "0.48.7"
+    const cursorClientVersion = "2.3.41"
     const cursorConfigVersion = uuidv4();
+    const cursorTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     // Request the AvailableModels before StreamChat.
     const availableModelsResponse = fetch("https://api2.cursor.sh/aiserver.v1.AiService/AvailableModels", {
@@ -108,8 +113,12 @@ router.post('/chat/completions', async (req, res) => {
         'x-client-key': clientKey,
         'x-cursor-checksum': cursorChecksum,
         'x-cursor-client-version': cursorClientVersion,
+        'x-cursor-client-type': 'ide',
+        'x-cursor-client-os': process.platform,
+        'x-cursor-client-arch': process.arch,
+        'x-cursor-client-device-type': 'desktop',
         'x-cursor-config-version': cursorConfigVersion,
-        'x-cursor-timezone': 'Asia/Shanghai',
+        'x-cursor-timezone': cursorTimezone,
         'x-ghost-mode': 'true',
         "x-request-id": uuidv4(),
         "x-session-id": sessionid,
@@ -134,8 +143,12 @@ router.post('/chat/completions', async (req, res) => {
         'x-client-key': clientKey,
         'x-cursor-checksum': cursorChecksum,
         'x-cursor-client-version': cursorClientVersion,
+        'x-cursor-client-type': 'ide',
+        'x-cursor-client-os': process.platform,
+        'x-cursor-client-arch': process.arch,
+        'x-cursor-client-device-type': 'desktop',
         'x-cursor-config-version': cursorConfigVersion,
-        'x-cursor-timezone': 'Asia/Shanghai',
+        'x-cursor-timezone': cursorTimezone,
         'x-ghost-mode': 'true',
         'x-request-id': uuidv4(),
         'x-session-id': sessionid,

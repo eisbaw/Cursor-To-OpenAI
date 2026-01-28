@@ -1,8 +1,43 @@
 const os = require('os');
+const path = require('path');
 const zlib = require('zlib');
 const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
 const $root = require('../proto/message.js');
+
+// Get Cursor storage path based on platform
+function getCursorStoragePath() {
+  const homeDir = os.homedir();
+  switch (process.platform) {
+    case 'win32':
+      return path.join(process.env.APPDATA || path.join(homeDir, 'AppData', 'Roaming'), 'Cursor', 'User', 'globalStorage', 'state.vscdb');
+    case 'darwin':
+      return path.join(homeDir, 'Library', 'Application Support', 'Cursor', 'User', 'globalStorage', 'state.vscdb');
+    default: // linux
+      return path.join(homeDir, '.config', 'Cursor', 'User', 'globalStorage', 'state.vscdb');
+  }
+}
+
+// Read machine ID from Cursor's SQLite storage
+let cachedMachineId = null;
+function getMachineIdFromStorage() {
+  if (cachedMachineId) return cachedMachineId;
+  
+  try {
+    const Database = require('better-sqlite3');
+    const dbPath = getCursorStoragePath();
+    const db = new Database(dbPath, { readonly: true });
+    const row = db.prepare("SELECT value FROM ItemTable WHERE key = 'storage.serviceMachineId'").get();
+    db.close();
+    if (row && row.value) {
+      cachedMachineId = row.value.toString();
+      return cachedMachineId;
+    }
+  } catch (err) {
+    console.error('Could not read machine ID from Cursor storage:', err.message);
+  }
+  return null;
+}
 
 function generateCursorBody(messages, modelName) {
 
@@ -169,8 +204,12 @@ function obfuscateBytes(byteArray) {
 }
 
 function generateCursorChecksum(token) {
-  const machineId = generateHashed64Hex(token, 'machineId');
-  const macMachineId = generateHashed64Hex(token, 'macMachineId');
+  // Try to get real machine ID from Cursor's storage
+  let machineId = getMachineIdFromStorage();
+  if (!machineId) {
+    // Fallback to derived ID if storage not accessible
+    machineId = generateHashed64Hex(token, 'machineId');
+  }
 
   const timestamp = Math.floor(Date.now() / 1e6);
   const byteArray = new Uint8Array([
@@ -183,14 +222,21 @@ function generateCursorChecksum(token) {
   ]);
 
   const obfuscatedBytes = obfuscateBytes(byteArray);
-  const encodedChecksum = Buffer.from(obfuscatedBytes).toString('base64');
+  // Use URL-safe base64 encoding (replace + with -, / with _)
+  const encodedChecksum = Buffer.from(obfuscatedBytes)
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
 
-  return `${encodedChecksum}${machineId}/${macMachineId}`;
+  return `${encodedChecksum}${machineId}`;
 }
 
 module.exports = {
   generateCursorBody,
   chunkToUtf8String,
   generateHashed64Hex,
-  generateCursorChecksum
+  generateCursorChecksum,
+  getMachineIdFromStorage,
+  getCursorStoragePath
 };

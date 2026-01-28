@@ -8,6 +8,7 @@
   "url": "https://github.com/JiuZ-Chn/Cursor-To-OpenAI",
   "license": "MIT",
   "dependencies": {
+    "better-sqlite3": "^12.6.2",
     "express": "4.21.2",
     "morgan": "^1.10.0",
     "protobufjs": "^7.4.0",
