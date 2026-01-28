@@ -570,6 +570,738 @@ $root.AvailableModelsResponse = (function() {
     return AvailableModelsResponse;
 })();
 
+/**
+ * ClientSideToolV2 enum.
+ * @exports ClientSideToolV2
+ * @enum {number}
+ * @property {number} CLIENT_SIDE_TOOL_V2_UNSPECIFIED=0 CLIENT_SIDE_TOOL_V2_UNSPECIFIED value
+ * @property {number} CLIENT_SIDE_TOOL_V2_READ_SEMSEARCH_FILES=1 CLIENT_SIDE_TOOL_V2_READ_SEMSEARCH_FILES value
+ * @property {number} CLIENT_SIDE_TOOL_V2_RIPGREP_SEARCH=3 CLIENT_SIDE_TOOL_V2_RIPGREP_SEARCH value
+ * @property {number} CLIENT_SIDE_TOOL_V2_READ_FILE=5 CLIENT_SIDE_TOOL_V2_READ_FILE value
+ * @property {number} CLIENT_SIDE_TOOL_V2_LIST_DIR=6 CLIENT_SIDE_TOOL_V2_LIST_DIR value
+ * @property {number} CLIENT_SIDE_TOOL_V2_EDIT_FILE=7 CLIENT_SIDE_TOOL_V2_EDIT_FILE value
+ * @property {number} CLIENT_SIDE_TOOL_V2_FILE_SEARCH=8 CLIENT_SIDE_TOOL_V2_FILE_SEARCH value
+ * @property {number} CLIENT_SIDE_TOOL_V2_SEMANTIC_SEARCH_FULL=9 CLIENT_SIDE_TOOL_V2_SEMANTIC_SEARCH_FULL value
+ * @property {number} CLIENT_SIDE_TOOL_V2_DELETE_FILE=11 CLIENT_SIDE_TOOL_V2_DELETE_FILE value
+ * @property {number} CLIENT_SIDE_TOOL_V2_REAPPLY=12 CLIENT_SIDE_TOOL_V2_REAPPLY value
+ * @property {number} CLIENT_SIDE_TOOL_V2_RUN_TERMINAL_COMMAND_V2=15 CLIENT_SIDE_TOOL_V2_RUN_TERMINAL_COMMAND_V2 value
+ * @property {number} CLIENT_SIDE_TOOL_V2_FETCH_RULES=16 CLIENT_SIDE_TOOL_V2_FETCH_RULES value
+ * @property {number} CLIENT_SIDE_TOOL_V2_WEB_SEARCH=18 CLIENT_SIDE_TOOL_V2_WEB_SEARCH value
+ * @property {number} CLIENT_SIDE_TOOL_V2_MCP=19 CLIENT_SIDE_TOOL_V2_MCP value
+ * @property {number} CLIENT_SIDE_TOOL_V2_SEARCH_SYMBOLS=23 CLIENT_SIDE_TOOL_V2_SEARCH_SYMBOLS value
+ * @property {number} CLIENT_SIDE_TOOL_V2_GO_TO_DEFINITION=31 CLIENT_SIDE_TOOL_V2_GO_TO_DEFINITION value
+ * @property {number} CLIENT_SIDE_TOOL_V2_GLOB_FILE_SEARCH=42 CLIENT_SIDE_TOOL_V2_GLOB_FILE_SEARCH value
+ */
+$root.ClientSideToolV2 = (function() {
+    var valuesById = {}, values = Object.create(valuesById);
+    values[valuesById[0] = "CLIENT_SIDE_TOOL_V2_UNSPECIFIED"] = 0;
+    values[valuesById[1] = "CLIENT_SIDE_TOOL_V2_READ_SEMSEARCH_FILES"] = 1;
+    values[valuesById[3] = "CLIENT_SIDE_TOOL_V2_RIPGREP_SEARCH"] = 3;
+    values[valuesById[5] = "CLIENT_SIDE_TOOL_V2_READ_FILE"] = 5;
+    values[valuesById[6] = "CLIENT_SIDE_TOOL_V2_LIST_DIR"] = 6;
+    values[valuesById[7] = "CLIENT_SIDE_TOOL_V2_EDIT_FILE"] = 7;
+    values[valuesById[8] = "CLIENT_SIDE_TOOL_V2_FILE_SEARCH"] = 8;
+    values[valuesById[9] = "CLIENT_SIDE_TOOL_V2_SEMANTIC_SEARCH_FULL"] = 9;
+    values[valuesById[11] = "CLIENT_SIDE_TOOL_V2_DELETE_FILE"] = 11;
+    values[valuesById[12] = "CLIENT_SIDE_TOOL_V2_REAPPLY"] = 12;
+    values[valuesById[15] = "CLIENT_SIDE_TOOL_V2_RUN_TERMINAL_COMMAND_V2"] = 15;
+    values[valuesById[16] = "CLIENT_SIDE_TOOL_V2_FETCH_RULES"] = 16;
+    values[valuesById[18] = "CLIENT_SIDE_TOOL_V2_WEB_SEARCH"] = 18;
+    values[valuesById[19] = "CLIENT_SIDE_TOOL_V2_MCP"] = 19;
+    values[valuesById[23] = "CLIENT_SIDE_TOOL_V2_SEARCH_SYMBOLS"] = 23;
+    values[valuesById[31] = "CLIENT_SIDE_TOOL_V2_GO_TO_DEFINITION"] = 31;
+    values[valuesById[42] = "CLIENT_SIDE_TOOL_V2_GLOB_FILE_SEARCH"] = 42;
+    return values;
+})();
+
+$root.ClientSideToolV2Call = (function() {
+
+    /**
+     * Properties of a ClientSideToolV2Call.
+     * @exports IClientSideToolV2Call
+     * @interface IClientSideToolV2Call
+     * @property {ClientSideToolV2|null} [tool] ClientSideToolV2Call tool
+     * @property {string|null} [toolCallId] ClientSideToolV2Call toolCallId
+     * @property {string|null} [name] ClientSideToolV2Call name
+     * @property {string|null} [rawArgs] ClientSideToolV2Call rawArgs
+     */
+
+    /**
+     * Constructs a new ClientSideToolV2Call.
+     * @exports ClientSideToolV2Call
+     * @classdesc Represents a ClientSideToolV2Call.
+     * @implements IClientSideToolV2Call
+     * @constructor
+     * @param {IClientSideToolV2Call=} [properties] Properties to set
+     */
+    function ClientSideToolV2Call(properties) {
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * ClientSideToolV2Call tool.
+     * @member {ClientSideToolV2} tool
+     * @memberof ClientSideToolV2Call
+     * @instance
+     */
+    ClientSideToolV2Call.prototype.tool = 0;
+
+    /**
+     * ClientSideToolV2Call toolCallId.
+     * @member {string} toolCallId
+     * @memberof ClientSideToolV2Call
+     * @instance
+     */
+    ClientSideToolV2Call.prototype.toolCallId = "";
+
+    /**
+     * ClientSideToolV2Call name.
+     * @member {string} name
+     * @memberof ClientSideToolV2Call
+     * @instance
+     */
+    ClientSideToolV2Call.prototype.name = "";
+
+    /**
+     * ClientSideToolV2Call rawArgs.
+     * @member {string} rawArgs
+     * @memberof ClientSideToolV2Call
+     * @instance
+     */
+    ClientSideToolV2Call.prototype.rawArgs = "";
+
+    /**
+     * Creates a new ClientSideToolV2Call instance using the specified properties.
+     * @function create
+     * @memberof ClientSideToolV2Call
+     * @static
+     * @param {IClientSideToolV2Call=} [properties] Properties to set
+     * @returns {ClientSideToolV2Call} ClientSideToolV2Call instance
+     */
+    ClientSideToolV2Call.create = function create(properties) {
+        return new ClientSideToolV2Call(properties);
+    };
+
+    /**
+     * Encodes the specified ClientSideToolV2Call message. Does not implicitly {@link ClientSideToolV2Call.verify|verify} messages.
+     * @function encode
+     * @memberof ClientSideToolV2Call
+     * @static
+     * @param {IClientSideToolV2Call} message ClientSideToolV2Call message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    ClientSideToolV2Call.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.tool != null && Object.hasOwnProperty.call(message, "tool"))
+            writer.uint32(/* id 1, wireType 0 =*/8).int32(message.tool);
+        if (message.toolCallId != null && Object.hasOwnProperty.call(message, "toolCallId"))
+            writer.uint32(/* id 3, wireType 2 =*/26).string(message.toolCallId);
+        if (message.name != null && Object.hasOwnProperty.call(message, "name"))
+            writer.uint32(/* id 9, wireType 2 =*/74).string(message.name);
+        if (message.rawArgs != null && Object.hasOwnProperty.call(message, "rawArgs"))
+            writer.uint32(/* id 10, wireType 2 =*/82).string(message.rawArgs);
+        return writer;
+    };
+
+    /**
+     * Encodes the specified ClientSideToolV2Call message, length delimited. Does not implicitly {@link ClientSideToolV2Call.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof ClientSideToolV2Call
+     * @static
+     * @param {IClientSideToolV2Call} message ClientSideToolV2Call message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    ClientSideToolV2Call.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a ClientSideToolV2Call message from the specified reader or buffer.
+     * @function decode
+     * @memberof ClientSideToolV2Call
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {ClientSideToolV2Call} ClientSideToolV2Call
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    ClientSideToolV2Call.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.ClientSideToolV2Call();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1: {
+                    message.tool = reader.int32();
+                    break;
+                }
+            case 3: {
+                    message.toolCallId = reader.string();
+                    break;
+                }
+            case 9: {
+                    message.name = reader.string();
+                    break;
+                }
+            case 10: {
+                    message.rawArgs = reader.string();
+                    break;
+                }
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a ClientSideToolV2Call message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof ClientSideToolV2Call
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {ClientSideToolV2Call} ClientSideToolV2Call
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    ClientSideToolV2Call.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a ClientSideToolV2Call message.
+     * @function verify
+     * @memberof ClientSideToolV2Call
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    ClientSideToolV2Call.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.tool != null && message.hasOwnProperty("tool"))
+            switch (message.tool) {
+            default:
+                return "tool: enum value expected";
+            case 0:
+            case 1:
+            case 3:
+            case 5:
+            case 6:
+            case 7:
+            case 8:
+            case 9:
+            case 11:
+            case 12:
+            case 15:
+            case 16:
+            case 18:
+            case 19:
+            case 23:
+            case 31:
+            case 42:
+                break;
+            }
+        if (message.toolCallId != null && message.hasOwnProperty("toolCallId"))
+            if (!$util.isString(message.toolCallId))
+                return "toolCallId: string expected";
+        if (message.name != null && message.hasOwnProperty("name"))
+            if (!$util.isString(message.name))
+                return "name: string expected";
+        if (message.rawArgs != null && message.hasOwnProperty("rawArgs"))
+            if (!$util.isString(message.rawArgs))
+                return "rawArgs: string expected";
+        return null;
+    };
+
+    /**
+     * Creates a ClientSideToolV2Call message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof ClientSideToolV2Call
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {ClientSideToolV2Call} ClientSideToolV2Call
+     */
+    ClientSideToolV2Call.fromObject = function fromObject(object) {
+        if (object instanceof $root.ClientSideToolV2Call)
+            return object;
+        var message = new $root.ClientSideToolV2Call();
+        switch (object.tool) {
+        default:
+            if (typeof object.tool === "number") {
+                message.tool = object.tool;
+                break;
+            }
+            break;
+        case "CLIENT_SIDE_TOOL_V2_UNSPECIFIED":
+        case 0:
+            message.tool = 0;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_READ_SEMSEARCH_FILES":
+        case 1:
+            message.tool = 1;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_RIPGREP_SEARCH":
+        case 3:
+            message.tool = 3;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_READ_FILE":
+        case 5:
+            message.tool = 5;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_LIST_DIR":
+        case 6:
+            message.tool = 6;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_EDIT_FILE":
+        case 7:
+            message.tool = 7;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_FILE_SEARCH":
+        case 8:
+            message.tool = 8;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_SEMANTIC_SEARCH_FULL":
+        case 9:
+            message.tool = 9;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_DELETE_FILE":
+        case 11:
+            message.tool = 11;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_REAPPLY":
+        case 12:
+            message.tool = 12;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_RUN_TERMINAL_COMMAND_V2":
+        case 15:
+            message.tool = 15;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_FETCH_RULES":
+        case 16:
+            message.tool = 16;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_WEB_SEARCH":
+        case 18:
+            message.tool = 18;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_MCP":
+        case 19:
+            message.tool = 19;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_SEARCH_SYMBOLS":
+        case 23:
+            message.tool = 23;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_GO_TO_DEFINITION":
+        case 31:
+            message.tool = 31;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_GLOB_FILE_SEARCH":
+        case 42:
+            message.tool = 42;
+            break;
+        }
+        if (object.toolCallId != null)
+            message.toolCallId = String(object.toolCallId);
+        if (object.name != null)
+            message.name = String(object.name);
+        if (object.rawArgs != null)
+            message.rawArgs = String(object.rawArgs);
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a ClientSideToolV2Call message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof ClientSideToolV2Call
+     * @static
+     * @param {ClientSideToolV2Call} message ClientSideToolV2Call
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    ClientSideToolV2Call.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.defaults) {
+            object.tool = options.enums === String ? "CLIENT_SIDE_TOOL_V2_UNSPECIFIED" : 0;
+            object.toolCallId = "";
+            object.name = "";
+            object.rawArgs = "";
+        }
+        if (message.tool != null && message.hasOwnProperty("tool"))
+            object.tool = options.enums === String ? $root.ClientSideToolV2[message.tool] === undefined ? message.tool : $root.ClientSideToolV2[message.tool] : message.tool;
+        if (message.toolCallId != null && message.hasOwnProperty("toolCallId"))
+            object.toolCallId = message.toolCallId;
+        if (message.name != null && message.hasOwnProperty("name"))
+            object.name = message.name;
+        if (message.rawArgs != null && message.hasOwnProperty("rawArgs"))
+            object.rawArgs = message.rawArgs;
+        return object;
+    };
+
+    /**
+     * Converts this ClientSideToolV2Call to JSON.
+     * @function toJSON
+     * @memberof ClientSideToolV2Call
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    ClientSideToolV2Call.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    /**
+     * Gets the default type url for ClientSideToolV2Call
+     * @function getTypeUrl
+     * @memberof ClientSideToolV2Call
+     * @static
+     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+     * @returns {string} The default type url
+     */
+    ClientSideToolV2Call.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+        if (typeUrlPrefix === undefined) {
+            typeUrlPrefix = "type.googleapis.com";
+        }
+        return typeUrlPrefix + "/ClientSideToolV2Call";
+    };
+
+    return ClientSideToolV2Call;
+})();
+
+$root.ClientSideToolV2Result = (function() {
+
+    /**
+     * Properties of a ClientSideToolV2Result.
+     * @exports IClientSideToolV2Result
+     * @interface IClientSideToolV2Result
+     * @property {ClientSideToolV2|null} [tool] ClientSideToolV2Result tool
+     * @property {string|null} [toolCallId] ClientSideToolV2Result toolCallId
+     */
+
+    /**
+     * Constructs a new ClientSideToolV2Result.
+     * @exports ClientSideToolV2Result
+     * @classdesc Represents a ClientSideToolV2Result.
+     * @implements IClientSideToolV2Result
+     * @constructor
+     * @param {IClientSideToolV2Result=} [properties] Properties to set
+     */
+    function ClientSideToolV2Result(properties) {
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * ClientSideToolV2Result tool.
+     * @member {ClientSideToolV2} tool
+     * @memberof ClientSideToolV2Result
+     * @instance
+     */
+    ClientSideToolV2Result.prototype.tool = 0;
+
+    /**
+     * ClientSideToolV2Result toolCallId.
+     * @member {string} toolCallId
+     * @memberof ClientSideToolV2Result
+     * @instance
+     */
+    ClientSideToolV2Result.prototype.toolCallId = "";
+
+    /**
+     * Creates a new ClientSideToolV2Result instance using the specified properties.
+     * @function create
+     * @memberof ClientSideToolV2Result
+     * @static
+     * @param {IClientSideToolV2Result=} [properties] Properties to set
+     * @returns {ClientSideToolV2Result} ClientSideToolV2Result instance
+     */
+    ClientSideToolV2Result.create = function create(properties) {
+        return new ClientSideToolV2Result(properties);
+    };
+
+    /**
+     * Encodes the specified ClientSideToolV2Result message. Does not implicitly {@link ClientSideToolV2Result.verify|verify} messages.
+     * @function encode
+     * @memberof ClientSideToolV2Result
+     * @static
+     * @param {IClientSideToolV2Result} message ClientSideToolV2Result message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    ClientSideToolV2Result.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.tool != null && Object.hasOwnProperty.call(message, "tool"))
+            writer.uint32(/* id 1, wireType 0 =*/8).int32(message.tool);
+        if (message.toolCallId != null && Object.hasOwnProperty.call(message, "toolCallId"))
+            writer.uint32(/* id 35, wireType 2 =*/282).string(message.toolCallId);
+        return writer;
+    };
+
+    /**
+     * Encodes the specified ClientSideToolV2Result message, length delimited. Does not implicitly {@link ClientSideToolV2Result.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof ClientSideToolV2Result
+     * @static
+     * @param {IClientSideToolV2Result} message ClientSideToolV2Result message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    ClientSideToolV2Result.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a ClientSideToolV2Result message from the specified reader or buffer.
+     * @function decode
+     * @memberof ClientSideToolV2Result
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {ClientSideToolV2Result} ClientSideToolV2Result
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    ClientSideToolV2Result.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.ClientSideToolV2Result();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1: {
+                    message.tool = reader.int32();
+                    break;
+                }
+            case 35: {
+                    message.toolCallId = reader.string();
+                    break;
+                }
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a ClientSideToolV2Result message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof ClientSideToolV2Result
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {ClientSideToolV2Result} ClientSideToolV2Result
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    ClientSideToolV2Result.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a ClientSideToolV2Result message.
+     * @function verify
+     * @memberof ClientSideToolV2Result
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    ClientSideToolV2Result.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.tool != null && message.hasOwnProperty("tool"))
+            switch (message.tool) {
+            default:
+                return "tool: enum value expected";
+            case 0:
+            case 1:
+            case 3:
+            case 5:
+            case 6:
+            case 7:
+            case 8:
+            case 9:
+            case 11:
+            case 12:
+            case 15:
+            case 16:
+            case 18:
+            case 19:
+            case 23:
+            case 31:
+            case 42:
+                break;
+            }
+        if (message.toolCallId != null && message.hasOwnProperty("toolCallId"))
+            if (!$util.isString(message.toolCallId))
+                return "toolCallId: string expected";
+        return null;
+    };
+
+    /**
+     * Creates a ClientSideToolV2Result message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof ClientSideToolV2Result
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {ClientSideToolV2Result} ClientSideToolV2Result
+     */
+    ClientSideToolV2Result.fromObject = function fromObject(object) {
+        if (object instanceof $root.ClientSideToolV2Result)
+            return object;
+        var message = new $root.ClientSideToolV2Result();
+        switch (object.tool) {
+        default:
+            if (typeof object.tool === "number") {
+                message.tool = object.tool;
+                break;
+            }
+            break;
+        case "CLIENT_SIDE_TOOL_V2_UNSPECIFIED":
+        case 0:
+            message.tool = 0;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_READ_SEMSEARCH_FILES":
+        case 1:
+            message.tool = 1;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_RIPGREP_SEARCH":
+        case 3:
+            message.tool = 3;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_READ_FILE":
+        case 5:
+            message.tool = 5;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_LIST_DIR":
+        case 6:
+            message.tool = 6;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_EDIT_FILE":
+        case 7:
+            message.tool = 7;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_FILE_SEARCH":
+        case 8:
+            message.tool = 8;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_SEMANTIC_SEARCH_FULL":
+        case 9:
+            message.tool = 9;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_DELETE_FILE":
+        case 11:
+            message.tool = 11;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_REAPPLY":
+        case 12:
+            message.tool = 12;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_RUN_TERMINAL_COMMAND_V2":
+        case 15:
+            message.tool = 15;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_FETCH_RULES":
+        case 16:
+            message.tool = 16;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_WEB_SEARCH":
+        case 18:
+            message.tool = 18;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_MCP":
+        case 19:
+            message.tool = 19;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_SEARCH_SYMBOLS":
+        case 23:
+            message.tool = 23;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_GO_TO_DEFINITION":
+        case 31:
+            message.tool = 31;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_GLOB_FILE_SEARCH":
+        case 42:
+            message.tool = 42;
+            break;
+        }
+        if (object.toolCallId != null)
+            message.toolCallId = String(object.toolCallId);
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a ClientSideToolV2Result message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof ClientSideToolV2Result
+     * @static
+     * @param {ClientSideToolV2Result} message ClientSideToolV2Result
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    ClientSideToolV2Result.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.defaults) {
+            object.tool = options.enums === String ? "CLIENT_SIDE_TOOL_V2_UNSPECIFIED" : 0;
+            object.toolCallId = "";
+        }
+        if (message.tool != null && message.hasOwnProperty("tool"))
+            object.tool = options.enums === String ? $root.ClientSideToolV2[message.tool] === undefined ? message.tool : $root.ClientSideToolV2[message.tool] : message.tool;
+        if (message.toolCallId != null && message.hasOwnProperty("toolCallId"))
+            object.toolCallId = message.toolCallId;
+        return object;
+    };
+
+    /**
+     * Converts this ClientSideToolV2Result to JSON.
+     * @function toJSON
+     * @memberof ClientSideToolV2Result
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    ClientSideToolV2Result.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    /**
+     * Gets the default type url for ClientSideToolV2Result
+     * @function getTypeUrl
+     * @memberof ClientSideToolV2Result
+     * @static
+     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+     * @returns {string} The default type url
+     */
+    ClientSideToolV2Result.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+        if (typeUrlPrefix === undefined) {
+            typeUrlPrefix = "type.googleapis.com";
+        }
+        return typeUrlPrefix + "/ClientSideToolV2Result";
+    };
+
+    return ClientSideToolV2Result;
+})();
+
 $root.MessageSummary = (function() {
 
     /**
@@ -1275,6 +2007,7 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
          * @property {Array.<StreamUnifiedChatWithToolsRequest.Request.IMessageId>|null} [messageIds] Request messageIds
          * @property {number|null} [largeContext] Request largeContext
          * @property {number|null} [unknown38] Request unknown38
+         * @property {Array.<StreamUnifiedChatWithToolsRequest.Request.ISupportedTool>|null} [supportedTools] Request supportedTools
          * @property {number|null} [chatModeEnum] Request chatModeEnum
          * @property {string|null} [unknown47] Request unknown47
          * @property {number|null} [unknown48] Request unknown48
@@ -1296,6 +2029,7 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
             this.messages = [];
             this.wikiTool = [];
             this.messageIds = [];
+            this.supportedTools = [];
             if (properties)
                 for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
@@ -1447,6 +2181,14 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
         Request.prototype.unknown38 = 0;
 
         /**
+         * Request supportedTools.
+         * @member {Array.<StreamUnifiedChatWithToolsRequest.Request.ISupportedTool>} supportedTools
+         * @memberof StreamUnifiedChatWithToolsRequest.Request
+         * @instance
+         */
+        Request.prototype.supportedTools = $util.emptyArray;
+
+        /**
          * Request chatModeEnum.
          * @member {number} chatModeEnum
          * @memberof StreamUnifiedChatWithToolsRequest.Request
@@ -1565,6 +2307,9 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
                 writer.uint32(/* id 35, wireType 0 =*/280).int32(message.largeContext);
             if (message.unknown38 != null && Object.hasOwnProperty.call(message, "unknown38"))
                 writer.uint32(/* id 38, wireType 0 =*/304).int32(message.unknown38);
+            if (message.supportedTools != null && message.supportedTools.length)
+                for (var i = 0; i < message.supportedTools.length; ++i)
+                    $root.StreamUnifiedChatWithToolsRequest.Request.SupportedTool.encode(message.supportedTools[i], writer.uint32(/* id 45, wireType 2 =*/362).fork()).ldelim();
             if (message.chatModeEnum != null && Object.hasOwnProperty.call(message, "chatModeEnum"))
                 writer.uint32(/* id 46, wireType 0 =*/368).int32(message.chatModeEnum);
             if (message.unknown47 != null && Object.hasOwnProperty.call(message, "unknown47"))
@@ -1689,6 +2434,12 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
                     }
                 case 38: {
                         message.unknown38 = reader.int32();
+                        break;
+                    }
+                case 45: {
+                        if (!(message.supportedTools && message.supportedTools.length))
+                            message.supportedTools = [];
+                        message.supportedTools.push($root.StreamUnifiedChatWithToolsRequest.Request.SupportedTool.decode(reader, reader.uint32()));
                         break;
                     }
                 case 46: {
@@ -1832,6 +2583,15 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
             if (message.unknown38 != null && message.hasOwnProperty("unknown38"))
                 if (!$util.isInteger(message.unknown38))
                     return "unknown38: integer expected";
+            if (message.supportedTools != null && message.hasOwnProperty("supportedTools")) {
+                if (!Array.isArray(message.supportedTools))
+                    return "supportedTools: array expected";
+                for (var i = 0; i < message.supportedTools.length; ++i) {
+                    var error = $root.StreamUnifiedChatWithToolsRequest.Request.SupportedTool.verify(message.supportedTools[i]);
+                    if (error)
+                        return "supportedTools." + error;
+                }
+            }
             if (message.chatModeEnum != null && message.hasOwnProperty("chatModeEnum"))
                 if (!$util.isInteger(message.chatModeEnum))
                     return "chatModeEnum: integer expected";
@@ -1937,6 +2697,16 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
                 message.largeContext = object.largeContext | 0;
             if (object.unknown38 != null)
                 message.unknown38 = object.unknown38 | 0;
+            if (object.supportedTools) {
+                if (!Array.isArray(object.supportedTools))
+                    throw TypeError(".StreamUnifiedChatWithToolsRequest.Request.supportedTools: array expected");
+                message.supportedTools = [];
+                for (var i = 0; i < object.supportedTools.length; ++i) {
+                    if (typeof object.supportedTools[i] !== "object")
+                        throw TypeError(".StreamUnifiedChatWithToolsRequest.Request.supportedTools: object expected");
+                    message.supportedTools[i] = $root.StreamUnifiedChatWithToolsRequest.Request.SupportedTool.fromObject(object.supportedTools[i]);
+                }
+            }
             if (object.chatModeEnum != null)
                 message.chatModeEnum = object.chatModeEnum | 0;
             if (object.unknown47 != null)
@@ -1971,6 +2741,7 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
                 object.messages = [];
                 object.wikiTool = [];
                 object.messageIds = [];
+                object.supportedTools = [];
             }
             if (options.defaults) {
                 object.unknown2 = 0;
@@ -2041,6 +2812,11 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
                 object.largeContext = message.largeContext;
             if (message.unknown38 != null && message.hasOwnProperty("unknown38"))
                 object.unknown38 = message.unknown38;
+            if (message.supportedTools && message.supportedTools.length) {
+                object.supportedTools = [];
+                for (var j = 0; j < message.supportedTools.length; ++j)
+                    object.supportedTools[j] = $root.StreamUnifiedChatWithToolsRequest.Request.SupportedTool.toObject(message.supportedTools[j], options);
+            }
             if (message.chatModeEnum != null && message.hasOwnProperty("chatModeEnum"))
                 object.chatModeEnum = message.chatModeEnum;
             if (message.unknown47 != null && message.hasOwnProperty("unknown47"))
@@ -4495,6 +5271,303 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
             return MessageId;
         })();
 
+        Request.SupportedTool = (function() {
+
+            /**
+             * Properties of a SupportedTool.
+             * @memberof StreamUnifiedChatWithToolsRequest.Request
+             * @interface ISupportedTool
+             * @property {ClientSideToolV2|null} [tool] SupportedTool tool
+             */
+
+            /**
+             * Constructs a new SupportedTool.
+             * @memberof StreamUnifiedChatWithToolsRequest.Request
+             * @classdesc Represents a SupportedTool.
+             * @implements ISupportedTool
+             * @constructor
+             * @param {StreamUnifiedChatWithToolsRequest.Request.ISupportedTool=} [properties] Properties to set
+             */
+            function SupportedTool(properties) {
+                if (properties)
+                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                        if (properties[keys[i]] != null)
+                            this[keys[i]] = properties[keys[i]];
+            }
+
+            /**
+             * SupportedTool tool.
+             * @member {ClientSideToolV2} tool
+             * @memberof StreamUnifiedChatWithToolsRequest.Request.SupportedTool
+             * @instance
+             */
+            SupportedTool.prototype.tool = 0;
+
+            /**
+             * Creates a new SupportedTool instance using the specified properties.
+             * @function create
+             * @memberof StreamUnifiedChatWithToolsRequest.Request.SupportedTool
+             * @static
+             * @param {StreamUnifiedChatWithToolsRequest.Request.ISupportedTool=} [properties] Properties to set
+             * @returns {StreamUnifiedChatWithToolsRequest.Request.SupportedTool} SupportedTool instance
+             */
+            SupportedTool.create = function create(properties) {
+                return new SupportedTool(properties);
+            };
+
+            /**
+             * Encodes the specified SupportedTool message. Does not implicitly {@link StreamUnifiedChatWithToolsRequest.Request.SupportedTool.verify|verify} messages.
+             * @function encode
+             * @memberof StreamUnifiedChatWithToolsRequest.Request.SupportedTool
+             * @static
+             * @param {StreamUnifiedChatWithToolsRequest.Request.ISupportedTool} message SupportedTool message or plain object to encode
+             * @param {$protobuf.Writer} [writer] Writer to encode to
+             * @returns {$protobuf.Writer} Writer
+             */
+            SupportedTool.encode = function encode(message, writer) {
+                if (!writer)
+                    writer = $Writer.create();
+                if (message.tool != null && Object.hasOwnProperty.call(message, "tool"))
+                    writer.uint32(/* id 1, wireType 0 =*/8).int32(message.tool);
+                return writer;
+            };
+
+            /**
+             * Encodes the specified SupportedTool message, length delimited. Does not implicitly {@link StreamUnifiedChatWithToolsRequest.Request.SupportedTool.verify|verify} messages.
+             * @function encodeDelimited
+             * @memberof StreamUnifiedChatWithToolsRequest.Request.SupportedTool
+             * @static
+             * @param {StreamUnifiedChatWithToolsRequest.Request.ISupportedTool} message SupportedTool message or plain object to encode
+             * @param {$protobuf.Writer} [writer] Writer to encode to
+             * @returns {$protobuf.Writer} Writer
+             */
+            SupportedTool.encodeDelimited = function encodeDelimited(message, writer) {
+                return this.encode(message, writer).ldelim();
+            };
+
+            /**
+             * Decodes a SupportedTool message from the specified reader or buffer.
+             * @function decode
+             * @memberof StreamUnifiedChatWithToolsRequest.Request.SupportedTool
+             * @static
+             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+             * @param {number} [length] Message length if known beforehand
+             * @returns {StreamUnifiedChatWithToolsRequest.Request.SupportedTool} SupportedTool
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            SupportedTool.decode = function decode(reader, length) {
+                if (!(reader instanceof $Reader))
+                    reader = $Reader.create(reader);
+                var end = length === undefined ? reader.len : reader.pos + length, message = new $root.StreamUnifiedChatWithToolsRequest.Request.SupportedTool();
+                while (reader.pos < end) {
+                    var tag = reader.uint32();
+                    switch (tag >>> 3) {
+                    case 1: {
+                            message.tool = reader.int32();
+                            break;
+                        }
+                    default:
+                        reader.skipType(tag & 7);
+                        break;
+                    }
+                }
+                return message;
+            };
+
+            /**
+             * Decodes a SupportedTool message from the specified reader or buffer, length delimited.
+             * @function decodeDelimited
+             * @memberof StreamUnifiedChatWithToolsRequest.Request.SupportedTool
+             * @static
+             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+             * @returns {StreamUnifiedChatWithToolsRequest.Request.SupportedTool} SupportedTool
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            SupportedTool.decodeDelimited = function decodeDelimited(reader) {
+                if (!(reader instanceof $Reader))
+                    reader = new $Reader(reader);
+                return this.decode(reader, reader.uint32());
+            };
+
+            /**
+             * Verifies a SupportedTool message.
+             * @function verify
+             * @memberof StreamUnifiedChatWithToolsRequest.Request.SupportedTool
+             * @static
+             * @param {Object.<string,*>} message Plain object to verify
+             * @returns {string|null} `null` if valid, otherwise the reason why it is not
+             */
+            SupportedTool.verify = function verify(message) {
+                if (typeof message !== "object" || message === null)
+                    return "object expected";
+                if (message.tool != null && message.hasOwnProperty("tool"))
+                    switch (message.tool) {
+                    default:
+                        return "tool: enum value expected";
+                    case 0:
+                    case 1:
+                    case 3:
+                    case 5:
+                    case 6:
+                    case 7:
+                    case 8:
+                    case 9:
+                    case 11:
+                    case 12:
+                    case 15:
+                    case 16:
+                    case 18:
+                    case 19:
+                    case 23:
+                    case 31:
+                    case 42:
+                        break;
+                    }
+                return null;
+            };
+
+            /**
+             * Creates a SupportedTool message from a plain object. Also converts values to their respective internal types.
+             * @function fromObject
+             * @memberof StreamUnifiedChatWithToolsRequest.Request.SupportedTool
+             * @static
+             * @param {Object.<string,*>} object Plain object
+             * @returns {StreamUnifiedChatWithToolsRequest.Request.SupportedTool} SupportedTool
+             */
+            SupportedTool.fromObject = function fromObject(object) {
+                if (object instanceof $root.StreamUnifiedChatWithToolsRequest.Request.SupportedTool)
+                    return object;
+                var message = new $root.StreamUnifiedChatWithToolsRequest.Request.SupportedTool();
+                switch (object.tool) {
+                default:
+                    if (typeof object.tool === "number") {
+                        message.tool = object.tool;
+                        break;
+                    }
+                    break;
+                case "CLIENT_SIDE_TOOL_V2_UNSPECIFIED":
+                case 0:
+                    message.tool = 0;
+                    break;
+                case "CLIENT_SIDE_TOOL_V2_READ_SEMSEARCH_FILES":
+                case 1:
+                    message.tool = 1;
+                    break;
+                case "CLIENT_SIDE_TOOL_V2_RIPGREP_SEARCH":
+                case 3:
+                    message.tool = 3;
+                    break;
+                case "CLIENT_SIDE_TOOL_V2_READ_FILE":
+                case 5:
+                    message.tool = 5;
+                    break;
+                case "CLIENT_SIDE_TOOL_V2_LIST_DIR":
+                case 6:
+                    message.tool = 6;
+                    break;
+                case "CLIENT_SIDE_TOOL_V2_EDIT_FILE":
+                case 7:
+                    message.tool = 7;
+                    break;
+                case "CLIENT_SIDE_TOOL_V2_FILE_SEARCH":
+                case 8:
+                    message.tool = 8;
+                    break;
+                case "CLIENT_SIDE_TOOL_V2_SEMANTIC_SEARCH_FULL":
+                case 9:
+                    message.tool = 9;
+                    break;
+                case "CLIENT_SIDE_TOOL_V2_DELETE_FILE":
+                case 11:
+                    message.tool = 11;
+                    break;
+                case "CLIENT_SIDE_TOOL_V2_REAPPLY":
+                case 12:
+                    message.tool = 12;
+                    break;
+                case "CLIENT_SIDE_TOOL_V2_RUN_TERMINAL_COMMAND_V2":
+                case 15:
+                    message.tool = 15;
+                    break;
+                case "CLIENT_SIDE_TOOL_V2_FETCH_RULES":
+                case 16:
+                    message.tool = 16;
+                    break;
+                case "CLIENT_SIDE_TOOL_V2_WEB_SEARCH":
+                case 18:
+                    message.tool = 18;
+                    break;
+                case "CLIENT_SIDE_TOOL_V2_MCP":
+                case 19:
+                    message.tool = 19;
+                    break;
+                case "CLIENT_SIDE_TOOL_V2_SEARCH_SYMBOLS":
+                case 23:
+                    message.tool = 23;
+                    break;
+                case "CLIENT_SIDE_TOOL_V2_GO_TO_DEFINITION":
+                case 31:
+                    message.tool = 31;
+                    break;
+                case "CLIENT_SIDE_TOOL_V2_GLOB_FILE_SEARCH":
+                case 42:
+                    message.tool = 42;
+                    break;
+                }
+                return message;
+            };
+
+            /**
+             * Creates a plain object from a SupportedTool message. Also converts values to other types if specified.
+             * @function toObject
+             * @memberof StreamUnifiedChatWithToolsRequest.Request.SupportedTool
+             * @static
+             * @param {StreamUnifiedChatWithToolsRequest.Request.SupportedTool} message SupportedTool
+             * @param {$protobuf.IConversionOptions} [options] Conversion options
+             * @returns {Object.<string,*>} Plain object
+             */
+            SupportedTool.toObject = function toObject(message, options) {
+                if (!options)
+                    options = {};
+                var object = {};
+                if (options.defaults)
+                    object.tool = options.enums === String ? "CLIENT_SIDE_TOOL_V2_UNSPECIFIED" : 0;
+                if (message.tool != null && message.hasOwnProperty("tool"))
+                    object.tool = options.enums === String ? $root.ClientSideToolV2[message.tool] === undefined ? message.tool : $root.ClientSideToolV2[message.tool] : message.tool;
+                return object;
+            };
+
+            /**
+             * Converts this SupportedTool to JSON.
+             * @function toJSON
+             * @memberof StreamUnifiedChatWithToolsRequest.Request.SupportedTool
+             * @instance
+             * @returns {Object.<string,*>} JSON object
+             */
+            SupportedTool.prototype.toJSON = function toJSON() {
+                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+            };
+
+            /**
+             * Gets the default type url for SupportedTool
+             * @function getTypeUrl
+             * @memberof StreamUnifiedChatWithToolsRequest.Request.SupportedTool
+             * @static
+             * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns {string} The default type url
+             */
+            SupportedTool.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                if (typeUrlPrefix === undefined) {
+                    typeUrlPrefix = "type.googleapis.com";
+                }
+                return typeUrlPrefix + "/StreamUnifiedChatWithToolsRequest.Request.SupportedTool";
+            };
+
+            return SupportedTool;
+        })();
+
         return Request;
     })();
 
@@ -4509,6 +5582,7 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
      * @interface IStreamUnifiedChatWithToolsResponse
      * @property {StreamUnifiedChatWithToolsResponse.IMessage|null} [message] StreamUnifiedChatWithToolsResponse message
      * @property {IMessageSummary|null} [summary] StreamUnifiedChatWithToolsResponse summary
+     * @property {StreamUnifiedChatWithToolsResponse.IToolCall|null} [toolCall] StreamUnifiedChatWithToolsResponse toolCall
      */
 
     /**
@@ -4543,6 +5617,14 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
     StreamUnifiedChatWithToolsResponse.prototype.summary = null;
 
     /**
+     * StreamUnifiedChatWithToolsResponse toolCall.
+     * @member {StreamUnifiedChatWithToolsResponse.IToolCall|null|undefined} toolCall
+     * @memberof StreamUnifiedChatWithToolsResponse
+     * @instance
+     */
+    StreamUnifiedChatWithToolsResponse.prototype.toolCall = null;
+
+    /**
      * Creates a new StreamUnifiedChatWithToolsResponse instance using the specified properties.
      * @function create
      * @memberof StreamUnifiedChatWithToolsResponse
@@ -4570,6 +5652,8 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
             $root.StreamUnifiedChatWithToolsResponse.Message.encode(message.message, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
         if (message.summary != null && Object.hasOwnProperty.call(message, "summary"))
             $root.MessageSummary.encode(message.summary, writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
+        if (message.toolCall != null && Object.hasOwnProperty.call(message, "toolCall"))
+            $root.StreamUnifiedChatWithToolsResponse.ToolCall.encode(message.toolCall, writer.uint32(/* id 4, wireType 2 =*/34).fork()).ldelim();
         return writer;
     };
 
@@ -4610,6 +5694,10 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
                 }
             case 3: {
                     message.summary = $root.MessageSummary.decode(reader, reader.uint32());
+                    break;
+                }
+            case 4: {
+                    message.toolCall = $root.StreamUnifiedChatWithToolsResponse.ToolCall.decode(reader, reader.uint32());
                     break;
                 }
             default:
@@ -4657,6 +5745,11 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
             if (error)
                 return "summary." + error;
         }
+        if (message.toolCall != null && message.hasOwnProperty("toolCall")) {
+            var error = $root.StreamUnifiedChatWithToolsResponse.ToolCall.verify(message.toolCall);
+            if (error)
+                return "toolCall." + error;
+        }
         return null;
     };
 
@@ -4682,6 +5775,11 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
                 throw TypeError(".StreamUnifiedChatWithToolsResponse.summary: object expected");
             message.summary = $root.MessageSummary.fromObject(object.summary);
         }
+        if (object.toolCall != null) {
+            if (typeof object.toolCall !== "object")
+                throw TypeError(".StreamUnifiedChatWithToolsResponse.toolCall: object expected");
+            message.toolCall = $root.StreamUnifiedChatWithToolsResponse.ToolCall.fromObject(object.toolCall);
+        }
         return message;
     };
 
@@ -4701,11 +5799,14 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
         if (options.defaults) {
             object.message = null;
             object.summary = null;
+            object.toolCall = null;
         }
         if (message.message != null && message.hasOwnProperty("message"))
             object.message = $root.StreamUnifiedChatWithToolsResponse.Message.toObject(message.message, options);
         if (message.summary != null && message.hasOwnProperty("summary"))
             object.summary = $root.MessageSummary.toObject(message.summary, options);
+        if (message.toolCall != null && message.hasOwnProperty("toolCall"))
+            object.toolCall = $root.StreamUnifiedChatWithToolsResponse.ToolCall.toObject(message.toolCall, options);
         return object;
     };
 
@@ -5975,6 +7076,373 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
         })();
 
         return Message;
+    })();
+
+    StreamUnifiedChatWithToolsResponse.ToolCall = (function() {
+
+        /**
+         * Properties of a ToolCall.
+         * @memberof StreamUnifiedChatWithToolsResponse
+         * @interface IToolCall
+         * @property {ClientSideToolV2|null} [tool] ToolCall tool
+         * @property {string|null} [toolCallId] ToolCall toolCallId
+         * @property {string|null} [name] ToolCall name
+         * @property {string|null} [rawArgs] ToolCall rawArgs
+         */
+
+        /**
+         * Constructs a new ToolCall.
+         * @memberof StreamUnifiedChatWithToolsResponse
+         * @classdesc Represents a ToolCall.
+         * @implements IToolCall
+         * @constructor
+         * @param {StreamUnifiedChatWithToolsResponse.IToolCall=} [properties] Properties to set
+         */
+        function ToolCall(properties) {
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+
+        /**
+         * ToolCall tool.
+         * @member {ClientSideToolV2} tool
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCall
+         * @instance
+         */
+        ToolCall.prototype.tool = 0;
+
+        /**
+         * ToolCall toolCallId.
+         * @member {string} toolCallId
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCall
+         * @instance
+         */
+        ToolCall.prototype.toolCallId = "";
+
+        /**
+         * ToolCall name.
+         * @member {string} name
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCall
+         * @instance
+         */
+        ToolCall.prototype.name = "";
+
+        /**
+         * ToolCall rawArgs.
+         * @member {string} rawArgs
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCall
+         * @instance
+         */
+        ToolCall.prototype.rawArgs = "";
+
+        /**
+         * Creates a new ToolCall instance using the specified properties.
+         * @function create
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCall
+         * @static
+         * @param {StreamUnifiedChatWithToolsResponse.IToolCall=} [properties] Properties to set
+         * @returns {StreamUnifiedChatWithToolsResponse.ToolCall} ToolCall instance
+         */
+        ToolCall.create = function create(properties) {
+            return new ToolCall(properties);
+        };
+
+        /**
+         * Encodes the specified ToolCall message. Does not implicitly {@link StreamUnifiedChatWithToolsResponse.ToolCall.verify|verify} messages.
+         * @function encode
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCall
+         * @static
+         * @param {StreamUnifiedChatWithToolsResponse.IToolCall} message ToolCall message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        ToolCall.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.tool != null && Object.hasOwnProperty.call(message, "tool"))
+                writer.uint32(/* id 1, wireType 0 =*/8).int32(message.tool);
+            if (message.toolCallId != null && Object.hasOwnProperty.call(message, "toolCallId"))
+                writer.uint32(/* id 3, wireType 2 =*/26).string(message.toolCallId);
+            if (message.name != null && Object.hasOwnProperty.call(message, "name"))
+                writer.uint32(/* id 9, wireType 2 =*/74).string(message.name);
+            if (message.rawArgs != null && Object.hasOwnProperty.call(message, "rawArgs"))
+                writer.uint32(/* id 10, wireType 2 =*/82).string(message.rawArgs);
+            return writer;
+        };
+
+        /**
+         * Encodes the specified ToolCall message, length delimited. Does not implicitly {@link StreamUnifiedChatWithToolsResponse.ToolCall.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCall
+         * @static
+         * @param {StreamUnifiedChatWithToolsResponse.IToolCall} message ToolCall message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        ToolCall.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+
+        /**
+         * Decodes a ToolCall message from the specified reader or buffer.
+         * @function decode
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCall
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {StreamUnifiedChatWithToolsResponse.ToolCall} ToolCall
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        ToolCall.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.StreamUnifiedChatWithToolsResponse.ToolCall();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1: {
+                        message.tool = reader.int32();
+                        break;
+                    }
+                case 3: {
+                        message.toolCallId = reader.string();
+                        break;
+                    }
+                case 9: {
+                        message.name = reader.string();
+                        break;
+                    }
+                case 10: {
+                        message.rawArgs = reader.string();
+                        break;
+                    }
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+
+        /**
+         * Decodes a ToolCall message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCall
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {StreamUnifiedChatWithToolsResponse.ToolCall} ToolCall
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        ToolCall.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+
+        /**
+         * Verifies a ToolCall message.
+         * @function verify
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCall
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        ToolCall.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            if (message.tool != null && message.hasOwnProperty("tool"))
+                switch (message.tool) {
+                default:
+                    return "tool: enum value expected";
+                case 0:
+                case 1:
+                case 3:
+                case 5:
+                case 6:
+                case 7:
+                case 8:
+                case 9:
+                case 11:
+                case 12:
+                case 15:
+                case 16:
+                case 18:
+                case 19:
+                case 23:
+                case 31:
+                case 42:
+                    break;
+                }
+            if (message.toolCallId != null && message.hasOwnProperty("toolCallId"))
+                if (!$util.isString(message.toolCallId))
+                    return "toolCallId: string expected";
+            if (message.name != null && message.hasOwnProperty("name"))
+                if (!$util.isString(message.name))
+                    return "name: string expected";
+            if (message.rawArgs != null && message.hasOwnProperty("rawArgs"))
+                if (!$util.isString(message.rawArgs))
+                    return "rawArgs: string expected";
+            return null;
+        };
+
+        /**
+         * Creates a ToolCall message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCall
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {StreamUnifiedChatWithToolsResponse.ToolCall} ToolCall
+         */
+        ToolCall.fromObject = function fromObject(object) {
+            if (object instanceof $root.StreamUnifiedChatWithToolsResponse.ToolCall)
+                return object;
+            var message = new $root.StreamUnifiedChatWithToolsResponse.ToolCall();
+            switch (object.tool) {
+            default:
+                if (typeof object.tool === "number") {
+                    message.tool = object.tool;
+                    break;
+                }
+                break;
+            case "CLIENT_SIDE_TOOL_V2_UNSPECIFIED":
+            case 0:
+                message.tool = 0;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_READ_SEMSEARCH_FILES":
+            case 1:
+                message.tool = 1;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_RIPGREP_SEARCH":
+            case 3:
+                message.tool = 3;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_READ_FILE":
+            case 5:
+                message.tool = 5;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_LIST_DIR":
+            case 6:
+                message.tool = 6;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_EDIT_FILE":
+            case 7:
+                message.tool = 7;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_FILE_SEARCH":
+            case 8:
+                message.tool = 8;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_SEMANTIC_SEARCH_FULL":
+            case 9:
+                message.tool = 9;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_DELETE_FILE":
+            case 11:
+                message.tool = 11;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_REAPPLY":
+            case 12:
+                message.tool = 12;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_RUN_TERMINAL_COMMAND_V2":
+            case 15:
+                message.tool = 15;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_FETCH_RULES":
+            case 16:
+                message.tool = 16;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_WEB_SEARCH":
+            case 18:
+                message.tool = 18;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_MCP":
+            case 19:
+                message.tool = 19;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_SEARCH_SYMBOLS":
+            case 23:
+                message.tool = 23;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_GO_TO_DEFINITION":
+            case 31:
+                message.tool = 31;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_GLOB_FILE_SEARCH":
+            case 42:
+                message.tool = 42;
+                break;
+            }
+            if (object.toolCallId != null)
+                message.toolCallId = String(object.toolCallId);
+            if (object.name != null)
+                message.name = String(object.name);
+            if (object.rawArgs != null)
+                message.rawArgs = String(object.rawArgs);
+            return message;
+        };
+
+        /**
+         * Creates a plain object from a ToolCall message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCall
+         * @static
+         * @param {StreamUnifiedChatWithToolsResponse.ToolCall} message ToolCall
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        ToolCall.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.defaults) {
+                object.tool = options.enums === String ? "CLIENT_SIDE_TOOL_V2_UNSPECIFIED" : 0;
+                object.toolCallId = "";
+                object.name = "";
+                object.rawArgs = "";
+            }
+            if (message.tool != null && message.hasOwnProperty("tool"))
+                object.tool = options.enums === String ? $root.ClientSideToolV2[message.tool] === undefined ? message.tool : $root.ClientSideToolV2[message.tool] : message.tool;
+            if (message.toolCallId != null && message.hasOwnProperty("toolCallId"))
+                object.toolCallId = message.toolCallId;
+            if (message.name != null && message.hasOwnProperty("name"))
+                object.name = message.name;
+            if (message.rawArgs != null && message.hasOwnProperty("rawArgs"))
+                object.rawArgs = message.rawArgs;
+            return object;
+        };
+
+        /**
+         * Converts this ToolCall to JSON.
+         * @function toJSON
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCall
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        ToolCall.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+
+        /**
+         * Gets the default type url for ToolCall
+         * @function getTypeUrl
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCall
+         * @static
+         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+         * @returns {string} The default type url
+         */
+        ToolCall.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === undefined) {
+                typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/StreamUnifiedChatWithToolsResponse.ToolCall";
+        };
+
+        return ToolCall;
     })();
 
     return StreamUnifiedChatWithToolsResponse;

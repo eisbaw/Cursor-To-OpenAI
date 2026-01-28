@@ -5,7 +5,16 @@ const { fetch, ProxyAgent, Agent } = require('undici');
 const { v4: uuidv4, v5: uuidv5 } = require('uuid');
 const config = require('../config/config');
 const $root = require('../proto/message.js');
-const { generateCursorBody, chunkToUtf8String, generateHashed64Hex, generateCursorChecksum } = require('../utils/utils.js');
+const { 
+  generateCursorBody, 
+  chunkToUtf8String, 
+  parseToolCallsFromText,
+  generateHashed64Hex, 
+  generateCursorChecksum,
+  ClientSideToolV2,
+  DEFAULT_AGENT_TOOLS,
+} = require('../utils/utils.js');
+const { ToolExecutor } = require('../utils/toolExecutor.js');
 
 router.get("/models", async (req, res) => {
   try{
@@ -72,7 +81,12 @@ router.get("/models", async (req, res) => {
 router.post('/chat/completions', async (req, res) => {
 
   try {
-    const { model, messages, stream = false } = req.body;
+    const { model, messages, stream = false, tools = null } = req.body;
+    
+    // Agent mode is enabled when tools are provided
+    // See TASK-110-tool-enum-mapping.md for mode values
+    const agentMode = tools && Array.isArray(tools) && tools.length > 0;
+    
     let bearerToken = req.headers.authorization?.replace('Bearer ', '');
     const keys = bearerToken.split(',').map((key) => key.trim());
     // Randomly select one key to use
@@ -126,7 +140,12 @@ router.post('/chat/completions', async (req, res) => {
       },
     })
     
-    const cursorBody = generateCursorBody(messages, model);
+    // Generate request body with agent mode if tools provided
+    const cursorBody = generateCursorBody(messages, model, { 
+      agentMode, 
+      tools: DEFAULT_AGENT_TOOLS 
+    });
+    
     const dispatcher = config.proxy.enabled
       ? new ProxyAgent(config.proxy.url, { allowH2: true })
       : new Agent({ allowH2: true });
@@ -174,12 +193,15 @@ router.post('/chat/completions', async (req, res) => {
       res.setHeader('Connection', 'keep-alive');
 
       const responseId = `chatcmpl-${uuidv4()}`;
+      const seenToolCalls = new Set();
+      let fullText = '';
 
       try {
         let thinkingStart = "<thinking>";
         let thinkingEnd = "</thinking>";
         for await (const chunk of response.body) {
-          const { thinking, text } = chunkToUtf8String(chunk);
+          const { thinking, text, toolCalls } = chunkToUtf8String(chunk);
+          fullText += text;
           let content = ""
 
           if (thinkingStart !== "" && thinking.length > 0 ){
@@ -210,6 +232,73 @@ router.post('/chat/completions', async (req, res) => {
               })}\n\n`
             );
           }
+
+          // Handle tool calls in agent mode (OpenAI format)
+          // See TASK-26-tool-schemas.md for tool call schema
+          if (agentMode && toolCalls.length > 0) {
+            for (const tc of toolCalls) {
+              if (seenToolCalls.has(tc.toolCallId)) continue;
+              seenToolCalls.add(tc.toolCallId);
+              
+              // Send tool call in OpenAI format
+              res.write(
+                `data: ${JSON.stringify({
+                  id: responseId,
+                  object: 'chat.completion.chunk',
+                  created: Math.floor(Date.now() / 1000),
+                  model: model,
+                  choices: [{
+                    index: 0,
+                    delta: {
+                      tool_calls: [{
+                        index: 0,
+                        id: tc.toolCallId,
+                        type: 'function',
+                        function: {
+                          name: tc.name || `tool_${tc.tool}`,
+                          arguments: tc.rawArgs || '{}',
+                        },
+                      }],
+                    },
+                    finish_reason: null,
+                  }],
+                })}\n\n`
+              );
+            }
+          }
+        }
+
+        // Try to find tool calls in full text if none found via protobuf
+        if (agentMode && seenToolCalls.size === 0) {
+          const textToolCalls = parseToolCallsFromText(fullText);
+          for (const tc of textToolCalls) {
+            if (seenToolCalls.has(tc.toolCallId)) continue;
+            seenToolCalls.add(tc.toolCallId);
+            
+            res.write(
+              `data: ${JSON.stringify({
+                id: responseId,
+                object: 'chat.completion.chunk',
+                created: Math.floor(Date.now() / 1000),
+                model: model,
+                choices: [{
+                  index: 0,
+                  delta: {
+                    tool_calls: [{
+                      index: 0,
+                      id: tc.toolCallId,
+                      type: 'function',
+                      function: {
+                        name: tc.name,
+                        arguments: tc.rawArgs,
+                      },
+                    }],
+                  },
+                  finish_reason: null,
+                }],
+              })}\n\n`
+            );
+          }
         }
       } catch (streamError) {
         console.error('Stream error:', streamError);
@@ -228,8 +317,11 @@ router.post('/chat/completions', async (req, res) => {
         let thinkingStart = "<thinking>";
         let thinkingEnd = "</thinking>";
         let content = '';
+        const allToolCalls = [];
+        const seenToolCalls = new Set();
+        
         for await (const chunk of response.body) {
-          const { thinking, text } = chunkToUtf8String(chunk);
+          const { thinking, text, toolCalls } = chunkToUtf8String(chunk);
           
           if (thinkingStart !== "" && thinking.length > 0 ){
             content += thinkingStart + "\n"
@@ -242,6 +334,46 @@ router.post('/chat/completions', async (req, res) => {
           }
 
           content += text
+
+          // Collect tool calls for agent mode
+          if (agentMode && toolCalls.length > 0) {
+            for (const tc of toolCalls) {
+              if (!seenToolCalls.has(tc.toolCallId)) {
+                seenToolCalls.add(tc.toolCallId);
+                allToolCalls.push(tc);
+              }
+            }
+          }
+        }
+
+        // Try text-based tool call detection if none found
+        if (agentMode && allToolCalls.length === 0) {
+          const textToolCalls = parseToolCallsFromText(content);
+          for (const tc of textToolCalls) {
+            if (!seenToolCalls.has(tc.toolCallId)) {
+              seenToolCalls.add(tc.toolCallId);
+              allToolCalls.push(tc);
+            }
+          }
+        }
+
+        // Build response message
+        const message = {
+          role: 'assistant',
+          content: content || null,
+        };
+
+        // Add tool calls in OpenAI format if any found
+        // See TASK-26-tool-schemas.md for tool call schema
+        if (allToolCalls.length > 0) {
+          message.tool_calls = allToolCalls.map((tc, i) => ({
+            id: tc.toolCallId,
+            type: 'function',
+            function: {
+              name: tc.name || `tool_${tc.tool}`,
+              arguments: tc.rawArgs || '{}',
+            },
+          }));
         }
 
         return res.json({
@@ -252,11 +384,8 @@ router.post('/chat/completions', async (req, res) => {
           choices: [
             {
               index: 0,
-              message: {
-                role: 'assistant',
-                content: content,
-              },
-              finish_reason: 'stop',
+              message: message,
+              finish_reason: allToolCalls.length > 0 ? 'tool_calls' : 'stop',
             },
           ],
           usage: {

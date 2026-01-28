@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+// Based on TASK-26-tool-schemas.md and TASK-110-tool-enum-mapping.md
+
 message AvailableModelsResponse { 
   message AvailableModel {
     string name = 1;
@@ -9,6 +11,43 @@ message AvailableModelsResponse {
   }
   repeated AvailableModel models = 2;
   repeated string modelNames = 1;
+}
+
+// ClientSideToolV2 enum - see TASK-110-tool-enum-mapping.md
+enum ClientSideToolV2 {
+  CLIENT_SIDE_TOOL_V2_UNSPECIFIED = 0;
+  CLIENT_SIDE_TOOL_V2_READ_SEMSEARCH_FILES = 1;
+  CLIENT_SIDE_TOOL_V2_RIPGREP_SEARCH = 3;
+  CLIENT_SIDE_TOOL_V2_READ_FILE = 5;
+  CLIENT_SIDE_TOOL_V2_LIST_DIR = 6;
+  CLIENT_SIDE_TOOL_V2_EDIT_FILE = 7;
+  CLIENT_SIDE_TOOL_V2_FILE_SEARCH = 8;
+  CLIENT_SIDE_TOOL_V2_SEMANTIC_SEARCH_FULL = 9;
+  CLIENT_SIDE_TOOL_V2_DELETE_FILE = 11;
+  CLIENT_SIDE_TOOL_V2_REAPPLY = 12;
+  CLIENT_SIDE_TOOL_V2_RUN_TERMINAL_COMMAND_V2 = 15;
+  CLIENT_SIDE_TOOL_V2_FETCH_RULES = 16;
+  CLIENT_SIDE_TOOL_V2_WEB_SEARCH = 18;
+  CLIENT_SIDE_TOOL_V2_MCP = 19;
+  CLIENT_SIDE_TOOL_V2_SEARCH_SYMBOLS = 23;
+  CLIENT_SIDE_TOOL_V2_GO_TO_DEFINITION = 31;
+  CLIENT_SIDE_TOOL_V2_GLOB_FILE_SEARCH = 42;
+}
+
+// Tool call from server - see TASK-26-tool-schemas.md ClientSideToolV2Call
+message ClientSideToolV2Call {
+  ClientSideToolV2 tool = 1;
+  string tool_call_id = 3;
+  string name = 9;
+  string raw_args = 10;
+  // params oneof fields omitted for simplicity - use raw_args JSON
+}
+
+// Tool result sent back to server - see TASK-26-tool-schemas.md ClientSideToolV2Result
+message ClientSideToolV2Result {
+  ClientSideToolV2 tool = 1;
+  string tool_call_id = 35;
+  // result oneof - we'll encode specific results inline
 }
 
 message MessageSummary {
@@ -73,6 +112,11 @@ message StreamUnifiedChatWithToolsRequest {
       int32 role = 3;
     }
 
+    // Supported tools for agent mode - see TASK-110-tool-enum-mapping.md
+    message SupportedTool {
+      ClientSideToolV2 tool = 1;
+    }
+
     repeated Message messages = 1;
     int32 unknown2 = 2; // 1
     Instruction instruction = 3;
@@ -91,13 +135,14 @@ message StreamUnifiedChatWithToolsRequest {
     repeated MessageId messageIds = 30;
     int32 largeContext = 35; // 1
     int32 unknown38 = 38; // 0
-    int32 chatModeEnum = 46; // 1 for ask, 2 for agent, 3 for edit
+    repeated SupportedTool supportedTools = 45; // Agent mode tools
+    int32 chatModeEnum = 46; // 1 for ask, 3 for agent
     string unknown47 = 47; 
     int32 unknown48 = 48; // 0
     int32 unknown49 = 49; // 0
     int32 unknown51 = 51; // 0
     int32 unknown53 = 53; // 0
-    string chatMode = 54;
+    string chatMode = 54; // "Ask" or "Agent"
   }
   
   Request request = 1;
@@ -128,6 +173,15 @@ message StreamUnifiedChatWithToolsResponse {
     MessageThinking thinking = 25;
   }
 
+  // Tool call from server - see TASK-26-tool-schemas.md
+  message ToolCall {
+    ClientSideToolV2 tool = 1;
+    string tool_call_id = 3;
+    string name = 9;
+    string raw_args = 10;
+  }
+
   Message message = 2;
   MessageSummary summary = 3;
+  ToolCall toolCall = 4; // Tool call request from server
 }
