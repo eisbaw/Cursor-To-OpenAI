@@ -548,6 +548,10 @@ async function handleAgentStreamResponse(res, session, model) {
       const fcId = `fc_${uuidv4()}`;
 
       sessionManager.registerCallId(callId, session.responseId);
+      // Register fallback keys crush might use
+      sessionManager.registerCallId(crushName, session.responseId);
+      if (tc.name) sessionManager.registerCallId(tc.name, session.responseId);
+      sessionManager.registerCallId(fcId, session.responseId);
 
       sse('response.output_item.added', {
         output_index: session.outputIndex,
@@ -652,19 +656,44 @@ router.post('/responses', async (req, res) => {
 
     // Agent mode: passthrough tool calls to crush
     if (hasTools) {
-      // Check for continuation (function_call_output in input)
+      // Check for continuation: function_call_output items that match an active session
       const toolOutputs = Array.isArray(input)
         ? input.filter(item => item.type === 'function_call_output')
         : [];
-      const isContinuation = toolOutputs.length > 0;
+      // Only treat as continuation if we can find a live session for these call_ids
+      let isContinuation = false;
+      if (toolOutputs.length > 0) {
+        for (const output of toolOutputs) {
+          const cid = (output.call_id || '').split('\n')[0];
+          if (sessionManager.getByCallId(cid) || sessionManager.getByCallId(output.call_id)) {
+            isContinuation = true;
+            break;
+          }
+        }
+      }
 
       if (isContinuation) {
         // --- Path B: Continuation — send tool results to existing Cursor stream ---
         console.log('Tool outputs:', JSON.stringify(toolOutputs.map(o => ({ call_id: o.call_id, output: (o.output||'').substring(0, 60) }))));
-        const firstCallId = toolOutputs[0].call_id;
-        const session = sessionManager.getByCallId(firstCallId);
+        // Find session: try each call_id, fall back to most recent session
+        let session = null;
+        for (const output of toolOutputs) {
+          session = sessionManager.getByCallId(output.call_id);
+          if (session) break;
+        }
+        // Fallback: if crush mangled the call_id, find the most recent waiting session
         if (!session) {
-          return res.status(400).json({ error: 'Session expired or not found for call_id: ' + firstCallId });
+          const allSessions = [];
+          // Try to find any session in waiting state
+          for (const output of toolOutputs) {
+            // call_id might contain newlines or be concatenated - try partial match
+            const cleanId = (output.call_id || '').split('\n')[0];
+            session = sessionManager.getByCallId(cleanId);
+            if (session) break;
+          }
+        }
+        if (!session) {
+          return res.status(400).json({ error: 'Session expired or not found for call_ids: ' + toolOutputs.map(o => o.call_id).join(', ') });
         }
         console.log('Continuation for session', session.responseId, '- sending', toolOutputs.length, 'tool results');
         sessionManager.touch(session);

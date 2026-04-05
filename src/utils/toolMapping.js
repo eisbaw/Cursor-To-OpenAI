@@ -6,6 +6,7 @@
 const { ClientSideToolV2 } = require('./utils');
 
 // Cursor tool enum -> crush function name + param transform
+// Crush param schemas from crush/internal/agent/tools/*.go
 const CURSOR_TO_CRUSH = {
   [ClientSideToolV2.LIST_DIR]: {
     name: 'ls',
@@ -17,7 +18,7 @@ const CURSOR_TO_CRUSH = {
     name: 'view',
     mapParams(p) {
       const out = { file_path: p.target_file || p.relative_workspace_path || '' };
-      if (p.start_line_one_indexed) out.offset = p.start_line_one_indexed;
+      if (p.start_line_one_indexed) out.offset = p.start_line_one_indexed - 1; // crush is 0-based
       if (p.end_line_one_indexed_inclusive) out.limit = p.end_line_one_indexed_inclusive - (p.start_line_one_indexed || 1) + 1;
       return out;
     },
@@ -41,13 +42,16 @@ const CURSOR_TO_CRUSH = {
   [ClientSideToolV2.RUN_TERMINAL_COMMAND_V2]: {
     name: 'bash',
     mapParams(p) {
-      return { command: p.command || '' };
+      return {
+        command: p.command || '',
+        description: p.explanation || 'Execute command',
+      };
     },
   },
   [ClientSideToolV2.FILE_SEARCH]: {
     name: 'glob',
     mapParams(p) {
-      return { pattern: p.query || p.pattern || '' };
+      return { pattern: '*' + (p.query || p.pattern || '') + '*' };
     },
   },
   [ClientSideToolV2.GLOB_FILE_SEARCH]: {
@@ -60,7 +64,7 @@ const CURSOR_TO_CRUSH = {
     name: 'bash',
     mapParams(p) {
       const filePath = p.target_file || p.relative_workspace_path || '';
-      return { command: `rm ${filePath}` };
+      return { command: `rm ${filePath}`, description: 'Delete file' };
     },
   },
 };
