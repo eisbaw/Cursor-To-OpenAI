@@ -4,7 +4,12 @@ const zlib = require('zlib');
 const crypto = require('crypto');
 const { v4: uuidv4, v5: uuidv5 } = require('uuid');
 const $root = require('../proto/message.js');
-const config = require('../config/config');
+// Lazy-load config to avoid circular dependency (config -> utils -> config)
+let _config = null;
+function getConfig() {
+  if (!_config) _config = require('../config/config');
+  return _config;
+}
 
 // Get Cursor storage path based on platform
 function getCursorStoragePath() {
@@ -158,9 +163,9 @@ function generateCursorBody(messages, modelName, options = {}) {
       //unknown22: 1,
       conversationId: uuidv4(),
       metadata: {
-        os: config.clientOs,
-        arch: config.clientArch,
-        version: config.clientOsVersion,
+        os: getConfig().clientOs,
+        arch: getConfig().clientArch,
+        version: getConfig().clientOsVersion,
         path: process.execPath,
         timestamp: new Date().toISOString(),
       },
@@ -188,11 +193,8 @@ function generateCursorBody(messages, modelName, options = {}) {
   if (errMsg) throw Error(errMsg);
   const instance = $root.StreamUnifiedChatWithToolsRequest.create(body);
   let buffer = $root.StreamUnifiedChatWithToolsRequest.encode(instance).finish();
-  let magicNumber = 0x00
-  if (formattedMessages.length >= 3){
-    buffer = zlib.gzipSync(buffer)
-    magicNumber = 0x01
-  }
+  buffer = zlib.gzipSync(buffer);
+  const magicNumber = 0x01;
 
   const finalBody = Buffer.concat([
     Buffer.from([magicNumber]),
@@ -398,15 +400,15 @@ function buildCommonHeaders(authToken) {
     'x-amzn-trace-id': `Root=${requestId}`,
     'x-client-key': clientKey,
     'x-cursor-checksum': cursorChecksum,
-    'x-cursor-client-version': config.cursorVersion,
+    'x-cursor-client-version': getConfig().cursorVersion,
     'x-cursor-client-type': 'ide',
-    'x-cursor-client-os': config.clientOs,
-    'x-cursor-client-arch': config.clientArch,
-    'x-cursor-client-os-version': config.clientOsVersion,
+    'x-cursor-client-os': getConfig().clientOs,
+    'x-cursor-client-arch': getConfig().clientArch,
+    'x-cursor-client-os-version': getConfig().clientOsVersion,
     'x-cursor-client-device-type': 'desktop',
     'x-cursor-config-version': uuidv4(),
     'x-cursor-timezone': Intl.DateTimeFormat().resolvedOptions().timeZone,
-    'x-ghost-mode': config.ghostMode ? 'true' : 'false',
+    'x-ghost-mode': getConfig().ghostMode ? 'true' : 'false',
     'x-new-onboarding-completed': 'false',
     'x-request-id': requestId,
     'x-session-id': sessionId,
@@ -426,7 +428,7 @@ async function refreshAccessToken(refreshToken) {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         grant_type: 'refresh_token',
-        client_id: config.oauthClientId,
+        client_id: getConfig().oauthClientId,
         refresh_token: refreshToken,
       }),
     });

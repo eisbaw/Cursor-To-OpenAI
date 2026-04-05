@@ -16,7 +16,8 @@ const zlib = require('zlib');
 const { v4: uuidv4, v5: uuidv5 } = require('uuid');
 const { EventEmitter } = require('events');
 const $root = require('../proto/message.js');
-const config = require('../config/config');
+let _config = null;
+function getConfig() { if (!_config) _config = require('../config/config'); return _config; }
 const {
   generateCursorChecksum,
   generateHashed64Hex,
@@ -347,15 +348,15 @@ class BidiCursorClient extends EventEmitter {
       'x-amzn-trace-id': `Root=${requestId}`,
       'x-client-key': clientKey,
       'x-cursor-checksum': checksum,
-      'x-cursor-client-version': config.cursorVersion,
+      'x-cursor-client-version': getConfig().cursorVersion,
       'x-cursor-client-type': 'ide',
-      'x-cursor-client-os': config.clientOs,
-      'x-cursor-client-arch': config.clientArch,
-      'x-cursor-client-os-version': config.clientOsVersion,
+      'x-cursor-client-os': getConfig().clientOs,
+      'x-cursor-client-arch': getConfig().clientArch,
+      'x-cursor-client-os-version': getConfig().clientOsVersion,
       'x-cursor-client-device-type': 'desktop',
       'x-cursor-config-version': uuidv4(),
       'x-cursor-timezone': Intl.DateTimeFormat().resolvedOptions().timeZone,
-      'x-ghost-mode': config.ghostMode ? 'true' : 'false',
+      'x-ghost-mode': getConfig().ghostMode ? 'true' : 'false',
       'x-new-onboarding-completed': 'false',
       'x-request-id': requestId,
       'x-session-id': sessionId,
@@ -430,9 +431,9 @@ class BidiCursorClient extends EventEmitter {
         unknown19: 1,
         conversationId: uuidv4(),
         metadata: {
-          os: config.clientOs,
-          arch: config.clientArch,
-          version: config.clientOsVersion,
+          os: getConfig().clientOs,
+          arch: getConfig().clientArch,
+          version: getConfig().clientOsVersion,
           path: process.execPath,
           timestamp: new Date().toISOString(),
         },

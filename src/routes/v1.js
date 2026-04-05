@@ -19,18 +19,39 @@ const {
 const { ToolExecutor } = require('../utils/toolExecutor.js');
 const { BidiCursorClient } = require('../utils/bidiClient.js');
 
+// Map OpenAI model names to Cursor model IDs
+// Models not in this map are passed through as-is
+const MODEL_MAP = {
+  'gpt-4o': 'gpt-4o',
+  'gpt-4o-mini': 'default',
+  'gpt-5.4': 'default',
+  'gpt-5.4-pro': 'default',
+  'gpt-5.4-mini': 'cursor-small',
+  'gpt-5.4-nano': 'cursor-small',
+};
+function mapModelName(model) {
+  if (!model) return 'default';
+  return MODEL_MAP[model] || model;
+}
+
+// Extract Cursor auth token: prefer stored token, fall back to Bearer header
+function getAuthToken(req) {
+  // Use stored Cursor token if available (like Python client does)
+  if (config.cursorToken) return config.cursorToken;
+  // Fall back to Bearer header
+  let bearer = req.headers.authorization?.replace('Bearer ', '');
+  if (!bearer) return null;
+  let token = bearer.split(',').map(k => k.trim())[0];
+  if (token && token.includes('%3A%3A')) token = token.split('%3A%3A')[1];
+  else if (token && token.includes('::')) token = token.split('::')[1];
+  return token;
+}
+
 router.get("/models", async (req, res) => {
   try{
-    let bearerToken = req.headers.authorization?.replace('Bearer ', '');
-    if (!bearerToken) {
-      return res.status(401).json({ error: "Missing Authorization header" });
-    }
-    let authToken = bearerToken.split(',').map((key) => key.trim())[0];
-    if (authToken && authToken.includes('%3A%3A')) {
-      authToken = authToken.split('%3A%3A')[1];
-    }
-    else if (authToken && authToken.includes('::')) {
-      authToken = authToken.split('::')[1];
+    const authToken = getAuthToken(req);
+    if (!authToken) {
+      return res.status(401).json({ error: "No Cursor token available" });
     }
 
     const headers = buildCommonHeaders(authToken.trim());
@@ -74,32 +95,17 @@ router.get("/models", async (req, res) => {
 router.post('/chat/completions', async (req, res) => {
 
   try {
-    const { model, messages, stream = false, tools = null } = req.body;
-    
+    const { model: rawModel, messages, stream = false, tools = null } = req.body;
+    const model = mapModelName(rawModel);
+
     // Agent mode is enabled when tools are provided
-    // See TASK-110-tool-enum-mapping.md for mode values
     const agentMode = tools && Array.isArray(tools) && tools.length > 0;
     
-    let bearerToken = req.headers.authorization?.replace('Bearer ', '');
-    if (!bearerToken) {
-      return res.status(401).json({ error: 'Missing Authorization header' });
-    }
-    
-    const keys = bearerToken.split(',').map((key) => key.trim());
-    // Randomly select one key to use
-    let authToken = keys[Math.floor(Math.random() * keys.length)]
-
-    if (!messages || !Array.isArray(messages) || messages.length === 0 || !authToken) {
+    const authToken = getAuthToken(req);
+    if (!authToken || !messages || !Array.isArray(messages) || messages.length === 0) {
       return res.status(400).json({
-        error: 'Invalid request. Messages should be a non-empty array and authorization is required',
+        error: 'Invalid request. Messages should be a non-empty array and Cursor token is required',
       });
-    }
-
-    if (authToken && authToken.includes('%3A%3A')) {
-      authToken = authToken.split('%3A%3A')[1];
-    }
-    else if (authToken && authToken.includes('::')) {
-      authToken = authToken.split('::')[1];
     }
 
     // Use bidirectional client for agent mode (required for tool calling)
@@ -214,6 +220,7 @@ router.post('/chat/completions', async (req, res) => {
       ? new ProxyAgent(config.proxy.url, { allowH2: true })
       : new Agent({ allowH2: true });
     chatHeaders['connect-accept-encoding'] = 'gzip';
+    chatHeaders['connect-content-encoding'] = 'gzip';
     chatHeaders['content-type'] = 'application/connect+proto';
     const response = await fetch('https://api2.cursor.sh/aiserver.v1.ChatService/StreamUnifiedChatWithTools', {
       method: 'POST',
@@ -473,6 +480,14 @@ router.post('/chat/completions', async (req, res) => {
 router.post('/responses', async (req, res) => {
   try {
     const { model, input, stream = false, instructions } = req.body;
+    // Log input structure (not full content)
+    const inputSummary = Array.isArray(input) ? input.map(i => ({
+      role: i.role, type: i.type,
+      contentType: typeof i.content,
+      contentIsArray: Array.isArray(i.content),
+      content: typeof i.content === 'string' ? i.content.substring(0, 40) : (Array.isArray(i.content) ? i.content.map(c => ({ type: c.type, text: c.text?.substring(0, 40) })) : i.content),
+    })) : input;
+    console.log('Responses API:', JSON.stringify({ model, stream, tools: req.body.tools?.length, input: inputSummary }));
 
     // Convert Responses API input to Chat Completions messages
     const messages = [];
@@ -486,27 +501,40 @@ router.post('/responses', async (req, res) => {
       for (const item of input) {
         if (typeof item === 'string') {
           messages.push({ role: 'user', content: item });
-        } else if (item.role && item.content) {
-          messages.push({ role: item.role, content: typeof item.content === 'string' ? item.content : JSON.stringify(item.content) });
+        } else if (item.role) {
+          // Extract text content from various formats
+          let text = '';
+          if (typeof item.content === 'string') {
+            text = item.content;
+          } else if (Array.isArray(item.content)) {
+            // OpenAI multi-modal content parts
+            text = item.content
+              .filter(p => p.type === 'input_text' || p.type === 'text' || p.type === 'output_text')
+              .map(p => p.text || '')
+              .join('');
+          }
+          if (text) {
+            messages.push({ role: item.role === 'developer' ? 'system' : item.role, content: text });
+          }
         }
       }
     }
 
-    // Forward as internal request to chat/completions handler
-    const bearerToken = req.headers.authorization?.replace('Bearer ', '');
-    if (!bearerToken) {
-      return res.status(401).json({ error: 'Missing Authorization header' });
+    const authToken = getAuthToken(req);
+    if (!authToken) {
+      return res.status(401).json({ error: 'No Cursor token available' });
     }
 
-    let authToken = bearerToken.split(',').map(k => k.trim())[0];
-    if (authToken && authToken.includes('%3A%3A')) authToken = authToken.split('%3A%3A')[1];
-    else if (authToken && authToken.includes('::')) authToken = authToken.split('::')[1];
+    // Map OpenAI model names to Cursor model IDs
+    const cursorModel = mapModelName(model);
+    console.log('Model mapping:', model, '->', cursorModel);
 
     const chatHeaders = buildCommonHeaders(authToken.trim());
     chatHeaders['connect-accept-encoding'] = 'gzip';
+    chatHeaders['connect-content-encoding'] = 'gzip';
     chatHeaders['content-type'] = 'application/connect+proto';
 
-    const cursorBody = generateCursorBody(messages, model || 'default', {
+    const cursorBody = generateCursorBody(messages, cursorModel, {
       agentMode: false,
       tools: [],
     });
@@ -534,43 +562,63 @@ router.post('/responses', async (req, res) => {
       res.setHeader('Cache-Control', 'no-cache');
       res.setHeader('Connection', 'keep-alive');
 
-      // Send response.created event
-      res.write(`event: response.created\ndata: ${JSON.stringify({
-        id: responseId, object: 'response', status: 'in_progress',
-        model: model || 'default', output: [],
-      })}\n\n`);
+      let seqNo = 0;
+      const sse = (event, data) => {
+        data.type = event;
+        data.sequence_number = seqNo++;
+        res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+      };
+
+      sse('response.created', {
+        response: { id: responseId, object: 'response', status: 'in_progress',
+          model: model || 'default', output: [] },
+      });
 
       const outputItemId = `msg_${uuidv4()}`;
-      res.write(`event: response.output_item.added\ndata: ${JSON.stringify({
+      sse('response.output_item.added', {
         output_index: 0,
         item: { id: outputItemId, type: 'message', role: 'assistant', content: [] },
-      })}\n\n`);
+      });
 
-      const contentPartId = `cp_${uuidv4()}`;
-      res.write(`event: response.content_part.added\ndata: ${JSON.stringify({
+      sse('response.content_part.added', {
         output_index: 0, content_index: 0,
         part: { type: 'output_text', text: '' },
-      })}\n\n`);
+      });
 
+      let fullText = '';
       try {
         for await (const chunk of response.body) {
           const { text } = chunkToUtf8String(chunk);
           if (text) {
-            res.write(`event: response.output_text.delta\ndata: ${JSON.stringify({
+            fullText += text;
+            sse('response.output_text.delta', {
               output_index: 0, content_index: 0, delta: text,
-            })}\n\n`);
+            });
           }
         }
       } catch (e) {
         console.error('Responses stream error:', e.message);
       }
+      console.log('Responses fullText:', JSON.stringify(fullText.substring(0, 200)));
 
-      res.write(`event: response.output_text.done\ndata: ${JSON.stringify({
-        output_index: 0, content_index: 0, text: '',
-      })}\n\n`);
-      res.write(`event: response.completed\ndata: ${JSON.stringify({
-        id: responseId, object: 'response', status: 'completed',
-      })}\n\n`);
+      sse('response.output_text.done', {
+        output_index: 0, content_index: 0, text: fullText,
+      });
+      sse('response.content_part.done', {
+        output_index: 0, content_index: 0,
+        part: { type: 'output_text', text: fullText },
+      });
+      sse('response.output_item.done', {
+        output_index: 0,
+        item: { id: outputItemId, type: 'message', role: 'assistant',
+          content: [{ type: 'output_text', text: fullText }] },
+      });
+      sse('response.completed', {
+        response: { id: responseId, object: 'response', status: 'completed',
+          model: model || 'default',
+          output: [{ id: outputItemId, type: 'message', role: 'assistant',
+            content: [{ type: 'output_text', text: fullText }] }] },
+      });
       res.end();
     } else {
       // Non-streaming: collect full response
