@@ -2,8 +2,9 @@ const os = require('os');
 const path = require('path');
 const zlib = require('zlib');
 const crypto = require('crypto');
-const { v4: uuidv4 } = require('uuid');
+const { v4: uuidv4, v5: uuidv5 } = require('uuid');
 const $root = require('../proto/message.js');
+const config = require('../config/config');
 
 // Get Cursor storage path based on platform
 function getCursorStoragePath() {
@@ -39,7 +40,7 @@ function getMachineIdFromStorage() {
   return null;
 }
 
-// ClientSideToolV2 enum values - see TASK-110-tool-enum-mapping.md
+// ClientSideToolV2 enum values - from cursor_agent_client.py (2.6.22)
 const ClientSideToolV2 = {
   UNSPECIFIED: 0,
   READ_SEMSEARCH_FILES: 1,
@@ -56,8 +57,37 @@ const ClientSideToolV2 = {
   WEB_SEARCH: 18,
   MCP: 19,
   SEARCH_SYMBOLS: 23,
+  BACKGROUND_COMPOSER_FOLLOWUP: 24,
+  KNOWLEDGE_BASE: 25,
+  FETCH_PULL_REQUEST: 26,
+  DEEP_SEARCH: 27,
+  CREATE_DIAGRAM: 28,
+  FIX_LINTS: 29,
+  READ_LINTS: 30,
   GO_TO_DEFINITION: 31,
+  TASK: 32,
+  AWAIT_TASK: 33,
+  TODO_READ: 34,
+  TODO_WRITE: 35,
+  EDIT_FILE_V2: 38,
+  LIST_DIR_V2: 39,
+  READ_FILE_V2: 40,
+  RIPGREP_RAW_SEARCH: 41,
   GLOB_FILE_SEARCH: 42,
+  CREATE_PLAN: 43,
+  LIST_MCP_RESOURCES: 44,
+  READ_MCP_RESOURCE: 45,
+  READ_PROJECT: 46,
+  UPDATE_PROJECT: 47,
+  TASK_V2: 48,
+  CALL_MCP_TOOL: 49,
+  APPLY_AGENT_DIFF: 50,
+  ASK_QUESTION: 51,
+  SWITCH_MODE: 52,
+  GENERATE_IMAGE: 53,
+  COMPUTER_USE: 54,
+  WRITE_SHELL_STDIN: 55,
+  GET_MCP_TOOLS: 63,
 };
 
 // Default tools for agent mode
@@ -128,17 +158,25 @@ function generateCursorBody(messages, modelName, options = {}) {
       //unknown22: 1,
       conversationId: uuidv4(),
       metadata: {
-        os: process.platform,
-        arch: process.arch,
-        version: "10.0.22631",
+        os: config.clientOs,
+        arch: config.clientArch,
+        version: config.clientOsVersion,
         path: process.execPath,
         timestamp: new Date().toISOString(),
       },
-      // Agent mode fields - see TASK-7-protobuf-schemas.md
+      // Agent mode fields
       ...(agentMode ? { isAgentic: true, supportedTools } : {}),
       messageIds: messageIds,
       largeContext: 0,
       unknown38: 0,
+      // 2.6.22 request-level fields
+      chatModeEnum: chatModeEnum,
+      unknown47: "",
+      unknown48: 0,
+      unknown49: 0,
+      unknown51: 0,
+      unknown53: 1,
+      chatMode: chatMode,
     }
   };
 
@@ -186,28 +224,23 @@ function chunkToUtf8String(chunk) {
       if (magicNumber == 0 || magicNumber == 1) {
         const gunzipData = magicNumber == 0 ? data : zlib.gunzipSync(data)
         const response = $root.StreamUnifiedChatWithToolsResponse.decode(gunzipData);
-        
-        // Debug: check for tool call patterns in raw data
-        const rawStr = gunzipData.toString('utf-8');
-        if (rawStr.includes('toolu_bdrk_') || rawStr.includes('list_dir')) {
-          console.log('Found tool pattern in raw data:', rawStr.substring(0, 200));
+
+        // Nested response at field 2: stream_unified_chat_response
+        const chatResp = response?.streamUnifiedChatResponse;
+        if (chatResp) {
+          const thinking = chatResp?.thinking?.content;
+          if (thinking !== undefined) {
+            thinkingOutput.push(thinking);
+          }
+
+          const content = chatResp?.text;
+          if (content !== undefined) {
+            textOutput.push(content);
+          }
         }
 
-        const thinking = response?.message?.thinking?.content
-        if (thinking !== undefined){
-          thinkingOutput.push(thinking)
-        }
-
-        const content = response?.message?.content
-        if (content !== undefined){
-          textOutput.push(content)
-        }
-
-        // Check for tool calls (agent mode)
-        const toolCall = response?.toolCall
-        if (toolCall) {
-          console.log('Found toolCall in response:', JSON.stringify(toolCall));
-        }
+        // Tool call at field 1: client_side_tool_v2_call
+        const toolCall = response?.clientSideToolV2Call;
         if (toolCall && toolCall.toolCallId) {
           toolCalls.push({
             tool: toolCall.tool,
@@ -216,12 +249,6 @@ function chunkToUtf8String(chunk) {
             rawArgs: toolCall.rawArgs,
           });
         }
-        
-        // Also log raw response for debugging
-        if (response && !response.message && !response.toolCall) {
-          console.log('Response without message or toolCall:', Object.keys(response));
-        }
-        
       }
       else if (magicNumber == 2 || magicNumber == 3) { 
         // Json message
@@ -355,6 +382,63 @@ function generateCursorChecksum(token) {
   return `${encodedChecksum}${machineId}`;
 }
 
+/**
+ * Build common headers for Cursor API requests (2.6.22 profile)
+ */
+function buildCommonHeaders(authToken) {
+  const sessionId = uuidv5(authToken, uuidv5.DNS);
+  const clientKey = generateHashed64Hex(authToken);
+  const cursorChecksum = generateCursorChecksum(authToken);
+  const requestId = uuidv4();
+
+  return {
+    'authorization': `Bearer ${authToken}`,
+    'connect-protocol-version': '1',
+    'user-agent': 'connect-es/1.6.1',
+    'x-amzn-trace-id': `Root=${requestId}`,
+    'x-client-key': clientKey,
+    'x-cursor-checksum': cursorChecksum,
+    'x-cursor-client-version': config.cursorVersion,
+    'x-cursor-client-type': 'ide',
+    'x-cursor-client-os': config.clientOs,
+    'x-cursor-client-arch': config.clientArch,
+    'x-cursor-client-os-version': config.clientOsVersion,
+    'x-cursor-client-device-type': 'desktop',
+    'x-cursor-config-version': uuidv4(),
+    'x-cursor-timezone': Intl.DateTimeFormat().resolvedOptions().timeZone,
+    'x-ghost-mode': config.ghostMode ? 'true' : 'false',
+    'x-new-onboarding-completed': 'false',
+    'x-request-id': requestId,
+    'x-session-id': sessionId,
+    'host': 'api2.cursor.sh',
+  };
+}
+
+/**
+ * Refresh OAuth access token (2.6.22 flow)
+ * POST https://api2.cursor.sh/oauth/token
+ */
+async function refreshAccessToken(refreshToken) {
+  try {
+    const { fetch } = require('undici');
+    const response = await fetch('https://api2.cursor.sh/oauth/token', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        grant_type: 'refresh_token',
+        client_id: config.oauthClientId,
+        refresh_token: refreshToken,
+      }),
+    });
+    if (response.status !== 200) return null;
+    const data = await response.json();
+    return data.access_token || null;
+  } catch (err) {
+    console.error('Token refresh failed:', err.message);
+    return null;
+  }
+}
+
 module.exports = {
   generateCursorBody,
   chunkToUtf8String,
@@ -363,6 +447,8 @@ module.exports = {
   generateCursorChecksum,
   getMachineIdFromStorage,
   getCursorStoragePath,
+  buildCommonHeaders,
+  refreshAccessToken,
   ClientSideToolV2,
   DEFAULT_AGENT_TOOLS,
 };

@@ -16,8 +16,9 @@ const zlib = require('zlib');
 const { v4: uuidv4, v5: uuidv5 } = require('uuid');
 const { EventEmitter } = require('events');
 const $root = require('../proto/message.js');
-const { 
-  generateCursorChecksum, 
+const config = require('../config/config');
+const {
+  generateCursorChecksum,
   generateHashed64Hex,
   ClientSideToolV2,
   DEFAULT_AGENT_TOOLS,
@@ -332,6 +333,7 @@ class BidiCursorClient extends EventEmitter {
     const clientKey = generateHashed64Hex(authToken);
     const checksum = generateCursorChecksum(authToken);
 
+    const requestId = uuidv4();
     return {
       ':method': 'POST',
       ':path': '/aiserver.v1.ChatService/StreamUnifiedChatWithTools',
@@ -342,18 +344,20 @@ class BidiCursorClient extends EventEmitter {
       'connect-protocol-version': '1',
       'content-type': 'application/connect+proto',
       'user-agent': 'connect-es/1.6.1',
-      'x-amzn-trace-id': `Root=${uuidv4()}`,
+      'x-amzn-trace-id': `Root=${requestId}`,
       'x-client-key': clientKey,
       'x-cursor-checksum': checksum,
-      'x-cursor-client-version': '2.3.41',
+      'x-cursor-client-version': config.cursorVersion,
       'x-cursor-client-type': 'ide',
-      'x-cursor-client-os': process.platform,
-      'x-cursor-client-arch': process.arch,
+      'x-cursor-client-os': config.clientOs,
+      'x-cursor-client-arch': config.clientArch,
+      'x-cursor-client-os-version': config.clientOsVersion,
       'x-cursor-client-device-type': 'desktop',
       'x-cursor-config-version': uuidv4(),
       'x-cursor-timezone': Intl.DateTimeFormat().resolvedOptions().timeZone,
-      'x-ghost-mode': 'true',
-      'x-request-id': uuidv4(),
+      'x-ghost-mode': config.ghostMode ? 'true' : 'false',
+      'x-new-onboarding-completed': 'false',
+      'x-request-id': requestId,
       'x-session-id': sessionId,
     };
   }
@@ -426,9 +430,9 @@ class BidiCursorClient extends EventEmitter {
         unknown19: 1,
         conversationId: uuidv4(),
         metadata: {
-          os: process.platform,
-          arch: process.arch,
-          version: '10.0.22631',
+          os: config.clientOs,
+          arch: config.clientArch,
+          version: config.clientOsVersion,
           path: process.execPath,
           timestamp: new Date().toISOString(),
         },
@@ -437,6 +441,14 @@ class BidiCursorClient extends EventEmitter {
         messageIds: messageIds,
         largeContext: 0,
         unknown38: 0,
+        // 2.6.22 request-level fields
+        chatModeEnum: 3, // Agent
+        unknown47: "",
+        unknown48: 0,
+        unknown49: 0,
+        unknown51: 0,
+        unknown53: 1,
+        chatMode: "Agent",
       }
     };
 

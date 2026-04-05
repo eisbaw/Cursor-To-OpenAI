@@ -589,8 +589,37 @@ $root.AvailableModelsResponse = (function() {
  * @property {number} CLIENT_SIDE_TOOL_V2_WEB_SEARCH=18 CLIENT_SIDE_TOOL_V2_WEB_SEARCH value
  * @property {number} CLIENT_SIDE_TOOL_V2_MCP=19 CLIENT_SIDE_TOOL_V2_MCP value
  * @property {number} CLIENT_SIDE_TOOL_V2_SEARCH_SYMBOLS=23 CLIENT_SIDE_TOOL_V2_SEARCH_SYMBOLS value
+ * @property {number} CLIENT_SIDE_TOOL_V2_BACKGROUND_COMPOSER_FOLLOWUP=24 CLIENT_SIDE_TOOL_V2_BACKGROUND_COMPOSER_FOLLOWUP value
+ * @property {number} CLIENT_SIDE_TOOL_V2_KNOWLEDGE_BASE=25 CLIENT_SIDE_TOOL_V2_KNOWLEDGE_BASE value
+ * @property {number} CLIENT_SIDE_TOOL_V2_FETCH_PULL_REQUEST=26 CLIENT_SIDE_TOOL_V2_FETCH_PULL_REQUEST value
+ * @property {number} CLIENT_SIDE_TOOL_V2_DEEP_SEARCH=27 CLIENT_SIDE_TOOL_V2_DEEP_SEARCH value
+ * @property {number} CLIENT_SIDE_TOOL_V2_CREATE_DIAGRAM=28 CLIENT_SIDE_TOOL_V2_CREATE_DIAGRAM value
+ * @property {number} CLIENT_SIDE_TOOL_V2_FIX_LINTS=29 CLIENT_SIDE_TOOL_V2_FIX_LINTS value
+ * @property {number} CLIENT_SIDE_TOOL_V2_READ_LINTS=30 CLIENT_SIDE_TOOL_V2_READ_LINTS value
  * @property {number} CLIENT_SIDE_TOOL_V2_GO_TO_DEFINITION=31 CLIENT_SIDE_TOOL_V2_GO_TO_DEFINITION value
+ * @property {number} CLIENT_SIDE_TOOL_V2_TASK=32 CLIENT_SIDE_TOOL_V2_TASK value
+ * @property {number} CLIENT_SIDE_TOOL_V2_AWAIT_TASK=33 CLIENT_SIDE_TOOL_V2_AWAIT_TASK value
+ * @property {number} CLIENT_SIDE_TOOL_V2_TODO_READ=34 CLIENT_SIDE_TOOL_V2_TODO_READ value
+ * @property {number} CLIENT_SIDE_TOOL_V2_TODO_WRITE=35 CLIENT_SIDE_TOOL_V2_TODO_WRITE value
+ * @property {number} CLIENT_SIDE_TOOL_V2_EDIT_FILE_V2=38 CLIENT_SIDE_TOOL_V2_EDIT_FILE_V2 value
+ * @property {number} CLIENT_SIDE_TOOL_V2_LIST_DIR_V2=39 CLIENT_SIDE_TOOL_V2_LIST_DIR_V2 value
+ * @property {number} CLIENT_SIDE_TOOL_V2_READ_FILE_V2=40 CLIENT_SIDE_TOOL_V2_READ_FILE_V2 value
+ * @property {number} CLIENT_SIDE_TOOL_V2_RIPGREP_RAW_SEARCH=41 CLIENT_SIDE_TOOL_V2_RIPGREP_RAW_SEARCH value
  * @property {number} CLIENT_SIDE_TOOL_V2_GLOB_FILE_SEARCH=42 CLIENT_SIDE_TOOL_V2_GLOB_FILE_SEARCH value
+ * @property {number} CLIENT_SIDE_TOOL_V2_CREATE_PLAN=43 CLIENT_SIDE_TOOL_V2_CREATE_PLAN value
+ * @property {number} CLIENT_SIDE_TOOL_V2_LIST_MCP_RESOURCES=44 CLIENT_SIDE_TOOL_V2_LIST_MCP_RESOURCES value
+ * @property {number} CLIENT_SIDE_TOOL_V2_READ_MCP_RESOURCE=45 CLIENT_SIDE_TOOL_V2_READ_MCP_RESOURCE value
+ * @property {number} CLIENT_SIDE_TOOL_V2_READ_PROJECT=46 CLIENT_SIDE_TOOL_V2_READ_PROJECT value
+ * @property {number} CLIENT_SIDE_TOOL_V2_UPDATE_PROJECT=47 CLIENT_SIDE_TOOL_V2_UPDATE_PROJECT value
+ * @property {number} CLIENT_SIDE_TOOL_V2_TASK_V2=48 CLIENT_SIDE_TOOL_V2_TASK_V2 value
+ * @property {number} CLIENT_SIDE_TOOL_V2_CALL_MCP_TOOL=49 CLIENT_SIDE_TOOL_V2_CALL_MCP_TOOL value
+ * @property {number} CLIENT_SIDE_TOOL_V2_APPLY_AGENT_DIFF=50 CLIENT_SIDE_TOOL_V2_APPLY_AGENT_DIFF value
+ * @property {number} CLIENT_SIDE_TOOL_V2_ASK_QUESTION=51 CLIENT_SIDE_TOOL_V2_ASK_QUESTION value
+ * @property {number} CLIENT_SIDE_TOOL_V2_SWITCH_MODE=52 CLIENT_SIDE_TOOL_V2_SWITCH_MODE value
+ * @property {number} CLIENT_SIDE_TOOL_V2_GENERATE_IMAGE=53 CLIENT_SIDE_TOOL_V2_GENERATE_IMAGE value
+ * @property {number} CLIENT_SIDE_TOOL_V2_COMPUTER_USE=54 CLIENT_SIDE_TOOL_V2_COMPUTER_USE value
+ * @property {number} CLIENT_SIDE_TOOL_V2_WRITE_SHELL_STDIN=55 CLIENT_SIDE_TOOL_V2_WRITE_SHELL_STDIN value
+ * @property {number} CLIENT_SIDE_TOOL_V2_GET_MCP_TOOLS=63 CLIENT_SIDE_TOOL_V2_GET_MCP_TOOLS value
  */
 $root.ClientSideToolV2 = (function() {
     var valuesById = {}, values = Object.create(valuesById);
@@ -609,8 +638,37 @@ $root.ClientSideToolV2 = (function() {
     values[valuesById[18] = "CLIENT_SIDE_TOOL_V2_WEB_SEARCH"] = 18;
     values[valuesById[19] = "CLIENT_SIDE_TOOL_V2_MCP"] = 19;
     values[valuesById[23] = "CLIENT_SIDE_TOOL_V2_SEARCH_SYMBOLS"] = 23;
+    values[valuesById[24] = "CLIENT_SIDE_TOOL_V2_BACKGROUND_COMPOSER_FOLLOWUP"] = 24;
+    values[valuesById[25] = "CLIENT_SIDE_TOOL_V2_KNOWLEDGE_BASE"] = 25;
+    values[valuesById[26] = "CLIENT_SIDE_TOOL_V2_FETCH_PULL_REQUEST"] = 26;
+    values[valuesById[27] = "CLIENT_SIDE_TOOL_V2_DEEP_SEARCH"] = 27;
+    values[valuesById[28] = "CLIENT_SIDE_TOOL_V2_CREATE_DIAGRAM"] = 28;
+    values[valuesById[29] = "CLIENT_SIDE_TOOL_V2_FIX_LINTS"] = 29;
+    values[valuesById[30] = "CLIENT_SIDE_TOOL_V2_READ_LINTS"] = 30;
     values[valuesById[31] = "CLIENT_SIDE_TOOL_V2_GO_TO_DEFINITION"] = 31;
+    values[valuesById[32] = "CLIENT_SIDE_TOOL_V2_TASK"] = 32;
+    values[valuesById[33] = "CLIENT_SIDE_TOOL_V2_AWAIT_TASK"] = 33;
+    values[valuesById[34] = "CLIENT_SIDE_TOOL_V2_TODO_READ"] = 34;
+    values[valuesById[35] = "CLIENT_SIDE_TOOL_V2_TODO_WRITE"] = 35;
+    values[valuesById[38] = "CLIENT_SIDE_TOOL_V2_EDIT_FILE_V2"] = 38;
+    values[valuesById[39] = "CLIENT_SIDE_TOOL_V2_LIST_DIR_V2"] = 39;
+    values[valuesById[40] = "CLIENT_SIDE_TOOL_V2_READ_FILE_V2"] = 40;
+    values[valuesById[41] = "CLIENT_SIDE_TOOL_V2_RIPGREP_RAW_SEARCH"] = 41;
     values[valuesById[42] = "CLIENT_SIDE_TOOL_V2_GLOB_FILE_SEARCH"] = 42;
+    values[valuesById[43] = "CLIENT_SIDE_TOOL_V2_CREATE_PLAN"] = 43;
+    values[valuesById[44] = "CLIENT_SIDE_TOOL_V2_LIST_MCP_RESOURCES"] = 44;
+    values[valuesById[45] = "CLIENT_SIDE_TOOL_V2_READ_MCP_RESOURCE"] = 45;
+    values[valuesById[46] = "CLIENT_SIDE_TOOL_V2_READ_PROJECT"] = 46;
+    values[valuesById[47] = "CLIENT_SIDE_TOOL_V2_UPDATE_PROJECT"] = 47;
+    values[valuesById[48] = "CLIENT_SIDE_TOOL_V2_TASK_V2"] = 48;
+    values[valuesById[49] = "CLIENT_SIDE_TOOL_V2_CALL_MCP_TOOL"] = 49;
+    values[valuesById[50] = "CLIENT_SIDE_TOOL_V2_APPLY_AGENT_DIFF"] = 50;
+    values[valuesById[51] = "CLIENT_SIDE_TOOL_V2_ASK_QUESTION"] = 51;
+    values[valuesById[52] = "CLIENT_SIDE_TOOL_V2_SWITCH_MODE"] = 52;
+    values[valuesById[53] = "CLIENT_SIDE_TOOL_V2_GENERATE_IMAGE"] = 53;
+    values[valuesById[54] = "CLIENT_SIDE_TOOL_V2_COMPUTER_USE"] = 54;
+    values[valuesById[55] = "CLIENT_SIDE_TOOL_V2_WRITE_SHELL_STDIN"] = 55;
+    values[valuesById[63] = "CLIENT_SIDE_TOOL_V2_GET_MCP_TOOLS"] = 63;
     return values;
 })();
 
@@ -809,8 +867,37 @@ $root.ClientSideToolV2Call = (function() {
             case 18:
             case 19:
             case 23:
+            case 24:
+            case 25:
+            case 26:
+            case 27:
+            case 28:
+            case 29:
+            case 30:
             case 31:
+            case 32:
+            case 33:
+            case 34:
+            case 35:
+            case 38:
+            case 39:
+            case 40:
+            case 41:
             case 42:
+            case 43:
+            case 44:
+            case 45:
+            case 46:
+            case 47:
+            case 48:
+            case 49:
+            case 50:
+            case 51:
+            case 52:
+            case 53:
+            case 54:
+            case 55:
+            case 63:
                 break;
             }
         if (message.toolCallId != null && message.hasOwnProperty("toolCallId"))
@@ -904,13 +991,129 @@ $root.ClientSideToolV2Call = (function() {
         case 23:
             message.tool = 23;
             break;
+        case "CLIENT_SIDE_TOOL_V2_BACKGROUND_COMPOSER_FOLLOWUP":
+        case 24:
+            message.tool = 24;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_KNOWLEDGE_BASE":
+        case 25:
+            message.tool = 25;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_FETCH_PULL_REQUEST":
+        case 26:
+            message.tool = 26;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_DEEP_SEARCH":
+        case 27:
+            message.tool = 27;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_CREATE_DIAGRAM":
+        case 28:
+            message.tool = 28;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_FIX_LINTS":
+        case 29:
+            message.tool = 29;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_READ_LINTS":
+        case 30:
+            message.tool = 30;
+            break;
         case "CLIENT_SIDE_TOOL_V2_GO_TO_DEFINITION":
         case 31:
             message.tool = 31;
             break;
+        case "CLIENT_SIDE_TOOL_V2_TASK":
+        case 32:
+            message.tool = 32;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_AWAIT_TASK":
+        case 33:
+            message.tool = 33;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_TODO_READ":
+        case 34:
+            message.tool = 34;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_TODO_WRITE":
+        case 35:
+            message.tool = 35;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_EDIT_FILE_V2":
+        case 38:
+            message.tool = 38;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_LIST_DIR_V2":
+        case 39:
+            message.tool = 39;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_READ_FILE_V2":
+        case 40:
+            message.tool = 40;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_RIPGREP_RAW_SEARCH":
+        case 41:
+            message.tool = 41;
+            break;
         case "CLIENT_SIDE_TOOL_V2_GLOB_FILE_SEARCH":
         case 42:
             message.tool = 42;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_CREATE_PLAN":
+        case 43:
+            message.tool = 43;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_LIST_MCP_RESOURCES":
+        case 44:
+            message.tool = 44;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_READ_MCP_RESOURCE":
+        case 45:
+            message.tool = 45;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_READ_PROJECT":
+        case 46:
+            message.tool = 46;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_UPDATE_PROJECT":
+        case 47:
+            message.tool = 47;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_TASK_V2":
+        case 48:
+            message.tool = 48;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_CALL_MCP_TOOL":
+        case 49:
+            message.tool = 49;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_APPLY_AGENT_DIFF":
+        case 50:
+            message.tool = 50;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_ASK_QUESTION":
+        case 51:
+            message.tool = 51;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_SWITCH_MODE":
+        case 52:
+            message.tool = 52;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_GENERATE_IMAGE":
+        case 53:
+            message.tool = 53;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_COMPUTER_USE":
+        case 54:
+            message.tool = 54;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_WRITE_SHELL_STDIN":
+        case 55:
+            message.tool = 55;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_GET_MCP_TOOLS":
+        case 63:
+            message.tool = 63;
             break;
         }
         if (object.toolCallId != null)
@@ -1146,8 +1349,37 @@ $root.ClientSideToolV2Result = (function() {
             case 18:
             case 19:
             case 23:
+            case 24:
+            case 25:
+            case 26:
+            case 27:
+            case 28:
+            case 29:
+            case 30:
             case 31:
+            case 32:
+            case 33:
+            case 34:
+            case 35:
+            case 38:
+            case 39:
+            case 40:
+            case 41:
             case 42:
+            case 43:
+            case 44:
+            case 45:
+            case 46:
+            case 47:
+            case 48:
+            case 49:
+            case 50:
+            case 51:
+            case 52:
+            case 53:
+            case 54:
+            case 55:
+            case 63:
                 break;
             }
         if (message.toolCallId != null && message.hasOwnProperty("toolCallId"))
@@ -1235,13 +1467,129 @@ $root.ClientSideToolV2Result = (function() {
         case 23:
             message.tool = 23;
             break;
+        case "CLIENT_SIDE_TOOL_V2_BACKGROUND_COMPOSER_FOLLOWUP":
+        case 24:
+            message.tool = 24;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_KNOWLEDGE_BASE":
+        case 25:
+            message.tool = 25;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_FETCH_PULL_REQUEST":
+        case 26:
+            message.tool = 26;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_DEEP_SEARCH":
+        case 27:
+            message.tool = 27;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_CREATE_DIAGRAM":
+        case 28:
+            message.tool = 28;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_FIX_LINTS":
+        case 29:
+            message.tool = 29;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_READ_LINTS":
+        case 30:
+            message.tool = 30;
+            break;
         case "CLIENT_SIDE_TOOL_V2_GO_TO_DEFINITION":
         case 31:
             message.tool = 31;
             break;
+        case "CLIENT_SIDE_TOOL_V2_TASK":
+        case 32:
+            message.tool = 32;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_AWAIT_TASK":
+        case 33:
+            message.tool = 33;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_TODO_READ":
+        case 34:
+            message.tool = 34;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_TODO_WRITE":
+        case 35:
+            message.tool = 35;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_EDIT_FILE_V2":
+        case 38:
+            message.tool = 38;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_LIST_DIR_V2":
+        case 39:
+            message.tool = 39;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_READ_FILE_V2":
+        case 40:
+            message.tool = 40;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_RIPGREP_RAW_SEARCH":
+        case 41:
+            message.tool = 41;
+            break;
         case "CLIENT_SIDE_TOOL_V2_GLOB_FILE_SEARCH":
         case 42:
             message.tool = 42;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_CREATE_PLAN":
+        case 43:
+            message.tool = 43;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_LIST_MCP_RESOURCES":
+        case 44:
+            message.tool = 44;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_READ_MCP_RESOURCE":
+        case 45:
+            message.tool = 45;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_READ_PROJECT":
+        case 46:
+            message.tool = 46;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_UPDATE_PROJECT":
+        case 47:
+            message.tool = 47;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_TASK_V2":
+        case 48:
+            message.tool = 48;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_CALL_MCP_TOOL":
+        case 49:
+            message.tool = 49;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_APPLY_AGENT_DIFF":
+        case 50:
+            message.tool = 50;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_ASK_QUESTION":
+        case 51:
+            message.tool = 51;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_SWITCH_MODE":
+        case 52:
+            message.tool = 52;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_GENERATE_IMAGE":
+        case 53:
+            message.tool = 53;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_COMPUTER_USE":
+        case 54:
+            message.tool = 54;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_WRITE_SHELL_STDIN":
+        case 55:
+            message.tool = 55;
+            break;
+        case "CLIENT_SIDE_TOOL_V2_GET_MCP_TOOLS":
+        case 63:
+            message.tool = 63;
             break;
         }
         if (object.toolCallId != null)
@@ -2007,6 +2355,13 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
          * @property {Array.<StreamUnifiedChatWithToolsRequest.Request.IMessageId>|null} [messageIds] Request messageIds
          * @property {number|null} [largeContext] Request largeContext
          * @property {number|null} [unknown38] Request unknown38
+         * @property {number|null} [chatModeEnum] Request chatModeEnum
+         * @property {string|null} [unknown47] Request unknown47
+         * @property {number|null} [unknown48] Request unknown48
+         * @property {number|null} [unknown49] Request unknown49
+         * @property {number|null} [unknown51] Request unknown51
+         * @property {number|null} [unknown53] Request unknown53
+         * @property {string|null} [chatMode] Request chatMode
          */
 
         /**
@@ -2173,6 +2528,62 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
         Request.prototype.unknown38 = 0;
 
         /**
+         * Request chatModeEnum.
+         * @member {number} chatModeEnum
+         * @memberof StreamUnifiedChatWithToolsRequest.Request
+         * @instance
+         */
+        Request.prototype.chatModeEnum = 0;
+
+        /**
+         * Request unknown47.
+         * @member {string} unknown47
+         * @memberof StreamUnifiedChatWithToolsRequest.Request
+         * @instance
+         */
+        Request.prototype.unknown47 = "";
+
+        /**
+         * Request unknown48.
+         * @member {number} unknown48
+         * @memberof StreamUnifiedChatWithToolsRequest.Request
+         * @instance
+         */
+        Request.prototype.unknown48 = 0;
+
+        /**
+         * Request unknown49.
+         * @member {number} unknown49
+         * @memberof StreamUnifiedChatWithToolsRequest.Request
+         * @instance
+         */
+        Request.prototype.unknown49 = 0;
+
+        /**
+         * Request unknown51.
+         * @member {number} unknown51
+         * @memberof StreamUnifiedChatWithToolsRequest.Request
+         * @instance
+         */
+        Request.prototype.unknown51 = 0;
+
+        /**
+         * Request unknown53.
+         * @member {number} unknown53
+         * @memberof StreamUnifiedChatWithToolsRequest.Request
+         * @instance
+         */
+        Request.prototype.unknown53 = 0;
+
+        /**
+         * Request chatMode.
+         * @member {string} chatMode
+         * @memberof StreamUnifiedChatWithToolsRequest.Request
+         * @instance
+         */
+        Request.prototype.chatMode = "";
+
+        /**
          * Creates a new Request instance using the specified properties.
          * @function create
          * @memberof StreamUnifiedChatWithToolsRequest.Request
@@ -2239,6 +2650,20 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
                 writer.uint32(/* id 35, wireType 0 =*/280).int32(message.largeContext);
             if (message.unknown38 != null && Object.hasOwnProperty.call(message, "unknown38"))
                 writer.uint32(/* id 38, wireType 0 =*/304).int32(message.unknown38);
+            if (message.chatModeEnum != null && Object.hasOwnProperty.call(message, "chatModeEnum"))
+                writer.uint32(/* id 46, wireType 0 =*/368).int32(message.chatModeEnum);
+            if (message.unknown47 != null && Object.hasOwnProperty.call(message, "unknown47"))
+                writer.uint32(/* id 47, wireType 2 =*/378).string(message.unknown47);
+            if (message.unknown48 != null && Object.hasOwnProperty.call(message, "unknown48"))
+                writer.uint32(/* id 48, wireType 0 =*/384).int32(message.unknown48);
+            if (message.unknown49 != null && Object.hasOwnProperty.call(message, "unknown49"))
+                writer.uint32(/* id 49, wireType 0 =*/392).int32(message.unknown49);
+            if (message.unknown51 != null && Object.hasOwnProperty.call(message, "unknown51"))
+                writer.uint32(/* id 51, wireType 0 =*/408).int32(message.unknown51);
+            if (message.unknown53 != null && Object.hasOwnProperty.call(message, "unknown53"))
+                writer.uint32(/* id 53, wireType 0 =*/424).int32(message.unknown53);
+            if (message.chatMode != null && Object.hasOwnProperty.call(message, "chatMode"))
+                writer.uint32(/* id 54, wireType 2 =*/434).string(message.chatMode);
             return writer;
         };
 
@@ -2358,6 +2783,34 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
                         message.unknown38 = reader.int32();
                         break;
                     }
+                case 46: {
+                        message.chatModeEnum = reader.int32();
+                        break;
+                    }
+                case 47: {
+                        message.unknown47 = reader.string();
+                        break;
+                    }
+                case 48: {
+                        message.unknown48 = reader.int32();
+                        break;
+                    }
+                case 49: {
+                        message.unknown49 = reader.int32();
+                        break;
+                    }
+                case 51: {
+                        message.unknown51 = reader.int32();
+                        break;
+                    }
+                case 53: {
+                        message.unknown53 = reader.int32();
+                        break;
+                    }
+                case 54: {
+                        message.chatMode = reader.string();
+                        break;
+                    }
                 default:
                     reader.skipType(tag & 7);
                     break;
@@ -2475,8 +2928,37 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
                     case 18:
                     case 19:
                     case 23:
+                    case 24:
+                    case 25:
+                    case 26:
+                    case 27:
+                    case 28:
+                    case 29:
+                    case 30:
                     case 31:
+                    case 32:
+                    case 33:
+                    case 34:
+                    case 35:
+                    case 38:
+                    case 39:
+                    case 40:
+                    case 41:
                     case 42:
+                    case 43:
+                    case 44:
+                    case 45:
+                    case 46:
+                    case 47:
+                    case 48:
+                    case 49:
+                    case 50:
+                    case 51:
+                    case 52:
+                    case 53:
+                    case 54:
+                    case 55:
+                    case 63:
                         break;
                     }
             }
@@ -2495,6 +2977,27 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
             if (message.unknown38 != null && message.hasOwnProperty("unknown38"))
                 if (!$util.isInteger(message.unknown38))
                     return "unknown38: integer expected";
+            if (message.chatModeEnum != null && message.hasOwnProperty("chatModeEnum"))
+                if (!$util.isInteger(message.chatModeEnum))
+                    return "chatModeEnum: integer expected";
+            if (message.unknown47 != null && message.hasOwnProperty("unknown47"))
+                if (!$util.isString(message.unknown47))
+                    return "unknown47: string expected";
+            if (message.unknown48 != null && message.hasOwnProperty("unknown48"))
+                if (!$util.isInteger(message.unknown48))
+                    return "unknown48: integer expected";
+            if (message.unknown49 != null && message.hasOwnProperty("unknown49"))
+                if (!$util.isInteger(message.unknown49))
+                    return "unknown49: integer expected";
+            if (message.unknown51 != null && message.hasOwnProperty("unknown51"))
+                if (!$util.isInteger(message.unknown51))
+                    return "unknown51: integer expected";
+            if (message.unknown53 != null && message.hasOwnProperty("unknown53"))
+                if (!$util.isInteger(message.unknown53))
+                    return "unknown53: integer expected";
+            if (message.chatMode != null && message.hasOwnProperty("chatMode"))
+                if (!$util.isString(message.chatMode))
+                    return "chatMode: string expected";
             return null;
         };
 
@@ -2634,13 +3137,129 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
                     case 23:
                         message.supportedTools[i] = 23;
                         break;
+                    case "CLIENT_SIDE_TOOL_V2_BACKGROUND_COMPOSER_FOLLOWUP":
+                    case 24:
+                        message.supportedTools[i] = 24;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_KNOWLEDGE_BASE":
+                    case 25:
+                        message.supportedTools[i] = 25;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_FETCH_PULL_REQUEST":
+                    case 26:
+                        message.supportedTools[i] = 26;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_DEEP_SEARCH":
+                    case 27:
+                        message.supportedTools[i] = 27;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_CREATE_DIAGRAM":
+                    case 28:
+                        message.supportedTools[i] = 28;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_FIX_LINTS":
+                    case 29:
+                        message.supportedTools[i] = 29;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_READ_LINTS":
+                    case 30:
+                        message.supportedTools[i] = 30;
+                        break;
                     case "CLIENT_SIDE_TOOL_V2_GO_TO_DEFINITION":
                     case 31:
                         message.supportedTools[i] = 31;
                         break;
+                    case "CLIENT_SIDE_TOOL_V2_TASK":
+                    case 32:
+                        message.supportedTools[i] = 32;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_AWAIT_TASK":
+                    case 33:
+                        message.supportedTools[i] = 33;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_TODO_READ":
+                    case 34:
+                        message.supportedTools[i] = 34;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_TODO_WRITE":
+                    case 35:
+                        message.supportedTools[i] = 35;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_EDIT_FILE_V2":
+                    case 38:
+                        message.supportedTools[i] = 38;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_LIST_DIR_V2":
+                    case 39:
+                        message.supportedTools[i] = 39;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_READ_FILE_V2":
+                    case 40:
+                        message.supportedTools[i] = 40;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_RIPGREP_RAW_SEARCH":
+                    case 41:
+                        message.supportedTools[i] = 41;
+                        break;
                     case "CLIENT_SIDE_TOOL_V2_GLOB_FILE_SEARCH":
                     case 42:
                         message.supportedTools[i] = 42;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_CREATE_PLAN":
+                    case 43:
+                        message.supportedTools[i] = 43;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_LIST_MCP_RESOURCES":
+                    case 44:
+                        message.supportedTools[i] = 44;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_READ_MCP_RESOURCE":
+                    case 45:
+                        message.supportedTools[i] = 45;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_READ_PROJECT":
+                    case 46:
+                        message.supportedTools[i] = 46;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_UPDATE_PROJECT":
+                    case 47:
+                        message.supportedTools[i] = 47;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_TASK_V2":
+                    case 48:
+                        message.supportedTools[i] = 48;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_CALL_MCP_TOOL":
+                    case 49:
+                        message.supportedTools[i] = 49;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_APPLY_AGENT_DIFF":
+                    case 50:
+                        message.supportedTools[i] = 50;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_ASK_QUESTION":
+                    case 51:
+                        message.supportedTools[i] = 51;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_SWITCH_MODE":
+                    case 52:
+                        message.supportedTools[i] = 52;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_GENERATE_IMAGE":
+                    case 53:
+                        message.supportedTools[i] = 53;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_COMPUTER_USE":
+                    case 54:
+                        message.supportedTools[i] = 54;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_WRITE_SHELL_STDIN":
+                    case 55:
+                        message.supportedTools[i] = 55;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_GET_MCP_TOOLS":
+                    case 63:
+                        message.supportedTools[i] = 63;
                         break;
                     }
             }
@@ -2658,6 +3277,20 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
                 message.largeContext = object.largeContext | 0;
             if (object.unknown38 != null)
                 message.unknown38 = object.unknown38 | 0;
+            if (object.chatModeEnum != null)
+                message.chatModeEnum = object.chatModeEnum | 0;
+            if (object.unknown47 != null)
+                message.unknown47 = String(object.unknown47);
+            if (object.unknown48 != null)
+                message.unknown48 = object.unknown48 | 0;
+            if (object.unknown49 != null)
+                message.unknown49 = object.unknown49 | 0;
+            if (object.unknown51 != null)
+                message.unknown51 = object.unknown51 | 0;
+            if (object.unknown53 != null)
+                message.unknown53 = object.unknown53 | 0;
+            if (object.chatMode != null)
+                message.chatMode = String(object.chatMode);
             return message;
         };
 
@@ -2695,6 +3328,13 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
                 object.isAgentic = false;
                 object.largeContext = 0;
                 object.unknown38 = 0;
+                object.chatModeEnum = 0;
+                object.unknown47 = "";
+                object.unknown48 = 0;
+                object.unknown49 = 0;
+                object.unknown51 = 0;
+                object.unknown53 = 0;
+                object.chatMode = "";
             }
             if (message.messages && message.messages.length) {
                 object.messages = [];
@@ -2744,6 +3384,20 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
                 object.largeContext = message.largeContext;
             if (message.unknown38 != null && message.hasOwnProperty("unknown38"))
                 object.unknown38 = message.unknown38;
+            if (message.chatModeEnum != null && message.hasOwnProperty("chatModeEnum"))
+                object.chatModeEnum = message.chatModeEnum;
+            if (message.unknown47 != null && message.hasOwnProperty("unknown47"))
+                object.unknown47 = message.unknown47;
+            if (message.unknown48 != null && message.hasOwnProperty("unknown48"))
+                object.unknown48 = message.unknown48;
+            if (message.unknown49 != null && message.hasOwnProperty("unknown49"))
+                object.unknown49 = message.unknown49;
+            if (message.unknown51 != null && message.hasOwnProperty("unknown51"))
+                object.unknown51 = message.unknown51;
+            if (message.unknown53 != null && message.hasOwnProperty("unknown53"))
+                object.unknown53 = message.unknown53;
+            if (message.chatMode != null && message.hasOwnProperty("chatMode"))
+                object.chatMode = message.chatMode;
             return object;
         };
 
@@ -5190,19 +5844,950 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
     return StreamUnifiedChatWithToolsRequest;
 })();
 
+$root.StreamUnifiedChatResponse = (function() {
+
+    /**
+     * Properties of a StreamUnifiedChatResponse.
+     * @exports IStreamUnifiedChatResponse
+     * @interface IStreamUnifiedChatResponse
+     * @property {string|null} [text] StreamUnifiedChatResponse text
+     * @property {string|null} [debuggingOnlyChatPrompt] StreamUnifiedChatResponse debuggingOnlyChatPrompt
+     * @property {number|null} [debuggingOnlyTokenCount] StreamUnifiedChatResponse debuggingOnlyTokenCount
+     * @property {string|null} [filledPrompt] StreamUnifiedChatResponse filledPrompt
+     * @property {string|null} [intermediateText] StreamUnifiedChatResponse intermediateText
+     * @property {string|null} [serverBubbleId] StreamUnifiedChatResponse serverBubbleId
+     * @property {StreamUnifiedChatResponse.IThinking|null} [thinking] StreamUnifiedChatResponse thinking
+     * @property {StreamUnifiedChatResponse.IToolCallV1|null} [toolCall] StreamUnifiedChatResponse toolCall
+     * @property {string|null} [usageUuid] StreamUnifiedChatResponse usageUuid
+     */
+
+    /**
+     * Constructs a new StreamUnifiedChatResponse.
+     * @exports StreamUnifiedChatResponse
+     * @classdesc Represents a StreamUnifiedChatResponse.
+     * @implements IStreamUnifiedChatResponse
+     * @constructor
+     * @param {IStreamUnifiedChatResponse=} [properties] Properties to set
+     */
+    function StreamUnifiedChatResponse(properties) {
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * StreamUnifiedChatResponse text.
+     * @member {string} text
+     * @memberof StreamUnifiedChatResponse
+     * @instance
+     */
+    StreamUnifiedChatResponse.prototype.text = "";
+
+    /**
+     * StreamUnifiedChatResponse debuggingOnlyChatPrompt.
+     * @member {string|null|undefined} debuggingOnlyChatPrompt
+     * @memberof StreamUnifiedChatResponse
+     * @instance
+     */
+    StreamUnifiedChatResponse.prototype.debuggingOnlyChatPrompt = null;
+
+    /**
+     * StreamUnifiedChatResponse debuggingOnlyTokenCount.
+     * @member {number|null|undefined} debuggingOnlyTokenCount
+     * @memberof StreamUnifiedChatResponse
+     * @instance
+     */
+    StreamUnifiedChatResponse.prototype.debuggingOnlyTokenCount = null;
+
+    /**
+     * StreamUnifiedChatResponse filledPrompt.
+     * @member {string|null|undefined} filledPrompt
+     * @memberof StreamUnifiedChatResponse
+     * @instance
+     */
+    StreamUnifiedChatResponse.prototype.filledPrompt = null;
+
+    /**
+     * StreamUnifiedChatResponse intermediateText.
+     * @member {string|null|undefined} intermediateText
+     * @memberof StreamUnifiedChatResponse
+     * @instance
+     */
+    StreamUnifiedChatResponse.prototype.intermediateText = null;
+
+    /**
+     * StreamUnifiedChatResponse serverBubbleId.
+     * @member {string|null|undefined} serverBubbleId
+     * @memberof StreamUnifiedChatResponse
+     * @instance
+     */
+    StreamUnifiedChatResponse.prototype.serverBubbleId = null;
+
+    /**
+     * StreamUnifiedChatResponse thinking.
+     * @member {StreamUnifiedChatResponse.IThinking|null|undefined} thinking
+     * @memberof StreamUnifiedChatResponse
+     * @instance
+     */
+    StreamUnifiedChatResponse.prototype.thinking = null;
+
+    /**
+     * StreamUnifiedChatResponse toolCall.
+     * @member {StreamUnifiedChatResponse.IToolCallV1|null|undefined} toolCall
+     * @memberof StreamUnifiedChatResponse
+     * @instance
+     */
+    StreamUnifiedChatResponse.prototype.toolCall = null;
+
+    /**
+     * StreamUnifiedChatResponse usageUuid.
+     * @member {string|null|undefined} usageUuid
+     * @memberof StreamUnifiedChatResponse
+     * @instance
+     */
+    StreamUnifiedChatResponse.prototype.usageUuid = null;
+
+    // OneOf field names bound to virtual getters and setters
+    var $oneOfFields;
+
+    // Virtual OneOf for proto3 optional field
+    Object.defineProperty(StreamUnifiedChatResponse.prototype, "_debuggingOnlyChatPrompt", {
+        get: $util.oneOfGetter($oneOfFields = ["debuggingOnlyChatPrompt"]),
+        set: $util.oneOfSetter($oneOfFields)
+    });
+
+    // Virtual OneOf for proto3 optional field
+    Object.defineProperty(StreamUnifiedChatResponse.prototype, "_debuggingOnlyTokenCount", {
+        get: $util.oneOfGetter($oneOfFields = ["debuggingOnlyTokenCount"]),
+        set: $util.oneOfSetter($oneOfFields)
+    });
+
+    // Virtual OneOf for proto3 optional field
+    Object.defineProperty(StreamUnifiedChatResponse.prototype, "_filledPrompt", {
+        get: $util.oneOfGetter($oneOfFields = ["filledPrompt"]),
+        set: $util.oneOfSetter($oneOfFields)
+    });
+
+    // Virtual OneOf for proto3 optional field
+    Object.defineProperty(StreamUnifiedChatResponse.prototype, "_intermediateText", {
+        get: $util.oneOfGetter($oneOfFields = ["intermediateText"]),
+        set: $util.oneOfSetter($oneOfFields)
+    });
+
+    // Virtual OneOf for proto3 optional field
+    Object.defineProperty(StreamUnifiedChatResponse.prototype, "_serverBubbleId", {
+        get: $util.oneOfGetter($oneOfFields = ["serverBubbleId"]),
+        set: $util.oneOfSetter($oneOfFields)
+    });
+
+    // Virtual OneOf for proto3 optional field
+    Object.defineProperty(StreamUnifiedChatResponse.prototype, "_thinking", {
+        get: $util.oneOfGetter($oneOfFields = ["thinking"]),
+        set: $util.oneOfSetter($oneOfFields)
+    });
+
+    // Virtual OneOf for proto3 optional field
+    Object.defineProperty(StreamUnifiedChatResponse.prototype, "_toolCall", {
+        get: $util.oneOfGetter($oneOfFields = ["toolCall"]),
+        set: $util.oneOfSetter($oneOfFields)
+    });
+
+    // Virtual OneOf for proto3 optional field
+    Object.defineProperty(StreamUnifiedChatResponse.prototype, "_usageUuid", {
+        get: $util.oneOfGetter($oneOfFields = ["usageUuid"]),
+        set: $util.oneOfSetter($oneOfFields)
+    });
+
+    /**
+     * Creates a new StreamUnifiedChatResponse instance using the specified properties.
+     * @function create
+     * @memberof StreamUnifiedChatResponse
+     * @static
+     * @param {IStreamUnifiedChatResponse=} [properties] Properties to set
+     * @returns {StreamUnifiedChatResponse} StreamUnifiedChatResponse instance
+     */
+    StreamUnifiedChatResponse.create = function create(properties) {
+        return new StreamUnifiedChatResponse(properties);
+    };
+
+    /**
+     * Encodes the specified StreamUnifiedChatResponse message. Does not implicitly {@link StreamUnifiedChatResponse.verify|verify} messages.
+     * @function encode
+     * @memberof StreamUnifiedChatResponse
+     * @static
+     * @param {IStreamUnifiedChatResponse} message StreamUnifiedChatResponse message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    StreamUnifiedChatResponse.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.text != null && Object.hasOwnProperty.call(message, "text"))
+            writer.uint32(/* id 1, wireType 2 =*/10).string(message.text);
+        if (message.debuggingOnlyChatPrompt != null && Object.hasOwnProperty.call(message, "debuggingOnlyChatPrompt"))
+            writer.uint32(/* id 2, wireType 2 =*/18).string(message.debuggingOnlyChatPrompt);
+        if (message.debuggingOnlyTokenCount != null && Object.hasOwnProperty.call(message, "debuggingOnlyTokenCount"))
+            writer.uint32(/* id 3, wireType 0 =*/24).int32(message.debuggingOnlyTokenCount);
+        if (message.filledPrompt != null && Object.hasOwnProperty.call(message, "filledPrompt"))
+            writer.uint32(/* id 5, wireType 2 =*/42).string(message.filledPrompt);
+        if (message.intermediateText != null && Object.hasOwnProperty.call(message, "intermediateText"))
+            writer.uint32(/* id 7, wireType 2 =*/58).string(message.intermediateText);
+        if (message.toolCall != null && Object.hasOwnProperty.call(message, "toolCall"))
+            $root.StreamUnifiedChatResponse.ToolCallV1.encode(message.toolCall, writer.uint32(/* id 13, wireType 2 =*/106).fork()).ldelim();
+        if (message.serverBubbleId != null && Object.hasOwnProperty.call(message, "serverBubbleId"))
+            writer.uint32(/* id 22, wireType 2 =*/178).string(message.serverBubbleId);
+        if (message.thinking != null && Object.hasOwnProperty.call(message, "thinking"))
+            $root.StreamUnifiedChatResponse.Thinking.encode(message.thinking, writer.uint32(/* id 25, wireType 2 =*/202).fork()).ldelim();
+        if (message.usageUuid != null && Object.hasOwnProperty.call(message, "usageUuid"))
+            writer.uint32(/* id 27, wireType 2 =*/218).string(message.usageUuid);
+        return writer;
+    };
+
+    /**
+     * Encodes the specified StreamUnifiedChatResponse message, length delimited. Does not implicitly {@link StreamUnifiedChatResponse.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof StreamUnifiedChatResponse
+     * @static
+     * @param {IStreamUnifiedChatResponse} message StreamUnifiedChatResponse message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    StreamUnifiedChatResponse.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a StreamUnifiedChatResponse message from the specified reader or buffer.
+     * @function decode
+     * @memberof StreamUnifiedChatResponse
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {StreamUnifiedChatResponse} StreamUnifiedChatResponse
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    StreamUnifiedChatResponse.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.StreamUnifiedChatResponse();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1: {
+                    message.text = reader.string();
+                    break;
+                }
+            case 2: {
+                    message.debuggingOnlyChatPrompt = reader.string();
+                    break;
+                }
+            case 3: {
+                    message.debuggingOnlyTokenCount = reader.int32();
+                    break;
+                }
+            case 5: {
+                    message.filledPrompt = reader.string();
+                    break;
+                }
+            case 7: {
+                    message.intermediateText = reader.string();
+                    break;
+                }
+            case 22: {
+                    message.serverBubbleId = reader.string();
+                    break;
+                }
+            case 25: {
+                    message.thinking = $root.StreamUnifiedChatResponse.Thinking.decode(reader, reader.uint32());
+                    break;
+                }
+            case 13: {
+                    message.toolCall = $root.StreamUnifiedChatResponse.ToolCallV1.decode(reader, reader.uint32());
+                    break;
+                }
+            case 27: {
+                    message.usageUuid = reader.string();
+                    break;
+                }
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a StreamUnifiedChatResponse message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof StreamUnifiedChatResponse
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {StreamUnifiedChatResponse} StreamUnifiedChatResponse
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    StreamUnifiedChatResponse.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a StreamUnifiedChatResponse message.
+     * @function verify
+     * @memberof StreamUnifiedChatResponse
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    StreamUnifiedChatResponse.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        var properties = {};
+        if (message.text != null && message.hasOwnProperty("text"))
+            if (!$util.isString(message.text))
+                return "text: string expected";
+        if (message.debuggingOnlyChatPrompt != null && message.hasOwnProperty("debuggingOnlyChatPrompt")) {
+            properties._debuggingOnlyChatPrompt = 1;
+            if (!$util.isString(message.debuggingOnlyChatPrompt))
+                return "debuggingOnlyChatPrompt: string expected";
+        }
+        if (message.debuggingOnlyTokenCount != null && message.hasOwnProperty("debuggingOnlyTokenCount")) {
+            properties._debuggingOnlyTokenCount = 1;
+            if (!$util.isInteger(message.debuggingOnlyTokenCount))
+                return "debuggingOnlyTokenCount: integer expected";
+        }
+        if (message.filledPrompt != null && message.hasOwnProperty("filledPrompt")) {
+            properties._filledPrompt = 1;
+            if (!$util.isString(message.filledPrompt))
+                return "filledPrompt: string expected";
+        }
+        if (message.intermediateText != null && message.hasOwnProperty("intermediateText")) {
+            properties._intermediateText = 1;
+            if (!$util.isString(message.intermediateText))
+                return "intermediateText: string expected";
+        }
+        if (message.serverBubbleId != null && message.hasOwnProperty("serverBubbleId")) {
+            properties._serverBubbleId = 1;
+            if (!$util.isString(message.serverBubbleId))
+                return "serverBubbleId: string expected";
+        }
+        if (message.thinking != null && message.hasOwnProperty("thinking")) {
+            properties._thinking = 1;
+            {
+                var error = $root.StreamUnifiedChatResponse.Thinking.verify(message.thinking);
+                if (error)
+                    return "thinking." + error;
+            }
+        }
+        if (message.toolCall != null && message.hasOwnProperty("toolCall")) {
+            properties._toolCall = 1;
+            {
+                var error = $root.StreamUnifiedChatResponse.ToolCallV1.verify(message.toolCall);
+                if (error)
+                    return "toolCall." + error;
+            }
+        }
+        if (message.usageUuid != null && message.hasOwnProperty("usageUuid")) {
+            properties._usageUuid = 1;
+            if (!$util.isString(message.usageUuid))
+                return "usageUuid: string expected";
+        }
+        return null;
+    };
+
+    /**
+     * Creates a StreamUnifiedChatResponse message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof StreamUnifiedChatResponse
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {StreamUnifiedChatResponse} StreamUnifiedChatResponse
+     */
+    StreamUnifiedChatResponse.fromObject = function fromObject(object) {
+        if (object instanceof $root.StreamUnifiedChatResponse)
+            return object;
+        var message = new $root.StreamUnifiedChatResponse();
+        if (object.text != null)
+            message.text = String(object.text);
+        if (object.debuggingOnlyChatPrompt != null)
+            message.debuggingOnlyChatPrompt = String(object.debuggingOnlyChatPrompt);
+        if (object.debuggingOnlyTokenCount != null)
+            message.debuggingOnlyTokenCount = object.debuggingOnlyTokenCount | 0;
+        if (object.filledPrompt != null)
+            message.filledPrompt = String(object.filledPrompt);
+        if (object.intermediateText != null)
+            message.intermediateText = String(object.intermediateText);
+        if (object.serverBubbleId != null)
+            message.serverBubbleId = String(object.serverBubbleId);
+        if (object.thinking != null) {
+            if (typeof object.thinking !== "object")
+                throw TypeError(".StreamUnifiedChatResponse.thinking: object expected");
+            message.thinking = $root.StreamUnifiedChatResponse.Thinking.fromObject(object.thinking);
+        }
+        if (object.toolCall != null) {
+            if (typeof object.toolCall !== "object")
+                throw TypeError(".StreamUnifiedChatResponse.toolCall: object expected");
+            message.toolCall = $root.StreamUnifiedChatResponse.ToolCallV1.fromObject(object.toolCall);
+        }
+        if (object.usageUuid != null)
+            message.usageUuid = String(object.usageUuid);
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a StreamUnifiedChatResponse message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof StreamUnifiedChatResponse
+     * @static
+     * @param {StreamUnifiedChatResponse} message StreamUnifiedChatResponse
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    StreamUnifiedChatResponse.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.defaults)
+            object.text = "";
+        if (message.text != null && message.hasOwnProperty("text"))
+            object.text = message.text;
+        if (message.debuggingOnlyChatPrompt != null && message.hasOwnProperty("debuggingOnlyChatPrompt")) {
+            object.debuggingOnlyChatPrompt = message.debuggingOnlyChatPrompt;
+            if (options.oneofs)
+                object._debuggingOnlyChatPrompt = "debuggingOnlyChatPrompt";
+        }
+        if (message.debuggingOnlyTokenCount != null && message.hasOwnProperty("debuggingOnlyTokenCount")) {
+            object.debuggingOnlyTokenCount = message.debuggingOnlyTokenCount;
+            if (options.oneofs)
+                object._debuggingOnlyTokenCount = "debuggingOnlyTokenCount";
+        }
+        if (message.filledPrompt != null && message.hasOwnProperty("filledPrompt")) {
+            object.filledPrompt = message.filledPrompt;
+            if (options.oneofs)
+                object._filledPrompt = "filledPrompt";
+        }
+        if (message.intermediateText != null && message.hasOwnProperty("intermediateText")) {
+            object.intermediateText = message.intermediateText;
+            if (options.oneofs)
+                object._intermediateText = "intermediateText";
+        }
+        if (message.toolCall != null && message.hasOwnProperty("toolCall")) {
+            object.toolCall = $root.StreamUnifiedChatResponse.ToolCallV1.toObject(message.toolCall, options);
+            if (options.oneofs)
+                object._toolCall = "toolCall";
+        }
+        if (message.serverBubbleId != null && message.hasOwnProperty("serverBubbleId")) {
+            object.serverBubbleId = message.serverBubbleId;
+            if (options.oneofs)
+                object._serverBubbleId = "serverBubbleId";
+        }
+        if (message.thinking != null && message.hasOwnProperty("thinking")) {
+            object.thinking = $root.StreamUnifiedChatResponse.Thinking.toObject(message.thinking, options);
+            if (options.oneofs)
+                object._thinking = "thinking";
+        }
+        if (message.usageUuid != null && message.hasOwnProperty("usageUuid")) {
+            object.usageUuid = message.usageUuid;
+            if (options.oneofs)
+                object._usageUuid = "usageUuid";
+        }
+        return object;
+    };
+
+    /**
+     * Converts this StreamUnifiedChatResponse to JSON.
+     * @function toJSON
+     * @memberof StreamUnifiedChatResponse
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    StreamUnifiedChatResponse.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    /**
+     * Gets the default type url for StreamUnifiedChatResponse
+     * @function getTypeUrl
+     * @memberof StreamUnifiedChatResponse
+     * @static
+     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+     * @returns {string} The default type url
+     */
+    StreamUnifiedChatResponse.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+        if (typeUrlPrefix === undefined) {
+            typeUrlPrefix = "type.googleapis.com";
+        }
+        return typeUrlPrefix + "/StreamUnifiedChatResponse";
+    };
+
+    StreamUnifiedChatResponse.Thinking = (function() {
+
+        /**
+         * Properties of a Thinking.
+         * @memberof StreamUnifiedChatResponse
+         * @interface IThinking
+         * @property {string|null} [content] Thinking content
+         */
+
+        /**
+         * Constructs a new Thinking.
+         * @memberof StreamUnifiedChatResponse
+         * @classdesc Represents a Thinking.
+         * @implements IThinking
+         * @constructor
+         * @param {StreamUnifiedChatResponse.IThinking=} [properties] Properties to set
+         */
+        function Thinking(properties) {
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+
+        /**
+         * Thinking content.
+         * @member {string} content
+         * @memberof StreamUnifiedChatResponse.Thinking
+         * @instance
+         */
+        Thinking.prototype.content = "";
+
+        /**
+         * Creates a new Thinking instance using the specified properties.
+         * @function create
+         * @memberof StreamUnifiedChatResponse.Thinking
+         * @static
+         * @param {StreamUnifiedChatResponse.IThinking=} [properties] Properties to set
+         * @returns {StreamUnifiedChatResponse.Thinking} Thinking instance
+         */
+        Thinking.create = function create(properties) {
+            return new Thinking(properties);
+        };
+
+        /**
+         * Encodes the specified Thinking message. Does not implicitly {@link StreamUnifiedChatResponse.Thinking.verify|verify} messages.
+         * @function encode
+         * @memberof StreamUnifiedChatResponse.Thinking
+         * @static
+         * @param {StreamUnifiedChatResponse.IThinking} message Thinking message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        Thinking.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.content != null && Object.hasOwnProperty.call(message, "content"))
+                writer.uint32(/* id 1, wireType 2 =*/10).string(message.content);
+            return writer;
+        };
+
+        /**
+         * Encodes the specified Thinking message, length delimited. Does not implicitly {@link StreamUnifiedChatResponse.Thinking.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof StreamUnifiedChatResponse.Thinking
+         * @static
+         * @param {StreamUnifiedChatResponse.IThinking} message Thinking message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        Thinking.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+
+        /**
+         * Decodes a Thinking message from the specified reader or buffer.
+         * @function decode
+         * @memberof StreamUnifiedChatResponse.Thinking
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {StreamUnifiedChatResponse.Thinking} Thinking
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        Thinking.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.StreamUnifiedChatResponse.Thinking();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1: {
+                        message.content = reader.string();
+                        break;
+                    }
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+
+        /**
+         * Decodes a Thinking message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof StreamUnifiedChatResponse.Thinking
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {StreamUnifiedChatResponse.Thinking} Thinking
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        Thinking.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+
+        /**
+         * Verifies a Thinking message.
+         * @function verify
+         * @memberof StreamUnifiedChatResponse.Thinking
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        Thinking.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            if (message.content != null && message.hasOwnProperty("content"))
+                if (!$util.isString(message.content))
+                    return "content: string expected";
+            return null;
+        };
+
+        /**
+         * Creates a Thinking message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof StreamUnifiedChatResponse.Thinking
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {StreamUnifiedChatResponse.Thinking} Thinking
+         */
+        Thinking.fromObject = function fromObject(object) {
+            if (object instanceof $root.StreamUnifiedChatResponse.Thinking)
+                return object;
+            var message = new $root.StreamUnifiedChatResponse.Thinking();
+            if (object.content != null)
+                message.content = String(object.content);
+            return message;
+        };
+
+        /**
+         * Creates a plain object from a Thinking message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof StreamUnifiedChatResponse.Thinking
+         * @static
+         * @param {StreamUnifiedChatResponse.Thinking} message Thinking
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        Thinking.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.defaults)
+                object.content = "";
+            if (message.content != null && message.hasOwnProperty("content"))
+                object.content = message.content;
+            return object;
+        };
+
+        /**
+         * Converts this Thinking to JSON.
+         * @function toJSON
+         * @memberof StreamUnifiedChatResponse.Thinking
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        Thinking.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+
+        /**
+         * Gets the default type url for Thinking
+         * @function getTypeUrl
+         * @memberof StreamUnifiedChatResponse.Thinking
+         * @static
+         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+         * @returns {string} The default type url
+         */
+        Thinking.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === undefined) {
+                typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/StreamUnifiedChatResponse.Thinking";
+        };
+
+        return Thinking;
+    })();
+
+    StreamUnifiedChatResponse.ToolCallV1 = (function() {
+
+        /**
+         * Properties of a ToolCallV1.
+         * @memberof StreamUnifiedChatResponse
+         * @interface IToolCallV1
+         * @property {string|null} [toolCallId] ToolCallV1 toolCallId
+         * @property {string|null} [name] ToolCallV1 name
+         * @property {string|null} ["arguments"] ToolCallV1 arguments
+         */
+
+        /**
+         * Constructs a new ToolCallV1.
+         * @memberof StreamUnifiedChatResponse
+         * @classdesc Represents a ToolCallV1.
+         * @implements IToolCallV1
+         * @constructor
+         * @param {StreamUnifiedChatResponse.IToolCallV1=} [properties] Properties to set
+         */
+        function ToolCallV1(properties) {
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+
+        /**
+         * ToolCallV1 toolCallId.
+         * @member {string} toolCallId
+         * @memberof StreamUnifiedChatResponse.ToolCallV1
+         * @instance
+         */
+        ToolCallV1.prototype.toolCallId = "";
+
+        /**
+         * ToolCallV1 name.
+         * @member {string} name
+         * @memberof StreamUnifiedChatResponse.ToolCallV1
+         * @instance
+         */
+        ToolCallV1.prototype.name = "";
+
+        /**
+         * ToolCallV1 arguments.
+         * @member {string} arguments
+         * @memberof StreamUnifiedChatResponse.ToolCallV1
+         * @instance
+         */
+        ToolCallV1.prototype["arguments"] = "";
+
+        /**
+         * Creates a new ToolCallV1 instance using the specified properties.
+         * @function create
+         * @memberof StreamUnifiedChatResponse.ToolCallV1
+         * @static
+         * @param {StreamUnifiedChatResponse.IToolCallV1=} [properties] Properties to set
+         * @returns {StreamUnifiedChatResponse.ToolCallV1} ToolCallV1 instance
+         */
+        ToolCallV1.create = function create(properties) {
+            return new ToolCallV1(properties);
+        };
+
+        /**
+         * Encodes the specified ToolCallV1 message. Does not implicitly {@link StreamUnifiedChatResponse.ToolCallV1.verify|verify} messages.
+         * @function encode
+         * @memberof StreamUnifiedChatResponse.ToolCallV1
+         * @static
+         * @param {StreamUnifiedChatResponse.IToolCallV1} message ToolCallV1 message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        ToolCallV1.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.toolCallId != null && Object.hasOwnProperty.call(message, "toolCallId"))
+                writer.uint32(/* id 1, wireType 2 =*/10).string(message.toolCallId);
+            if (message.name != null && Object.hasOwnProperty.call(message, "name"))
+                writer.uint32(/* id 2, wireType 2 =*/18).string(message.name);
+            if (message["arguments"] != null && Object.hasOwnProperty.call(message, "arguments"))
+                writer.uint32(/* id 3, wireType 2 =*/26).string(message["arguments"]);
+            return writer;
+        };
+
+        /**
+         * Encodes the specified ToolCallV1 message, length delimited. Does not implicitly {@link StreamUnifiedChatResponse.ToolCallV1.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof StreamUnifiedChatResponse.ToolCallV1
+         * @static
+         * @param {StreamUnifiedChatResponse.IToolCallV1} message ToolCallV1 message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        ToolCallV1.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+
+        /**
+         * Decodes a ToolCallV1 message from the specified reader or buffer.
+         * @function decode
+         * @memberof StreamUnifiedChatResponse.ToolCallV1
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {StreamUnifiedChatResponse.ToolCallV1} ToolCallV1
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        ToolCallV1.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.StreamUnifiedChatResponse.ToolCallV1();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1: {
+                        message.toolCallId = reader.string();
+                        break;
+                    }
+                case 2: {
+                        message.name = reader.string();
+                        break;
+                    }
+                case 3: {
+                        message["arguments"] = reader.string();
+                        break;
+                    }
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+
+        /**
+         * Decodes a ToolCallV1 message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof StreamUnifiedChatResponse.ToolCallV1
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {StreamUnifiedChatResponse.ToolCallV1} ToolCallV1
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        ToolCallV1.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+
+        /**
+         * Verifies a ToolCallV1 message.
+         * @function verify
+         * @memberof StreamUnifiedChatResponse.ToolCallV1
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        ToolCallV1.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            if (message.toolCallId != null && message.hasOwnProperty("toolCallId"))
+                if (!$util.isString(message.toolCallId))
+                    return "toolCallId: string expected";
+            if (message.name != null && message.hasOwnProperty("name"))
+                if (!$util.isString(message.name))
+                    return "name: string expected";
+            if (message["arguments"] != null && message.hasOwnProperty("arguments"))
+                if (!$util.isString(message["arguments"]))
+                    return "arguments: string expected";
+            return null;
+        };
+
+        /**
+         * Creates a ToolCallV1 message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof StreamUnifiedChatResponse.ToolCallV1
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {StreamUnifiedChatResponse.ToolCallV1} ToolCallV1
+         */
+        ToolCallV1.fromObject = function fromObject(object) {
+            if (object instanceof $root.StreamUnifiedChatResponse.ToolCallV1)
+                return object;
+            var message = new $root.StreamUnifiedChatResponse.ToolCallV1();
+            if (object.toolCallId != null)
+                message.toolCallId = String(object.toolCallId);
+            if (object.name != null)
+                message.name = String(object.name);
+            if (object["arguments"] != null)
+                message["arguments"] = String(object["arguments"]);
+            return message;
+        };
+
+        /**
+         * Creates a plain object from a ToolCallV1 message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof StreamUnifiedChatResponse.ToolCallV1
+         * @static
+         * @param {StreamUnifiedChatResponse.ToolCallV1} message ToolCallV1
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        ToolCallV1.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.defaults) {
+                object.toolCallId = "";
+                object.name = "";
+                object["arguments"] = "";
+            }
+            if (message.toolCallId != null && message.hasOwnProperty("toolCallId"))
+                object.toolCallId = message.toolCallId;
+            if (message.name != null && message.hasOwnProperty("name"))
+                object.name = message.name;
+            if (message["arguments"] != null && message.hasOwnProperty("arguments"))
+                object["arguments"] = message["arguments"];
+            return object;
+        };
+
+        /**
+         * Converts this ToolCallV1 to JSON.
+         * @function toJSON
+         * @memberof StreamUnifiedChatResponse.ToolCallV1
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        ToolCallV1.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+
+        /**
+         * Gets the default type url for ToolCallV1
+         * @function getTypeUrl
+         * @memberof StreamUnifiedChatResponse.ToolCallV1
+         * @static
+         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+         * @returns {string} The default type url
+         */
+        ToolCallV1.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === undefined) {
+                typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/StreamUnifiedChatResponse.ToolCallV1";
+        };
+
+        return ToolCallV1;
+    })();
+
+    return StreamUnifiedChatResponse;
+})();
+
 $root.StreamUnifiedChatWithToolsResponse = (function() {
 
     /**
      * Properties of a StreamUnifiedChatWithToolsResponse.
      * @exports IStreamUnifiedChatWithToolsResponse
      * @interface IStreamUnifiedChatWithToolsResponse
-     * @property {string|null} [text] StreamUnifiedChatWithToolsResponse text
-     * @property {string|null} [serverBubbleId] StreamUnifiedChatWithToolsResponse serverBubbleId
-     * @property {string|null} [debuggingOnlyChatPrompt] StreamUnifiedChatWithToolsResponse debuggingOnlyChatPrompt
-     * @property {number|null} [debuggingOnlyTokenCount] StreamUnifiedChatWithToolsResponse debuggingOnlyTokenCount
-     * @property {StreamUnifiedChatWithToolsResponse.IThinking|null} [thinking] StreamUnifiedChatWithToolsResponse thinking
-     * @property {StreamUnifiedChatWithToolsResponse.IToolCallV2|null} [toolCallV2] StreamUnifiedChatWithToolsResponse toolCallV2
-     * @property {StreamUnifiedChatWithToolsResponse.IToolCallV1|null} [toolCall] StreamUnifiedChatWithToolsResponse toolCall
+     * @property {StreamUnifiedChatWithToolsResponse.IToolCallV2|null} [clientSideToolV2Call] StreamUnifiedChatWithToolsResponse clientSideToolV2Call
+     * @property {IStreamUnifiedChatResponse|null} [streamUnifiedChatResponse] StreamUnifiedChatWithToolsResponse streamUnifiedChatResponse
      */
 
     /**
@@ -5221,60 +6806,20 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
     }
 
     /**
-     * StreamUnifiedChatWithToolsResponse text.
-     * @member {string} text
+     * StreamUnifiedChatWithToolsResponse clientSideToolV2Call.
+     * @member {StreamUnifiedChatWithToolsResponse.IToolCallV2|null|undefined} clientSideToolV2Call
      * @memberof StreamUnifiedChatWithToolsResponse
      * @instance
      */
-    StreamUnifiedChatWithToolsResponse.prototype.text = "";
+    StreamUnifiedChatWithToolsResponse.prototype.clientSideToolV2Call = null;
 
     /**
-     * StreamUnifiedChatWithToolsResponse serverBubbleId.
-     * @member {string} serverBubbleId
+     * StreamUnifiedChatWithToolsResponse streamUnifiedChatResponse.
+     * @member {IStreamUnifiedChatResponse|null|undefined} streamUnifiedChatResponse
      * @memberof StreamUnifiedChatWithToolsResponse
      * @instance
      */
-    StreamUnifiedChatWithToolsResponse.prototype.serverBubbleId = "";
-
-    /**
-     * StreamUnifiedChatWithToolsResponse debuggingOnlyChatPrompt.
-     * @member {string} debuggingOnlyChatPrompt
-     * @memberof StreamUnifiedChatWithToolsResponse
-     * @instance
-     */
-    StreamUnifiedChatWithToolsResponse.prototype.debuggingOnlyChatPrompt = "";
-
-    /**
-     * StreamUnifiedChatWithToolsResponse debuggingOnlyTokenCount.
-     * @member {number} debuggingOnlyTokenCount
-     * @memberof StreamUnifiedChatWithToolsResponse
-     * @instance
-     */
-    StreamUnifiedChatWithToolsResponse.prototype.debuggingOnlyTokenCount = 0;
-
-    /**
-     * StreamUnifiedChatWithToolsResponse thinking.
-     * @member {StreamUnifiedChatWithToolsResponse.IThinking|null|undefined} thinking
-     * @memberof StreamUnifiedChatWithToolsResponse
-     * @instance
-     */
-    StreamUnifiedChatWithToolsResponse.prototype.thinking = null;
-
-    /**
-     * StreamUnifiedChatWithToolsResponse toolCallV2.
-     * @member {StreamUnifiedChatWithToolsResponse.IToolCallV2|null|undefined} toolCallV2
-     * @memberof StreamUnifiedChatWithToolsResponse
-     * @instance
-     */
-    StreamUnifiedChatWithToolsResponse.prototype.toolCallV2 = null;
-
-    /**
-     * StreamUnifiedChatWithToolsResponse toolCall.
-     * @member {StreamUnifiedChatWithToolsResponse.IToolCallV1|null|undefined} toolCall
-     * @memberof StreamUnifiedChatWithToolsResponse
-     * @instance
-     */
-    StreamUnifiedChatWithToolsResponse.prototype.toolCall = null;
+    StreamUnifiedChatWithToolsResponse.prototype.streamUnifiedChatResponse = null;
 
     /**
      * Creates a new StreamUnifiedChatWithToolsResponse instance using the specified properties.
@@ -5300,20 +6845,10 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
     StreamUnifiedChatWithToolsResponse.encode = function encode(message, writer) {
         if (!writer)
             writer = $Writer.create();
-        if (message.text != null && Object.hasOwnProperty.call(message, "text"))
-            writer.uint32(/* id 1, wireType 2 =*/10).string(message.text);
-        if (message.debuggingOnlyChatPrompt != null && Object.hasOwnProperty.call(message, "debuggingOnlyChatPrompt"))
-            writer.uint32(/* id 2, wireType 2 =*/18).string(message.debuggingOnlyChatPrompt);
-        if (message.debuggingOnlyTokenCount != null && Object.hasOwnProperty.call(message, "debuggingOnlyTokenCount"))
-            writer.uint32(/* id 3, wireType 0 =*/24).int32(message.debuggingOnlyTokenCount);
-        if (message.toolCall != null && Object.hasOwnProperty.call(message, "toolCall"))
-            $root.StreamUnifiedChatWithToolsResponse.ToolCallV1.encode(message.toolCall, writer.uint32(/* id 13, wireType 2 =*/106).fork()).ldelim();
-        if (message.serverBubbleId != null && Object.hasOwnProperty.call(message, "serverBubbleId"))
-            writer.uint32(/* id 22, wireType 2 =*/178).string(message.serverBubbleId);
-        if (message.thinking != null && Object.hasOwnProperty.call(message, "thinking"))
-            $root.StreamUnifiedChatWithToolsResponse.Thinking.encode(message.thinking, writer.uint32(/* id 25, wireType 2 =*/202).fork()).ldelim();
-        if (message.toolCallV2 != null && Object.hasOwnProperty.call(message, "toolCallV2"))
-            $root.StreamUnifiedChatWithToolsResponse.ToolCallV2.encode(message.toolCallV2, writer.uint32(/* id 36, wireType 2 =*/290).fork()).ldelim();
+        if (message.clientSideToolV2Call != null && Object.hasOwnProperty.call(message, "clientSideToolV2Call"))
+            $root.StreamUnifiedChatWithToolsResponse.ToolCallV2.encode(message.clientSideToolV2Call, writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
+        if (message.streamUnifiedChatResponse != null && Object.hasOwnProperty.call(message, "streamUnifiedChatResponse"))
+            $root.StreamUnifiedChatResponse.encode(message.streamUnifiedChatResponse, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
         return writer;
     };
 
@@ -5349,31 +6884,11 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
             var tag = reader.uint32();
             switch (tag >>> 3) {
             case 1: {
-                    message.text = reader.string();
-                    break;
-                }
-            case 22: {
-                    message.serverBubbleId = reader.string();
+                    message.clientSideToolV2Call = $root.StreamUnifiedChatWithToolsResponse.ToolCallV2.decode(reader, reader.uint32());
                     break;
                 }
             case 2: {
-                    message.debuggingOnlyChatPrompt = reader.string();
-                    break;
-                }
-            case 3: {
-                    message.debuggingOnlyTokenCount = reader.int32();
-                    break;
-                }
-            case 25: {
-                    message.thinking = $root.StreamUnifiedChatWithToolsResponse.Thinking.decode(reader, reader.uint32());
-                    break;
-                }
-            case 36: {
-                    message.toolCallV2 = $root.StreamUnifiedChatWithToolsResponse.ToolCallV2.decode(reader, reader.uint32());
-                    break;
-                }
-            case 13: {
-                    message.toolCall = $root.StreamUnifiedChatWithToolsResponse.ToolCallV1.decode(reader, reader.uint32());
+                    message.streamUnifiedChatResponse = $root.StreamUnifiedChatResponse.decode(reader, reader.uint32());
                     break;
                 }
             default:
@@ -5411,32 +6926,15 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
     StreamUnifiedChatWithToolsResponse.verify = function verify(message) {
         if (typeof message !== "object" || message === null)
             return "object expected";
-        if (message.text != null && message.hasOwnProperty("text"))
-            if (!$util.isString(message.text))
-                return "text: string expected";
-        if (message.serverBubbleId != null && message.hasOwnProperty("serverBubbleId"))
-            if (!$util.isString(message.serverBubbleId))
-                return "serverBubbleId: string expected";
-        if (message.debuggingOnlyChatPrompt != null && message.hasOwnProperty("debuggingOnlyChatPrompt"))
-            if (!$util.isString(message.debuggingOnlyChatPrompt))
-                return "debuggingOnlyChatPrompt: string expected";
-        if (message.debuggingOnlyTokenCount != null && message.hasOwnProperty("debuggingOnlyTokenCount"))
-            if (!$util.isInteger(message.debuggingOnlyTokenCount))
-                return "debuggingOnlyTokenCount: integer expected";
-        if (message.thinking != null && message.hasOwnProperty("thinking")) {
-            var error = $root.StreamUnifiedChatWithToolsResponse.Thinking.verify(message.thinking);
+        if (message.clientSideToolV2Call != null && message.hasOwnProperty("clientSideToolV2Call")) {
+            var error = $root.StreamUnifiedChatWithToolsResponse.ToolCallV2.verify(message.clientSideToolV2Call);
             if (error)
-                return "thinking." + error;
+                return "clientSideToolV2Call." + error;
         }
-        if (message.toolCallV2 != null && message.hasOwnProperty("toolCallV2")) {
-            var error = $root.StreamUnifiedChatWithToolsResponse.ToolCallV2.verify(message.toolCallV2);
+        if (message.streamUnifiedChatResponse != null && message.hasOwnProperty("streamUnifiedChatResponse")) {
+            var error = $root.StreamUnifiedChatResponse.verify(message.streamUnifiedChatResponse);
             if (error)
-                return "toolCallV2." + error;
-        }
-        if (message.toolCall != null && message.hasOwnProperty("toolCall")) {
-            var error = $root.StreamUnifiedChatWithToolsResponse.ToolCallV1.verify(message.toolCall);
-            if (error)
-                return "toolCall." + error;
+                return "streamUnifiedChatResponse." + error;
         }
         return null;
     };
@@ -5453,28 +6951,15 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
         if (object instanceof $root.StreamUnifiedChatWithToolsResponse)
             return object;
         var message = new $root.StreamUnifiedChatWithToolsResponse();
-        if (object.text != null)
-            message.text = String(object.text);
-        if (object.serverBubbleId != null)
-            message.serverBubbleId = String(object.serverBubbleId);
-        if (object.debuggingOnlyChatPrompt != null)
-            message.debuggingOnlyChatPrompt = String(object.debuggingOnlyChatPrompt);
-        if (object.debuggingOnlyTokenCount != null)
-            message.debuggingOnlyTokenCount = object.debuggingOnlyTokenCount | 0;
-        if (object.thinking != null) {
-            if (typeof object.thinking !== "object")
-                throw TypeError(".StreamUnifiedChatWithToolsResponse.thinking: object expected");
-            message.thinking = $root.StreamUnifiedChatWithToolsResponse.Thinking.fromObject(object.thinking);
+        if (object.clientSideToolV2Call != null) {
+            if (typeof object.clientSideToolV2Call !== "object")
+                throw TypeError(".StreamUnifiedChatWithToolsResponse.clientSideToolV2Call: object expected");
+            message.clientSideToolV2Call = $root.StreamUnifiedChatWithToolsResponse.ToolCallV2.fromObject(object.clientSideToolV2Call);
         }
-        if (object.toolCallV2 != null) {
-            if (typeof object.toolCallV2 !== "object")
-                throw TypeError(".StreamUnifiedChatWithToolsResponse.toolCallV2: object expected");
-            message.toolCallV2 = $root.StreamUnifiedChatWithToolsResponse.ToolCallV2.fromObject(object.toolCallV2);
-        }
-        if (object.toolCall != null) {
-            if (typeof object.toolCall !== "object")
-                throw TypeError(".StreamUnifiedChatWithToolsResponse.toolCall: object expected");
-            message.toolCall = $root.StreamUnifiedChatWithToolsResponse.ToolCallV1.fromObject(object.toolCall);
+        if (object.streamUnifiedChatResponse != null) {
+            if (typeof object.streamUnifiedChatResponse !== "object")
+                throw TypeError(".StreamUnifiedChatWithToolsResponse.streamUnifiedChatResponse: object expected");
+            message.streamUnifiedChatResponse = $root.StreamUnifiedChatResponse.fromObject(object.streamUnifiedChatResponse);
         }
         return message;
     };
@@ -5493,28 +6978,13 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
             options = {};
         var object = {};
         if (options.defaults) {
-            object.text = "";
-            object.debuggingOnlyChatPrompt = "";
-            object.debuggingOnlyTokenCount = 0;
-            object.toolCall = null;
-            object.serverBubbleId = "";
-            object.thinking = null;
-            object.toolCallV2 = null;
+            object.clientSideToolV2Call = null;
+            object.streamUnifiedChatResponse = null;
         }
-        if (message.text != null && message.hasOwnProperty("text"))
-            object.text = message.text;
-        if (message.debuggingOnlyChatPrompt != null && message.hasOwnProperty("debuggingOnlyChatPrompt"))
-            object.debuggingOnlyChatPrompt = message.debuggingOnlyChatPrompt;
-        if (message.debuggingOnlyTokenCount != null && message.hasOwnProperty("debuggingOnlyTokenCount"))
-            object.debuggingOnlyTokenCount = message.debuggingOnlyTokenCount;
-        if (message.toolCall != null && message.hasOwnProperty("toolCall"))
-            object.toolCall = $root.StreamUnifiedChatWithToolsResponse.ToolCallV1.toObject(message.toolCall, options);
-        if (message.serverBubbleId != null && message.hasOwnProperty("serverBubbleId"))
-            object.serverBubbleId = message.serverBubbleId;
-        if (message.thinking != null && message.hasOwnProperty("thinking"))
-            object.thinking = $root.StreamUnifiedChatWithToolsResponse.Thinking.toObject(message.thinking, options);
-        if (message.toolCallV2 != null && message.hasOwnProperty("toolCallV2"))
-            object.toolCallV2 = $root.StreamUnifiedChatWithToolsResponse.ToolCallV2.toObject(message.toolCallV2, options);
+        if (message.clientSideToolV2Call != null && message.hasOwnProperty("clientSideToolV2Call"))
+            object.clientSideToolV2Call = $root.StreamUnifiedChatWithToolsResponse.ToolCallV2.toObject(message.clientSideToolV2Call, options);
+        if (message.streamUnifiedChatResponse != null && message.hasOwnProperty("streamUnifiedChatResponse"))
+            object.streamUnifiedChatResponse = $root.StreamUnifiedChatResponse.toObject(message.streamUnifiedChatResponse, options);
         return object;
     };
 
@@ -5543,209 +7013,6 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
         }
         return typeUrlPrefix + "/StreamUnifiedChatWithToolsResponse";
     };
-
-    StreamUnifiedChatWithToolsResponse.Thinking = (function() {
-
-        /**
-         * Properties of a Thinking.
-         * @memberof StreamUnifiedChatWithToolsResponse
-         * @interface IThinking
-         * @property {string|null} [content] Thinking content
-         */
-
-        /**
-         * Constructs a new Thinking.
-         * @memberof StreamUnifiedChatWithToolsResponse
-         * @classdesc Represents a Thinking.
-         * @implements IThinking
-         * @constructor
-         * @param {StreamUnifiedChatWithToolsResponse.IThinking=} [properties] Properties to set
-         */
-        function Thinking(properties) {
-            if (properties)
-                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                    if (properties[keys[i]] != null)
-                        this[keys[i]] = properties[keys[i]];
-        }
-
-        /**
-         * Thinking content.
-         * @member {string} content
-         * @memberof StreamUnifiedChatWithToolsResponse.Thinking
-         * @instance
-         */
-        Thinking.prototype.content = "";
-
-        /**
-         * Creates a new Thinking instance using the specified properties.
-         * @function create
-         * @memberof StreamUnifiedChatWithToolsResponse.Thinking
-         * @static
-         * @param {StreamUnifiedChatWithToolsResponse.IThinking=} [properties] Properties to set
-         * @returns {StreamUnifiedChatWithToolsResponse.Thinking} Thinking instance
-         */
-        Thinking.create = function create(properties) {
-            return new Thinking(properties);
-        };
-
-        /**
-         * Encodes the specified Thinking message. Does not implicitly {@link StreamUnifiedChatWithToolsResponse.Thinking.verify|verify} messages.
-         * @function encode
-         * @memberof StreamUnifiedChatWithToolsResponse.Thinking
-         * @static
-         * @param {StreamUnifiedChatWithToolsResponse.IThinking} message Thinking message or plain object to encode
-         * @param {$protobuf.Writer} [writer] Writer to encode to
-         * @returns {$protobuf.Writer} Writer
-         */
-        Thinking.encode = function encode(message, writer) {
-            if (!writer)
-                writer = $Writer.create();
-            if (message.content != null && Object.hasOwnProperty.call(message, "content"))
-                writer.uint32(/* id 1, wireType 2 =*/10).string(message.content);
-            return writer;
-        };
-
-        /**
-         * Encodes the specified Thinking message, length delimited. Does not implicitly {@link StreamUnifiedChatWithToolsResponse.Thinking.verify|verify} messages.
-         * @function encodeDelimited
-         * @memberof StreamUnifiedChatWithToolsResponse.Thinking
-         * @static
-         * @param {StreamUnifiedChatWithToolsResponse.IThinking} message Thinking message or plain object to encode
-         * @param {$protobuf.Writer} [writer] Writer to encode to
-         * @returns {$protobuf.Writer} Writer
-         */
-        Thinking.encodeDelimited = function encodeDelimited(message, writer) {
-            return this.encode(message, writer).ldelim();
-        };
-
-        /**
-         * Decodes a Thinking message from the specified reader or buffer.
-         * @function decode
-         * @memberof StreamUnifiedChatWithToolsResponse.Thinking
-         * @static
-         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-         * @param {number} [length] Message length if known beforehand
-         * @returns {StreamUnifiedChatWithToolsResponse.Thinking} Thinking
-         * @throws {Error} If the payload is not a reader or valid buffer
-         * @throws {$protobuf.util.ProtocolError} If required fields are missing
-         */
-        Thinking.decode = function decode(reader, length) {
-            if (!(reader instanceof $Reader))
-                reader = $Reader.create(reader);
-            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.StreamUnifiedChatWithToolsResponse.Thinking();
-            while (reader.pos < end) {
-                var tag = reader.uint32();
-                switch (tag >>> 3) {
-                case 1: {
-                        message.content = reader.string();
-                        break;
-                    }
-                default:
-                    reader.skipType(tag & 7);
-                    break;
-                }
-            }
-            return message;
-        };
-
-        /**
-         * Decodes a Thinking message from the specified reader or buffer, length delimited.
-         * @function decodeDelimited
-         * @memberof StreamUnifiedChatWithToolsResponse.Thinking
-         * @static
-         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-         * @returns {StreamUnifiedChatWithToolsResponse.Thinking} Thinking
-         * @throws {Error} If the payload is not a reader or valid buffer
-         * @throws {$protobuf.util.ProtocolError} If required fields are missing
-         */
-        Thinking.decodeDelimited = function decodeDelimited(reader) {
-            if (!(reader instanceof $Reader))
-                reader = new $Reader(reader);
-            return this.decode(reader, reader.uint32());
-        };
-
-        /**
-         * Verifies a Thinking message.
-         * @function verify
-         * @memberof StreamUnifiedChatWithToolsResponse.Thinking
-         * @static
-         * @param {Object.<string,*>} message Plain object to verify
-         * @returns {string|null} `null` if valid, otherwise the reason why it is not
-         */
-        Thinking.verify = function verify(message) {
-            if (typeof message !== "object" || message === null)
-                return "object expected";
-            if (message.content != null && message.hasOwnProperty("content"))
-                if (!$util.isString(message.content))
-                    return "content: string expected";
-            return null;
-        };
-
-        /**
-         * Creates a Thinking message from a plain object. Also converts values to their respective internal types.
-         * @function fromObject
-         * @memberof StreamUnifiedChatWithToolsResponse.Thinking
-         * @static
-         * @param {Object.<string,*>} object Plain object
-         * @returns {StreamUnifiedChatWithToolsResponse.Thinking} Thinking
-         */
-        Thinking.fromObject = function fromObject(object) {
-            if (object instanceof $root.StreamUnifiedChatWithToolsResponse.Thinking)
-                return object;
-            var message = new $root.StreamUnifiedChatWithToolsResponse.Thinking();
-            if (object.content != null)
-                message.content = String(object.content);
-            return message;
-        };
-
-        /**
-         * Creates a plain object from a Thinking message. Also converts values to other types if specified.
-         * @function toObject
-         * @memberof StreamUnifiedChatWithToolsResponse.Thinking
-         * @static
-         * @param {StreamUnifiedChatWithToolsResponse.Thinking} message Thinking
-         * @param {$protobuf.IConversionOptions} [options] Conversion options
-         * @returns {Object.<string,*>} Plain object
-         */
-        Thinking.toObject = function toObject(message, options) {
-            if (!options)
-                options = {};
-            var object = {};
-            if (options.defaults)
-                object.content = "";
-            if (message.content != null && message.hasOwnProperty("content"))
-                object.content = message.content;
-            return object;
-        };
-
-        /**
-         * Converts this Thinking to JSON.
-         * @function toJSON
-         * @memberof StreamUnifiedChatWithToolsResponse.Thinking
-         * @instance
-         * @returns {Object.<string,*>} JSON object
-         */
-        Thinking.prototype.toJSON = function toJSON() {
-            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-        };
-
-        /**
-         * Gets the default type url for Thinking
-         * @function getTypeUrl
-         * @memberof StreamUnifiedChatWithToolsResponse.Thinking
-         * @static
-         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-         * @returns {string} The default type url
-         */
-        Thinking.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
-            if (typeUrlPrefix === undefined) {
-                typeUrlPrefix = "type.googleapis.com";
-            }
-            return typeUrlPrefix + "/StreamUnifiedChatWithToolsResponse.Thinking";
-        };
-
-        return Thinking;
-    })();
 
     StreamUnifiedChatWithToolsResponse.ToolCallV2 = (function() {
 
@@ -5942,8 +7209,37 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
                 case 18:
                 case 19:
                 case 23:
+                case 24:
+                case 25:
+                case 26:
+                case 27:
+                case 28:
+                case 29:
+                case 30:
                 case 31:
+                case 32:
+                case 33:
+                case 34:
+                case 35:
+                case 38:
+                case 39:
+                case 40:
+                case 41:
                 case 42:
+                case 43:
+                case 44:
+                case 45:
+                case 46:
+                case 47:
+                case 48:
+                case 49:
+                case 50:
+                case 51:
+                case 52:
+                case 53:
+                case 54:
+                case 55:
+                case 63:
                     break;
                 }
             if (message.toolCallId != null && message.hasOwnProperty("toolCallId"))
@@ -6037,13 +7333,129 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
             case 23:
                 message.tool = 23;
                 break;
+            case "CLIENT_SIDE_TOOL_V2_BACKGROUND_COMPOSER_FOLLOWUP":
+            case 24:
+                message.tool = 24;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_KNOWLEDGE_BASE":
+            case 25:
+                message.tool = 25;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_FETCH_PULL_REQUEST":
+            case 26:
+                message.tool = 26;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_DEEP_SEARCH":
+            case 27:
+                message.tool = 27;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_CREATE_DIAGRAM":
+            case 28:
+                message.tool = 28;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_FIX_LINTS":
+            case 29:
+                message.tool = 29;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_READ_LINTS":
+            case 30:
+                message.tool = 30;
+                break;
             case "CLIENT_SIDE_TOOL_V2_GO_TO_DEFINITION":
             case 31:
                 message.tool = 31;
                 break;
+            case "CLIENT_SIDE_TOOL_V2_TASK":
+            case 32:
+                message.tool = 32;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_AWAIT_TASK":
+            case 33:
+                message.tool = 33;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_TODO_READ":
+            case 34:
+                message.tool = 34;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_TODO_WRITE":
+            case 35:
+                message.tool = 35;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_EDIT_FILE_V2":
+            case 38:
+                message.tool = 38;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_LIST_DIR_V2":
+            case 39:
+                message.tool = 39;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_READ_FILE_V2":
+            case 40:
+                message.tool = 40;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_RIPGREP_RAW_SEARCH":
+            case 41:
+                message.tool = 41;
+                break;
             case "CLIENT_SIDE_TOOL_V2_GLOB_FILE_SEARCH":
             case 42:
                 message.tool = 42;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_CREATE_PLAN":
+            case 43:
+                message.tool = 43;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_LIST_MCP_RESOURCES":
+            case 44:
+                message.tool = 44;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_READ_MCP_RESOURCE":
+            case 45:
+                message.tool = 45;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_READ_PROJECT":
+            case 46:
+                message.tool = 46;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_UPDATE_PROJECT":
+            case 47:
+                message.tool = 47;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_TASK_V2":
+            case 48:
+                message.tool = 48;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_CALL_MCP_TOOL":
+            case 49:
+                message.tool = 49;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_APPLY_AGENT_DIFF":
+            case 50:
+                message.tool = 50;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_ASK_QUESTION":
+            case 51:
+                message.tool = 51;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_SWITCH_MODE":
+            case 52:
+                message.tool = 52;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_GENERATE_IMAGE":
+            case 53:
+                message.tool = 53;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_COMPUTER_USE":
+            case 54:
+                message.tool = 54;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_WRITE_SHELL_STDIN":
+            case 55:
+                message.tool = 55;
+                break;
+            case "CLIENT_SIDE_TOOL_V2_GET_MCP_TOOLS":
+            case 63:
+                message.tool = 63;
                 break;
             }
             if (object.toolCallId != null)
@@ -6112,256 +7524,6 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
         };
 
         return ToolCallV2;
-    })();
-
-    StreamUnifiedChatWithToolsResponse.ToolCallV1 = (function() {
-
-        /**
-         * Properties of a ToolCallV1.
-         * @memberof StreamUnifiedChatWithToolsResponse
-         * @interface IToolCallV1
-         * @property {string|null} [toolCallId] ToolCallV1 toolCallId
-         * @property {string|null} [name] ToolCallV1 name
-         * @property {string|null} ["arguments"] ToolCallV1 arguments
-         */
-
-        /**
-         * Constructs a new ToolCallV1.
-         * @memberof StreamUnifiedChatWithToolsResponse
-         * @classdesc Represents a ToolCallV1.
-         * @implements IToolCallV1
-         * @constructor
-         * @param {StreamUnifiedChatWithToolsResponse.IToolCallV1=} [properties] Properties to set
-         */
-        function ToolCallV1(properties) {
-            if (properties)
-                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                    if (properties[keys[i]] != null)
-                        this[keys[i]] = properties[keys[i]];
-        }
-
-        /**
-         * ToolCallV1 toolCallId.
-         * @member {string} toolCallId
-         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV1
-         * @instance
-         */
-        ToolCallV1.prototype.toolCallId = "";
-
-        /**
-         * ToolCallV1 name.
-         * @member {string} name
-         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV1
-         * @instance
-         */
-        ToolCallV1.prototype.name = "";
-
-        /**
-         * ToolCallV1 arguments.
-         * @member {string} arguments
-         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV1
-         * @instance
-         */
-        ToolCallV1.prototype["arguments"] = "";
-
-        /**
-         * Creates a new ToolCallV1 instance using the specified properties.
-         * @function create
-         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV1
-         * @static
-         * @param {StreamUnifiedChatWithToolsResponse.IToolCallV1=} [properties] Properties to set
-         * @returns {StreamUnifiedChatWithToolsResponse.ToolCallV1} ToolCallV1 instance
-         */
-        ToolCallV1.create = function create(properties) {
-            return new ToolCallV1(properties);
-        };
-
-        /**
-         * Encodes the specified ToolCallV1 message. Does not implicitly {@link StreamUnifiedChatWithToolsResponse.ToolCallV1.verify|verify} messages.
-         * @function encode
-         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV1
-         * @static
-         * @param {StreamUnifiedChatWithToolsResponse.IToolCallV1} message ToolCallV1 message or plain object to encode
-         * @param {$protobuf.Writer} [writer] Writer to encode to
-         * @returns {$protobuf.Writer} Writer
-         */
-        ToolCallV1.encode = function encode(message, writer) {
-            if (!writer)
-                writer = $Writer.create();
-            if (message.toolCallId != null && Object.hasOwnProperty.call(message, "toolCallId"))
-                writer.uint32(/* id 1, wireType 2 =*/10).string(message.toolCallId);
-            if (message.name != null && Object.hasOwnProperty.call(message, "name"))
-                writer.uint32(/* id 2, wireType 2 =*/18).string(message.name);
-            if (message["arguments"] != null && Object.hasOwnProperty.call(message, "arguments"))
-                writer.uint32(/* id 3, wireType 2 =*/26).string(message["arguments"]);
-            return writer;
-        };
-
-        /**
-         * Encodes the specified ToolCallV1 message, length delimited. Does not implicitly {@link StreamUnifiedChatWithToolsResponse.ToolCallV1.verify|verify} messages.
-         * @function encodeDelimited
-         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV1
-         * @static
-         * @param {StreamUnifiedChatWithToolsResponse.IToolCallV1} message ToolCallV1 message or plain object to encode
-         * @param {$protobuf.Writer} [writer] Writer to encode to
-         * @returns {$protobuf.Writer} Writer
-         */
-        ToolCallV1.encodeDelimited = function encodeDelimited(message, writer) {
-            return this.encode(message, writer).ldelim();
-        };
-
-        /**
-         * Decodes a ToolCallV1 message from the specified reader or buffer.
-         * @function decode
-         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV1
-         * @static
-         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-         * @param {number} [length] Message length if known beforehand
-         * @returns {StreamUnifiedChatWithToolsResponse.ToolCallV1} ToolCallV1
-         * @throws {Error} If the payload is not a reader or valid buffer
-         * @throws {$protobuf.util.ProtocolError} If required fields are missing
-         */
-        ToolCallV1.decode = function decode(reader, length) {
-            if (!(reader instanceof $Reader))
-                reader = $Reader.create(reader);
-            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.StreamUnifiedChatWithToolsResponse.ToolCallV1();
-            while (reader.pos < end) {
-                var tag = reader.uint32();
-                switch (tag >>> 3) {
-                case 1: {
-                        message.toolCallId = reader.string();
-                        break;
-                    }
-                case 2: {
-                        message.name = reader.string();
-                        break;
-                    }
-                case 3: {
-                        message["arguments"] = reader.string();
-                        break;
-                    }
-                default:
-                    reader.skipType(tag & 7);
-                    break;
-                }
-            }
-            return message;
-        };
-
-        /**
-         * Decodes a ToolCallV1 message from the specified reader or buffer, length delimited.
-         * @function decodeDelimited
-         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV1
-         * @static
-         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-         * @returns {StreamUnifiedChatWithToolsResponse.ToolCallV1} ToolCallV1
-         * @throws {Error} If the payload is not a reader or valid buffer
-         * @throws {$protobuf.util.ProtocolError} If required fields are missing
-         */
-        ToolCallV1.decodeDelimited = function decodeDelimited(reader) {
-            if (!(reader instanceof $Reader))
-                reader = new $Reader(reader);
-            return this.decode(reader, reader.uint32());
-        };
-
-        /**
-         * Verifies a ToolCallV1 message.
-         * @function verify
-         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV1
-         * @static
-         * @param {Object.<string,*>} message Plain object to verify
-         * @returns {string|null} `null` if valid, otherwise the reason why it is not
-         */
-        ToolCallV1.verify = function verify(message) {
-            if (typeof message !== "object" || message === null)
-                return "object expected";
-            if (message.toolCallId != null && message.hasOwnProperty("toolCallId"))
-                if (!$util.isString(message.toolCallId))
-                    return "toolCallId: string expected";
-            if (message.name != null && message.hasOwnProperty("name"))
-                if (!$util.isString(message.name))
-                    return "name: string expected";
-            if (message["arguments"] != null && message.hasOwnProperty("arguments"))
-                if (!$util.isString(message["arguments"]))
-                    return "arguments: string expected";
-            return null;
-        };
-
-        /**
-         * Creates a ToolCallV1 message from a plain object. Also converts values to their respective internal types.
-         * @function fromObject
-         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV1
-         * @static
-         * @param {Object.<string,*>} object Plain object
-         * @returns {StreamUnifiedChatWithToolsResponse.ToolCallV1} ToolCallV1
-         */
-        ToolCallV1.fromObject = function fromObject(object) {
-            if (object instanceof $root.StreamUnifiedChatWithToolsResponse.ToolCallV1)
-                return object;
-            var message = new $root.StreamUnifiedChatWithToolsResponse.ToolCallV1();
-            if (object.toolCallId != null)
-                message.toolCallId = String(object.toolCallId);
-            if (object.name != null)
-                message.name = String(object.name);
-            if (object["arguments"] != null)
-                message["arguments"] = String(object["arguments"]);
-            return message;
-        };
-
-        /**
-         * Creates a plain object from a ToolCallV1 message. Also converts values to other types if specified.
-         * @function toObject
-         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV1
-         * @static
-         * @param {StreamUnifiedChatWithToolsResponse.ToolCallV1} message ToolCallV1
-         * @param {$protobuf.IConversionOptions} [options] Conversion options
-         * @returns {Object.<string,*>} Plain object
-         */
-        ToolCallV1.toObject = function toObject(message, options) {
-            if (!options)
-                options = {};
-            var object = {};
-            if (options.defaults) {
-                object.toolCallId = "";
-                object.name = "";
-                object["arguments"] = "";
-            }
-            if (message.toolCallId != null && message.hasOwnProperty("toolCallId"))
-                object.toolCallId = message.toolCallId;
-            if (message.name != null && message.hasOwnProperty("name"))
-                object.name = message.name;
-            if (message["arguments"] != null && message.hasOwnProperty("arguments"))
-                object["arguments"] = message["arguments"];
-            return object;
-        };
-
-        /**
-         * Converts this ToolCallV1 to JSON.
-         * @function toJSON
-         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV1
-         * @instance
-         * @returns {Object.<string,*>} JSON object
-         */
-        ToolCallV1.prototype.toJSON = function toJSON() {
-            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-        };
-
-        /**
-         * Gets the default type url for ToolCallV1
-         * @function getTypeUrl
-         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV1
-         * @static
-         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-         * @returns {string} The default type url
-         */
-        ToolCallV1.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
-            if (typeUrlPrefix === undefined) {
-                typeUrlPrefix = "type.googleapis.com";
-            }
-            return typeUrlPrefix + "/StreamUnifiedChatWithToolsResponse.ToolCallV1";
-        };
-
-        return ToolCallV1;
     })();
 
     return StreamUnifiedChatWithToolsResponse;

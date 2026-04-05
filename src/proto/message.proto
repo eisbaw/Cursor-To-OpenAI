@@ -13,7 +13,7 @@ message AvailableModelsResponse {
   repeated string modelNames = 1;
 }
 
-// ClientSideToolV2 enum - see TASK-110-tool-enum-mapping.md
+// ClientSideToolV2 enum - from cursor_agent_client.py (2.6.22)
 enum ClientSideToolV2 {
   CLIENT_SIDE_TOOL_V2_UNSPECIFIED = 0;
   CLIENT_SIDE_TOOL_V2_READ_SEMSEARCH_FILES = 1;
@@ -30,8 +30,37 @@ enum ClientSideToolV2 {
   CLIENT_SIDE_TOOL_V2_WEB_SEARCH = 18;
   CLIENT_SIDE_TOOL_V2_MCP = 19;
   CLIENT_SIDE_TOOL_V2_SEARCH_SYMBOLS = 23;
+  CLIENT_SIDE_TOOL_V2_BACKGROUND_COMPOSER_FOLLOWUP = 24;
+  CLIENT_SIDE_TOOL_V2_KNOWLEDGE_BASE = 25;
+  CLIENT_SIDE_TOOL_V2_FETCH_PULL_REQUEST = 26;
+  CLIENT_SIDE_TOOL_V2_DEEP_SEARCH = 27;
+  CLIENT_SIDE_TOOL_V2_CREATE_DIAGRAM = 28;
+  CLIENT_SIDE_TOOL_V2_FIX_LINTS = 29;
+  CLIENT_SIDE_TOOL_V2_READ_LINTS = 30;
   CLIENT_SIDE_TOOL_V2_GO_TO_DEFINITION = 31;
+  CLIENT_SIDE_TOOL_V2_TASK = 32;
+  CLIENT_SIDE_TOOL_V2_AWAIT_TASK = 33;
+  CLIENT_SIDE_TOOL_V2_TODO_READ = 34;
+  CLIENT_SIDE_TOOL_V2_TODO_WRITE = 35;
+  CLIENT_SIDE_TOOL_V2_EDIT_FILE_V2 = 38;
+  CLIENT_SIDE_TOOL_V2_LIST_DIR_V2 = 39;
+  CLIENT_SIDE_TOOL_V2_READ_FILE_V2 = 40;
+  CLIENT_SIDE_TOOL_V2_RIPGREP_RAW_SEARCH = 41;
   CLIENT_SIDE_TOOL_V2_GLOB_FILE_SEARCH = 42;
+  CLIENT_SIDE_TOOL_V2_CREATE_PLAN = 43;
+  CLIENT_SIDE_TOOL_V2_LIST_MCP_RESOURCES = 44;
+  CLIENT_SIDE_TOOL_V2_READ_MCP_RESOURCE = 45;
+  CLIENT_SIDE_TOOL_V2_READ_PROJECT = 46;
+  CLIENT_SIDE_TOOL_V2_UPDATE_PROJECT = 47;
+  CLIENT_SIDE_TOOL_V2_TASK_V2 = 48;
+  CLIENT_SIDE_TOOL_V2_CALL_MCP_TOOL = 49;
+  CLIENT_SIDE_TOOL_V2_APPLY_AGENT_DIFF = 50;
+  CLIENT_SIDE_TOOL_V2_ASK_QUESTION = 51;
+  CLIENT_SIDE_TOOL_V2_SWITCH_MODE = 52;
+  CLIENT_SIDE_TOOL_V2_GENERATE_IMAGE = 53;
+  CLIENT_SIDE_TOOL_V2_COMPUTER_USE = 54;
+  CLIENT_SIDE_TOOL_V2_WRITE_SHELL_STDIN = 55;
+  CLIENT_SIDE_TOOL_V2_GET_MCP_TOOLS = 63;
 }
 
 // Tool call from server - see TASK-26-tool-schemas.md ClientSideToolV2Call
@@ -130,45 +159,55 @@ message StreamUnifiedChatWithToolsRequest {
     repeated MessageId messageIds = 30;
     int32 largeContext = 35; // 1
     int32 unknown38 = 38; // 0
+    int32 chatModeEnum = 46; // 1=Ask, 3=Agent (request-level)
+    string unknown47 = 47;
+    int32 unknown48 = 48; // 0
+    int32 unknown49 = 49; // 0
+    int32 unknown51 = 51; // 0
+    int32 unknown53 = 53; // 1
+    string chatMode = 54; // "Ask" or "Agent"
   }
   
   Request request = 1;
 }
 
-// StreamUnifiedChatResponse - see TASK-7-protobuf-schemas.md
-// Main response message from StreamUnifiedChatWithTools
-message StreamUnifiedChatWithToolsResponse {
-  // Main text content - field 1
+// Inner response - from cursor-grpc/server_full.proto
+message StreamUnifiedChatResponse {
   string text = 1;
-  
-  // Server bubble ID
-  string server_bubble_id = 22;
-  
-  // Debugging fields
-  string debugging_only_chat_prompt = 2;
-  int32 debugging_only_token_count = 3;
-  
-  // Thinking/reasoning - field 25
+  optional string debugging_only_chat_prompt = 2;
+  optional int32 debugging_only_token_count = 3;
+  optional string filled_prompt = 5;
+  optional string intermediate_text = 7;
+  optional string server_bubble_id = 22;
+
   message Thinking {
     string content = 1;
   }
-  Thinking thinking = 25;
-  
-  // Tool calls - see TASK-26-tool-schemas.md
-  // tool_call_v2 at field 36
-  message ToolCallV2 {
-    ClientSideToolV2 tool = 1;
-    string tool_call_id = 3;
-    string name = 9;
-    string raw_args = 10;
-  }
-  ToolCallV2 tool_call_v2 = 36;
-  
+  optional Thinking thinking = 25;
+
   // Legacy tool call at field 13
   message ToolCallV1 {
     string tool_call_id = 1;
     string name = 2;
     string arguments = 3;
   }
-  ToolCallV1 tool_call = 13;
+  optional ToolCallV1 tool_call = 13;
+
+  optional string usage_uuid = 27;
+}
+
+// Wrapper response - from cursor-grpc/server_full.proto
+// oneof: tool call at field 1, chat response at field 2, summary at field 3
+message StreamUnifiedChatWithToolsResponse {
+  // Tool call from server
+  message ToolCallV2 {
+    ClientSideToolV2 tool = 1;
+    string tool_call_id = 3;
+    string name = 9;
+    string raw_args = 10;
+  }
+
+  ToolCallV2 client_side_tool_v2_call = 1;
+  StreamUnifiedChatResponse stream_unified_chat_response = 2;
+  // ConversationSummary at field 3 - omitted for now
 }
