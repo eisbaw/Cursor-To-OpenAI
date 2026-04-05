@@ -18,6 +18,8 @@ const {
 } = require('../utils/utils.js');
 const { ToolExecutor } = require('../utils/toolExecutor.js');
 const { BidiCursorClient } = require('../utils/bidiClient.js');
+const sessionManager = require('../utils/sessionManager.js');
+const toolMapping = require('../utils/toolMapping.js');
 
 // Map OpenAI model names to Cursor model IDs
 // Models not in this map are passed through as-is
@@ -472,6 +474,122 @@ router.post('/chat/completions', async (req, res) => {
 });
 
 /**
+ * Shared handler: read frames from Cursor bidi stream and emit SSE events.
+ * If tool calls arrive, emit them and end with status "incomplete".
+ * If text arrives and stream ends, emit text and end with status "completed".
+ */
+async function handleAgentStreamResponse(res, session, model) {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+
+  const sse = (event, data) => {
+    data.type = event;
+    data.sequence_number = session.seqNo++;
+    res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+  };
+
+  sse('response.created', {
+    response: { id: session.responseId, object: 'response', status: 'in_progress',
+      model: model || 'default', output: [] },
+  });
+
+  // Read next batch of frames from Cursor
+  const { toolCalls, textChunks, ended, buffer } = await session.client.readNextFrames(
+    session.stream, session.buffer, { batchDelayMs: 400, timeoutMs: 120000 }
+  );
+  session.buffer = buffer;
+  sessionManager.touch(session);
+
+  const outputItems = [];
+
+  // Emit any text content first
+  if (textChunks.length > 0) {
+    const textItemId = `msg_${uuidv4()}`;
+    const fullText = textChunks.join('');
+
+    sse('response.output_item.added', {
+      output_index: session.outputIndex,
+      item: { id: textItemId, type: 'message', role: 'assistant', content: [] },
+    });
+    sse('response.content_part.added', {
+      output_index: session.outputIndex, content_index: 0,
+      part: { type: 'output_text', text: '' },
+    });
+    for (const chunk of textChunks) {
+      sse('response.output_text.delta', {
+        output_index: session.outputIndex, content_index: 0, delta: chunk,
+      });
+    }
+    sse('response.output_text.done', {
+      output_index: session.outputIndex, content_index: 0, text: fullText,
+    });
+    sse('response.content_part.done', {
+      output_index: session.outputIndex, content_index: 0,
+      part: { type: 'output_text', text: fullText },
+    });
+    sse('response.output_item.done', {
+      output_index: session.outputIndex,
+      item: { id: textItemId, type: 'message', role: 'assistant',
+        content: [{ type: 'output_text', text: fullText }] },
+    });
+
+    outputItems.push({ id: textItemId, type: 'message', role: 'assistant',
+      content: [{ type: 'output_text', text: fullText }] });
+    session.outputIndex++;
+  }
+
+  // Emit tool calls
+  if (toolCalls.length > 0) {
+    console.log('Emitting', toolCalls.length, 'tool calls to crush');
+    for (const tc of toolCalls) {
+      const { name: crushName, arguments: crushArgs } = toolMapping.cursorToCrush(tc.tool, tc.rawArgs);
+      const callId = tc.toolCallId;
+      const fcId = `fc_${uuidv4()}`;
+
+      sessionManager.registerCallId(callId, session.responseId);
+
+      sse('response.output_item.added', {
+        output_index: session.outputIndex,
+        item: { id: fcId, type: 'function_call', name: crushName, call_id: callId, arguments: '' },
+      });
+      sse('response.function_call_arguments.done', {
+        output_index: session.outputIndex, item_id: fcId, arguments: crushArgs,
+      });
+      sse('response.output_item.done', {
+        output_index: session.outputIndex,
+        item: { id: fcId, type: 'function_call', name: crushName, call_id: callId,
+          arguments: crushArgs, status: 'completed' },
+      });
+
+      outputItems.push({ id: fcId, type: 'function_call', name: crushName,
+        call_id: callId, arguments: crushArgs, status: 'completed' });
+
+      console.log(`  Tool call: ${tc.name}(${tc.tool}) -> ${crushName}(${crushArgs.substring(0, 80)})`);
+      session.outputIndex++;
+    }
+
+    // End with incomplete — crush needs to execute tools and send results
+    session.state = 'waiting_for_tool_result';
+    sse('response.completed', {
+      response: { id: session.responseId, object: 'response', status: 'incomplete',
+        incomplete_details: { reason: 'tool_use' },
+        model: model || 'default', output: outputItems },
+    });
+    res.end();
+    return;
+  }
+
+  // No tool calls — final response
+  sse('response.completed', {
+    response: { id: session.responseId, object: 'response', status: 'completed',
+      model: model || 'default', output: outputItems },
+  });
+  res.end();
+  sessionManager.destroy(session.responseId);
+}
+
+/**
  * OpenAI Responses API adapter (/v1/responses)
  * Translates Responses API requests to Chat Completions format,
  * proxies through the existing Cursor flow, and translates back.
@@ -532,75 +650,58 @@ router.post('/responses', async (req, res) => {
     const cursorModel = mapModelName(model);
     const responseId = `resp-${uuidv4()}`;
 
-    // Agent mode: use bidirectional client for tool calling
+    // Agent mode: passthrough tool calls to crush
     if (hasTools) {
-      console.log('Agent mode via bidi client, model:', cursorModel);
-      const bidiClient = new BidiCursorClient(process.cwd());
-      const prompt = messages.map(m => `${m.role}: ${m.content}`).join('\n');
+      // Check for continuation (function_call_output in input)
+      const toolOutputs = Array.isArray(input)
+        ? input.filter(item => item.type === 'function_call_output')
+        : [];
+      const isContinuation = toolOutputs.length > 0;
 
-      if (stream) {
-        res.setHeader('Content-Type', 'text/event-stream');
-        res.setHeader('Cache-Control', 'no-cache');
-        res.setHeader('Connection', 'keep-alive');
+      if (isContinuation) {
+        // --- Path B: Continuation — send tool results to existing Cursor stream ---
+        console.log('Tool outputs:', JSON.stringify(toolOutputs.map(o => ({ call_id: o.call_id, output: (o.output||'').substring(0, 60) }))));
+        const firstCallId = toolOutputs[0].call_id;
+        const session = sessionManager.getByCallId(firstCallId);
+        if (!session) {
+          return res.status(400).json({ error: 'Session expired or not found for call_id: ' + firstCallId });
+        }
+        console.log('Continuation for session', session.responseId, '- sending', toolOutputs.length, 'tool results');
+        sessionManager.touch(session);
+        session.state = 'streaming';
 
-        let seqNo = 0;
-        const sse = (event, data) => {
-          data.type = event;
-          data.sequence_number = seqNo++;
-          res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
-        };
+        // Send each tool result to Cursor
+        for (const output of toolOutputs) {
+          // Find the matching function_call to get the tool name
+          const matchingCall = Array.isArray(input)
+            ? input.find(item => item.type === 'function_call' && item.call_id === output.call_id)
+            : null;
+          const crushName = matchingCall?.name || 'bash';
+          const toolEnum = toolMapping.crushToCursorEnum(crushName);
 
-        const outputItemId = `msg_${uuidv4()}`;
-        sse('response.created', {
-          response: { id: responseId, object: 'response', status: 'in_progress',
-            model: model || 'default', output: [] },
-        });
-        sse('response.output_item.added', {
-          output_index: 0,
-          item: { id: outputItemId, type: 'message', role: 'assistant', content: [] },
-        });
-        sse('response.content_part.added', {
-          output_index: 0, content_index: 0,
-          part: { type: 'output_text', text: '' },
-        });
+          console.log('Sending tool result:', output.call_id, crushName, '->', toolEnum);
 
-        let fullText = '';
-        try {
-          const result = await bidiClient.runAgent(authToken, prompt, cursorModel, {
-            maxToolCalls: 10, verbose: true, timeout: 60000,
-            onContent: (content) => {
-              fullText += content;
-              sse('response.output_text.delta', {
-                output_index: 0, content_index: 0, delta: content,
-              });
-            },
-          });
-          if (result && !fullText) fullText = result;
-        } catch (err) {
-          console.error('Agent bidi error:', err.message);
+          // Encode result for Cursor
+          const resultData = { success: true, data: { content: output.output || '', contents: output.output || '', output: output.output || '' } };
+          session.client.sendToolResultOnStream(session.stream, toolEnum, output.call_id, resultData);
         }
 
-        console.log('Agent fullText:', JSON.stringify(fullText.substring(0, 200)));
-        sse('response.output_text.done', { output_index: 0, content_index: 0, text: fullText });
-        sse('response.content_part.done', { output_index: 0, content_index: 0, part: { type: 'output_text', text: fullText } });
-        sse('response.output_item.done', { output_index: 0, item: { id: outputItemId, type: 'message', role: 'assistant', content: [{ type: 'output_text', text: fullText }] } });
-        sse('response.completed', { response: { id: responseId, object: 'response', status: 'completed', model: model || 'default', output: [{ id: outputItemId, type: 'message', role: 'assistant', content: [{ type: 'output_text', text: fullText }] }] } });
-        res.end();
-      } else {
-        try {
-          const result = await bidiClient.runAgent(authToken, prompt, cursorModel, {
-            maxToolCalls: 10, verbose: true, timeout: 60000,
-          });
-          return res.json({
-            id: responseId, object: 'response', status: 'completed',
-            model: model || 'default',
-            output: [{ type: 'message', role: 'assistant', content: [{ type: 'output_text', text: result || '' }] }],
-          });
-        } catch (err) {
-          return res.status(500).json({ error: err.message });
-        }
+        // Now listen for Cursor's next response (more tool calls or final text)
+        return await handleAgentStreamResponse(res, session, model);
       }
-      return;
+
+      // --- Path A: Initial request — open new bidi stream ---
+      console.log('Agent passthrough mode, model:', cursorModel);
+      const bidiClient = new BidiCursorClient(process.cwd());
+      const { stream: bidiStream } = await bidiClient.openAgentStream(
+        authToken,
+        messages.map(m => ({ role: m.role, content: m.content })),
+        cursorModel,
+      );
+      console.log('Bidi stream opened for', responseId);
+
+      const session = sessionManager.create(responseId, bidiStream, bidiClient);
+      return await handleAgentStreamResponse(res, session, model);
     }
 
     // Non-agent mode: unidirectional streaming

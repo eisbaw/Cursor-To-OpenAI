@@ -675,8 +675,118 @@ class BidiCursorClient extends EventEmitter {
   }
 
   /**
-   * Run agent with bidirectional streaming
-   * Returns a promise that resolves with the full response
+   * Open an agent bidi stream without starting the tool execution loop.
+   * Returns { stream } for the caller to manage.
+   */
+  async openAgentStream(authToken, messages, model, supportedTools = DEFAULT_AGENT_TOOLS) {
+    await this.connect();
+    const headers = this.getHeaders(authToken);
+    const stream = this.session.request(headers);
+    const requestBody = this.encodeAgentRequest(messages, model, supportedTools);
+    stream.write(requestBody);
+    return { stream };
+  }
+
+  /**
+   * Encode and write a tool result frame onto an open bidi stream.
+   */
+  sendToolResultOnStream(stream, toolEnum, toolCallId, resultData) {
+    const resultBytes = this.encodeToolResultMessage(toolEnum, toolCallId, resultData);
+    const framed = this.frameMessage(resultBytes);
+    stream.write(framed);
+  }
+
+  /**
+   * Pull the next batch of parsed frames from a bidi stream.
+   * Resolves with { toolCalls: [], textChunks: [], ended: bool }.
+   * Waits up to batchDelayMs after last data for more tool calls in the same batch.
+   */
+  readNextFrames(stream, existingBuffer = Buffer.alloc(0), { batchDelayMs = 400, timeoutMs = 120000 } = {}) {
+    return new Promise((resolve) => {
+      let buffer = existingBuffer;
+      const toolCalls = [];
+      const textChunks = [];
+      const toolCallsSeen = new Set();
+      let ended = false;
+      let batchTimer = null;
+      let totalTimer = null;
+
+      const finish = () => {
+        clearTimeout(batchTimer);
+        clearTimeout(totalTimer);
+        stream.removeListener('data', onData);
+        stream.removeListener('end', onEnd);
+        stream.removeListener('close', onEnd);
+        resolve({ toolCalls, textChunks, ended, buffer });
+      };
+
+      const resetBatch = () => {
+        clearTimeout(batchTimer);
+        batchTimer = setTimeout(() => {
+          // No new data for batchDelayMs — emit what we have
+          if (toolCalls.length > 0 || textChunks.length > 0 || ended) {
+            finish();
+          }
+        }, batchDelayMs);
+      };
+
+      totalTimer = setTimeout(() => {
+        ended = true;
+        finish();
+      }, timeoutMs);
+
+      const onData = (chunk) => {
+        buffer = Buffer.concat([buffer, chunk]);
+        const { frames, remaining } = this.parseFrames(buffer);
+        buffer = remaining;
+
+        for (const { compressed, payload } of frames) {
+          let data = payload;
+          if (compressed) {
+            try { data = require('zlib').gunzipSync(payload); } catch (e) { data = payload; }
+          }
+
+          // Check for tool calls
+          const tcs = ToolCallDecoder.findToolCalls(data);
+          for (const tc of tcs) {
+            if (!toolCallsSeen.has(tc.toolCallId)) {
+              toolCallsSeen.add(tc.toolCallId);
+              let params = {};
+              try { if (tc.rawArgs) params = JSON.parse(tc.rawArgs); } catch (e) {}
+              toolCalls.push({ ...tc, params });
+            }
+          }
+
+          // Extract text if no tool calls in this frame
+          if (tcs.length === 0) {
+            const resp = ResponseDecoder.decode(data);
+            if (resp.text) textChunks.push(resp.text);
+          }
+        }
+
+        resetBatch();
+
+        // If we got tool calls, wait for the batch to settle before resolving
+        // If only text and no tool calls yet, also settle
+      };
+
+      const onEnd = () => {
+        ended = true;
+        finish();
+      };
+
+      stream.on('data', onData);
+      stream.on('end', onEnd);
+      stream.on('close', onEnd);
+
+      // Start batch timer
+      resetBatch();
+    });
+  }
+
+  /**
+   * Run agent with bidirectional streaming (legacy convenience method).
+   * Returns a promise that resolves with the full response.
    */
   async runAgent(authToken, prompt, model = 'claude-4-sonnet', options = {}) {
     const { 
