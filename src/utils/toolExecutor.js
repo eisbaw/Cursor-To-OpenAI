@@ -64,21 +64,31 @@ class ToolExecutor {
    * See TASK-26-tool-schemas.md ReadFileParams/Result
    */
   readFile(params) {
-    const relativePath = params.relative_workspace_path || params.relativeworkspacepath || '';
-    const fullPath = path.join(this.workspaceRoot, relativePath);
-    
+    const filePath = params.target_file || params.relative_workspace_path || params.relativeworkspacepath || '';
+    const fullPath = path.isAbsolute(filePath) ? filePath : path.join(this.workspaceRoot, filePath);
+
     if (!fs.existsSync(fullPath)) {
-      return { success: false, data: {}, error: `File not found: ${relativePath}` };
+      return { success: false, data: {}, error: `File not found: ${filePath}` };
+    }
+    if (fs.statSync(fullPath).isDirectory()) {
+      return { success: false, data: {}, error: `Path is a directory: ${filePath}` };
     }
 
-    const contents = fs.readFileSync(fullPath, 'utf-8');
+    let contents = fs.readFileSync(fullPath, 'utf-8');
     const lines = contents.split('\n');
-    
+
+    // Support line range params
+    const startLine = params.start_line_one_indexed || 1;
+    const endLine = params.end_line_one_indexed_inclusive || lines.length;
+    if (startLine > 1 || endLine < lines.length) {
+      contents = lines.slice(startLine - 1, endLine).join('\n');
+    }
+
     return {
       success: true,
       data: {
         contents,
-        relative_workspace_path: relativePath,
+        relative_workspace_path: path.relative(this.workspaceRoot, fullPath),
         total_lines: lines.length,
       }
     };
@@ -90,7 +100,7 @@ class ToolExecutor {
    */
   listDir(params) {
     const dirPath = params.relative_workspace_path || params.directory_path || '.';
-    const fullPath = path.join(this.workspaceRoot, dirPath);
+    const fullPath = path.isAbsolute(dirPath) ? dirPath : path.join(this.workspaceRoot, dirPath);
     
     if (!fs.existsSync(fullPath)) {
       return { success: false, data: {}, error: `Directory not found: ${dirPath}` };
@@ -200,11 +210,11 @@ class ToolExecutor {
    * See TASK-26-tool-schemas.md EditFileParams/Result
    */
   editFile(params) {
-    const relativePath = params.relative_workspace_path || '';
+    const filePath = params.target_file || params.relative_workspace_path || '';
     const oldString = params.old_string || '';
     const newString = params.new_string;
-    
-    const fullPath = path.join(this.workspaceRoot, relativePath);
+
+    const fullPath = path.isAbsolute(filePath) ? filePath : path.join(this.workspaceRoot, filePath);
 
     if (newString === undefined) {
       return { success: false, data: {}, error: 'new_string is required' };
@@ -320,8 +330,8 @@ class ToolExecutor {
    * See TASK-26-tool-schemas.md DeleteFileParams/Result
    */
   deleteFile(params) {
-    const relativePath = params.relative_workspace_path || '';
-    const fullPath = path.join(this.workspaceRoot, relativePath);
+    const filePath = params.target_file || params.relative_workspace_path || '';
+    const fullPath = path.isAbsolute(filePath) ? filePath : path.join(this.workspaceRoot, filePath);
 
     if (!fs.existsSync(fullPath)) {
       return { success: true, data: { file_non_existent: true, file_deleted_successfully: false } };
