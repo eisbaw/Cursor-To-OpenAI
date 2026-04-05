@@ -522,13 +522,14 @@ class BidiCursorClient extends EventEmitter {
       case ClientSideToolV2.LIST_DIR: {
         // ListDirResult: repeated File files = 1
         let msg = Buffer.alloc(0);
-        const files = data.files || [];
+        const files = data.files || data.entries || [];
         for (const file of files) {
           // File message: string name = 1, bool is_dir = 2
           let fileMsg = Buffer.alloc(0);
           fileMsg = Buffer.concat([fileMsg, ProtobufEncoder.encodeField(1, 2, file.name || file)]);
-          if (file.is_dir !== undefined) {
-            fileMsg = Buffer.concat([fileMsg, ProtobufEncoder.encodeField(2, 0, file.is_dir ? 1 : 0)]);
+          const isDir = file.is_dir !== undefined ? file.is_dir : file.is_directory;
+          if (isDir !== undefined) {
+            fileMsg = Buffer.concat([fileMsg, ProtobufEncoder.encodeField(2, 0, isDir ? 1 : 0)]);
           }
           msg = Buffer.concat([msg, ProtobufEncoder.encodeField(1, 2, fileMsg)]);
         }
@@ -537,7 +538,7 @@ class BidiCursorClient extends EventEmitter {
       
       case ClientSideToolV2.READ_FILE: {
         // ReadFileResult: string content = 1
-        return ProtobufEncoder.encodeField(1, 2, data.content || '');
+        return ProtobufEncoder.encodeField(1, 2, data.content || data.contents || '');
       }
       
       case ClientSideToolV2.RUN_TERMINAL_COMMAND_V2: {

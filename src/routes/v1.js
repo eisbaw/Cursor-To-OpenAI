@@ -487,7 +487,11 @@ router.post('/responses', async (req, res) => {
       contentIsArray: Array.isArray(i.content),
       content: typeof i.content === 'string' ? i.content.substring(0, 40) : (Array.isArray(i.content) ? i.content.map(c => ({ type: c.type, text: c.text?.substring(0, 40) })) : i.content),
     })) : input;
-    console.log('Responses API:', JSON.stringify({ model, stream, tools: req.body.tools?.length, input: inputSummary }));
+    const hasTools = req.body.tools && req.body.tools.length > 0;
+    console.log('Responses API:', JSON.stringify({ model, stream, tools: req.body.tools?.length, hasTools, input: inputSummary }));
+    if (hasTools) {
+      console.log('Tools:', JSON.stringify(req.body.tools.map(t => t.name || t.function?.name)).substring(0, 300));
+    }
 
     // Convert Responses API input to Chat Completions messages
     const messages = [];
@@ -525,18 +529,88 @@ router.post('/responses', async (req, res) => {
       return res.status(401).json({ error: 'No Cursor token available' });
     }
 
-    // Map OpenAI model names to Cursor model IDs
     const cursorModel = mapModelName(model);
-    console.log('Model mapping:', model, '->', cursorModel);
+    const responseId = `resp-${uuidv4()}`;
 
+    // Agent mode: use bidirectional client for tool calling
+    if (hasTools) {
+      console.log('Agent mode via bidi client, model:', cursorModel);
+      const bidiClient = new BidiCursorClient(process.cwd());
+      const prompt = messages.map(m => `${m.role}: ${m.content}`).join('\n');
+
+      if (stream) {
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+
+        let seqNo = 0;
+        const sse = (event, data) => {
+          data.type = event;
+          data.sequence_number = seqNo++;
+          res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+        };
+
+        const outputItemId = `msg_${uuidv4()}`;
+        sse('response.created', {
+          response: { id: responseId, object: 'response', status: 'in_progress',
+            model: model || 'default', output: [] },
+        });
+        sse('response.output_item.added', {
+          output_index: 0,
+          item: { id: outputItemId, type: 'message', role: 'assistant', content: [] },
+        });
+        sse('response.content_part.added', {
+          output_index: 0, content_index: 0,
+          part: { type: 'output_text', text: '' },
+        });
+
+        let fullText = '';
+        try {
+          const result = await bidiClient.runAgent(authToken, prompt, cursorModel, {
+            maxToolCalls: 10, verbose: true, timeout: 60000,
+            onContent: (content) => {
+              fullText += content;
+              sse('response.output_text.delta', {
+                output_index: 0, content_index: 0, delta: content,
+              });
+            },
+          });
+          if (result && !fullText) fullText = result;
+        } catch (err) {
+          console.error('Agent bidi error:', err.message);
+        }
+
+        console.log('Agent fullText:', JSON.stringify(fullText.substring(0, 200)));
+        sse('response.output_text.done', { output_index: 0, content_index: 0, text: fullText });
+        sse('response.content_part.done', { output_index: 0, content_index: 0, part: { type: 'output_text', text: fullText } });
+        sse('response.output_item.done', { output_index: 0, item: { id: outputItemId, type: 'message', role: 'assistant', content: [{ type: 'output_text', text: fullText }] } });
+        sse('response.completed', { response: { id: responseId, object: 'response', status: 'completed', model: model || 'default', output: [{ id: outputItemId, type: 'message', role: 'assistant', content: [{ type: 'output_text', text: fullText }] }] } });
+        res.end();
+      } else {
+        try {
+          const result = await bidiClient.runAgent(authToken, prompt, cursorModel, {
+            maxToolCalls: 10, verbose: true, timeout: 60000,
+          });
+          return res.json({
+            id: responseId, object: 'response', status: 'completed',
+            model: model || 'default',
+            output: [{ type: 'message', role: 'assistant', content: [{ type: 'output_text', text: result || '' }] }],
+          });
+        } catch (err) {
+          return res.status(500).json({ error: err.message });
+        }
+      }
+      return;
+    }
+
+    // Non-agent mode: unidirectional streaming
     const chatHeaders = buildCommonHeaders(authToken.trim());
     chatHeaders['connect-accept-encoding'] = 'gzip';
     chatHeaders['connect-content-encoding'] = 'gzip';
     chatHeaders['content-type'] = 'application/connect+proto';
 
     const cursorBody = generateCursorBody(messages, cursorModel, {
-      agentMode: false,
-      tools: [],
+      agentMode: false, tools: [],
     });
 
     const dispatcher = config.proxy.enabled
@@ -554,8 +628,6 @@ router.post('/responses', async (req, res) => {
     if (response.status !== 200) {
       return res.status(response.status).json({ error: response.statusText });
     }
-
-    const responseId = `resp-${uuidv4()}`;
 
     if (stream) {
       res.setHeader('Content-Type', 'text/event-stream');
