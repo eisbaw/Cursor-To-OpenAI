@@ -542,8 +542,60 @@ async function handleAgentStreamResponse(res, session, model) {
 
   // Emit tool calls
   if (toolCalls.length > 0) {
-    console.log('Emitting', toolCalls.length, 'tool calls to crush');
+    // Separate complete tool calls from incomplete EDIT_FILE_V2 calls
+    const passThroughCalls = [];
+    const rejectCalls = [];
     for (const tc of toolCalls) {
+      if (tc.tool === 38 && (!tc.rawArgs || !tc.rawArgs.includes('@@'))) {
+        // EDIT_FILE_V2 without diff hunks - reject back to Cursor
+        rejectCalls.push(tc);
+      } else {
+        passThroughCalls.push(tc);
+      }
+    }
+
+    // Send rejections back to Cursor, asking for structured edit
+    for (const tc of rejectCalls) {
+      const errorResult = {
+        success: false,
+        data: { content: 'Tool not supported in this environment. Use edit_file with explicit old_string and new_string parameters, or use run_terminal_cmd with sed.' },
+      };
+      const toolEnum = tc.tool;
+      console.log(`Rejecting EDIT_FILE_V2 ${tc.toolCallId} back to Cursor`);
+      session.client.sendToolResultOnStream(session.stream, toolEnum, tc.toolCallId, errorResult);
+      sessionManager.registerCallId(tc.toolCallId, session.responseId);
+    }
+
+    // If we only had rejections and no pass-through calls, read next frames
+    // (the model should retry with a different tool)
+    if (passThroughCalls.length === 0 && rejectCalls.length > 0) {
+      console.log('All tool calls rejected, waiting for model retry...');
+      const next = await session.client.readNextFrames(
+        session.stream, session.buffer, { batchDelayMs: 800, timeoutMs: 120000 }
+      );
+      session.buffer = next.buffer;
+      // Recursively handle the next batch
+      // (could be more tool calls, text, or stream end)
+      toolCalls.length = 0;
+      toolCalls.push(...next.toolCalls);
+      textChunks.push(...next.textChunks);
+      if (next.ended) ended = true;
+
+      // Re-check for pass-through calls
+      for (const tc of next.toolCalls) {
+        if (tc.tool === 38 && (!tc.rawArgs || !tc.rawArgs.includes('@@'))) {
+          // Still EDIT_FILE_V2 - reject again
+          const err = { success: false, data: { content: 'Use run_terminal_cmd with sed instead of apply_patch.' } };
+          session.client.sendToolResultOnStream(session.stream, tc.tool, tc.toolCallId, err);
+          sessionManager.registerCallId(tc.toolCallId, session.responseId);
+        } else {
+          passThroughCalls.push(tc);
+        }
+      }
+    }
+
+    console.log('Emitting', passThroughCalls.length, 'tool calls to crush');
+    for (const tc of passThroughCalls) {
       const { name: crushName, arguments: crushArgs } = toolMapping.cursorToCrush(tc.tool, tc.rawArgs);
       const callId = tc.toolCallId;
       const fcId = `fc_${uuidv4()}`;
