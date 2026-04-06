@@ -2,7 +2,9 @@
 
 OpenAI-compatible API proxy for Cursor Editor with **full agent mode and tool calling support**.
 
-> **Compatible with Cursor 2.3.41** - Protocol implementation based on reverse-engineered protobuf schemas.
+> **Compatible with Cursor 2.6.22** - Protocol implementation based on reverse-engineered protobuf schemas.
+>
+> **Porting to native?** See [CURSOR-PROTOCOL-GUIDE.md](CURSOR-PROTOCOL-GUIDE.md) for the full protocol specification — authentication, HTTP/2 framing, protobuf structures, all 46+ tool enums, EDIT_FILE_V2 two-phase flow, and 25 documented pitfalls.
 
 ## Features
 
@@ -120,22 +122,31 @@ Crush will automatically use agent mode with tool calling when appropriate, allo
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/v1/models` | GET | List available models |
-| `/v1/chat/completions` | POST | Chat completion (streaming supported) |
+| `/v1/chat/completions` | POST | Chat completions with tool passthrough (opencode) |
+| `/v1/responses` | POST | Responses API with tool passthrough (crush) |
 | `/cursor/loginDeepControl` | GET | Get auth token via browser login |
 
-## Agent Mode
+## Agent Mode (Tool Passthrough)
 
-When `tools` array is provided in the request, the proxy enables **bidirectional HTTP/2 streaming** to execute tools locally and return results to the model.
+When `tools` array is provided in the request, the proxy opens a **bidirectional HTTP/2 stream** to Cursor and passes tool calls through to the client. The proxy does NOT execute tools locally — it translates between Cursor's protobuf tool format and the OpenAI function calling format, letting the client (opencode, crush, etc.) execute tools.
 
-Supported tools (mapped to Cursor's `ClientSideToolV2`):
-- `list_dir` - List directory contents
-- `read_file` - Read file contents
-- `edit_file` - Edit/create files
-- `run_terminal_cmd` - Execute shell commands
-- `grep_search` - Search with ripgrep
-- `file_search` - Search files by name
-- `glob_search` - Search files by glob pattern
-- `delete_file` - Delete files
+**Tested clients:**
+- **[opencode](https://opencode.ai)** — via `/v1/chat/completions` (camelCase params: `filePath`, `oldString`, `newString`)
+- **[Crush](https://github.com/charmbracelet/crush)** — via `/v1/responses` (snake_case params: `file_path`, `old_string`, `new_string`)
+
+Tool mapping (Cursor `ClientSideToolV2` to client function names):
+
+| Cursor Tool | Crush | Opencode |
+|-------------|-------|----------|
+| `read_file` (5) | `view` | `read` |
+| `list_dir` (6) | `ls` | `bash` |
+| `edit_file` (7) | `edit` | `edit` |
+| `edit_file_v2` (38) | `edit` | `edit` |
+| `run_terminal_cmd` (15) | `bash` | `bash` |
+| `grep_search` (3) | `grep` | `grep` |
+| `file_search` (8) | `glob` | `glob` |
+| `glob_search` (42) | `glob` | `glob` |
+| `delete_file` (11) | `bash` | `bash` |
 
 ## Authentication
 
@@ -159,10 +170,10 @@ curl http://localhost:3010/cursor/loginDeepControl \
 ## Architecture
 
 ```
-Client (OpenAI SDK) 
-    ↓ HTTP/1.1
+Client (opencode/crush/SDK)
+    ↓ HTTP/1.1 (OpenAI format)
 cursor-to-openai proxy (localhost:3010)
-    ↓ HTTP/2 bidirectional streaming
+    ↓ HTTP/2 bidirectional streaming (ConnectRPC + protobuf)
 Cursor API (api2.cursor.sh)
     ↓
 Claude/GPT models
@@ -171,8 +182,10 @@ Claude/GPT models
 For agent mode, the proxy:
 1. Encodes request with `isAgentic=true` and `supportedTools` (protobuf)
 2. Opens bidirectional HTTP/2 stream to Cursor API
-3. Receives tool calls, executes locally, sends results back
-4. Streams final response to client
+3. Translates Cursor tool calls to OpenAI function_call format, returns to client
+4. Client executes tool locally, sends result back to proxy
+5. Proxy translates result to Cursor protobuf, sends on the same bidi stream
+6. Repeats until model finishes (no more tool calls)
 
 ## Development
 
@@ -186,13 +199,16 @@ npm run proto
 
 ## Compatibility
 
-**Tested with Cursor 2.3.41**
+**Tested with Cursor 2.6.22** (also analysed against 3.0.9 decompiled source)
 
-The protobuf schemas and protocol details were derived from reverse engineering Cursor's `workbench.desktop.main.js`. Key discoveries:
+The protobuf schemas and protocol details were derived from reverse engineering Cursor's `workbench.desktop.main.js` and `extensionHostProcess.js`. Key discoveries:
 - `StreamUnifiedChatWithTools` RPC for bidirectional streaming
-- `ClientSideToolV2` enum with 44 tool types
+- `ClientSideToolV2` enum with 46+ tool types
 - `isAgentic` (field 27) and `supportedTools` (field 29) for agent mode
-- Tool call/result message formats
+- EDIT_FILE_V2 two-phase ACK protocol with `EditFileV2Result.result_for_model`
+- Tool call/result message formats with per-tool field numbers
+
+For the full protocol specification, see [CURSOR-PROTOCOL-GUIDE.md](CURSOR-PROTOCOL-GUIDE.md).
 
 ## Reverse Engineering
 
