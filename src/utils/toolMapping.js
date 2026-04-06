@@ -8,18 +8,26 @@ const { ClientSideToolV2 } = require('./utils');
 // Cursor tool enum -> crush function name + param transform
 // Crush param schemas from crush/internal/agent/tools/*.go
 const CURSOR_TO_CRUSH = {
+  // Tool names use a common subset that works for both crush and opencode:
+  // bash, read/view, glob, grep, edit, write
+  // Crush uses: ls, view, bash, grep, glob, edit
+  // Opencode uses: bash, read, glob, grep, edit, write
+  // We use names that match the client's tool list (detected at runtime).
   [ClientSideToolV2.LIST_DIR]: {
-    name: 'ls',
+    name: 'bash',
     mapParams(p) {
-      return { path: p.relative_workspace_path || p.directory_path || '.' };
+      const dir = p.relative_workspace_path || p.directory_path || '.';
+      return { command: `ls -la ${dir}`, description: `List directory ${dir}` };
     },
   },
   [ClientSideToolV2.READ_FILE]: {
-    name: 'view',
+    name: 'read',
     mapParams(p) {
-      const out = { file_path: p.target_file || p.relative_workspace_path || '' };
-      if (p.start_line_one_indexed) out.offset = p.start_line_one_indexed - 1; // crush is 0-based
+      const out = { filePath: p.target_file || p.relative_workspace_path || '' };
+      if (p.start_line_one_indexed) out.offset = p.start_line_one_indexed - 1;
       if (p.end_line_one_indexed_inclusive) out.limit = p.end_line_one_indexed_inclusive - (p.start_line_one_indexed || 1) + 1;
+      // Also include crush-compatible field names
+      out.file_path = out.filePath;
       return out;
     },
   },
@@ -27,6 +35,7 @@ const CURSOR_TO_CRUSH = {
     name: 'edit',
     mapParams(p) {
       return {
+        filePath: p.target_file || p.relative_workspace_path || '',
         file_path: p.target_file || p.relative_workspace_path || '',
         old_string: p.old_string || '',
         new_string: p.new_string || '',
@@ -120,12 +129,14 @@ for (const [enumVal, mapping] of Object.entries(CURSOR_TO_CRUSH)) {
     CRUSH_TO_CURSOR[mapping.name] = parseInt(enumVal, 10);
   }
 }
-// Explicit overrides for ambiguous names
+// Explicit overrides for both crush and opencode tool names
 CRUSH_TO_CURSOR['view'] = ClientSideToolV2.READ_FILE;
+CRUSH_TO_CURSOR['read'] = ClientSideToolV2.READ_FILE;
 CRUSH_TO_CURSOR['ls'] = ClientSideToolV2.LIST_DIR;
 CRUSH_TO_CURSOR['bash'] = ClientSideToolV2.RUN_TERMINAL_COMMAND_V2;
 CRUSH_TO_CURSOR['edit'] = ClientSideToolV2.EDIT_FILE;
 CRUSH_TO_CURSOR['grep'] = ClientSideToolV2.RIPGREP_SEARCH;
+CRUSH_TO_CURSOR['glob'] = ClientSideToolV2.GLOB_FILE_SEARCH;
 CRUSH_TO_CURSOR['write'] = ClientSideToolV2.EDIT_FILE;
 
 /**

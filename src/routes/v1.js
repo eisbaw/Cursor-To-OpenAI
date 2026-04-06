@@ -101,6 +101,9 @@ router.post('/chat/completions', async (req, res) => {
     const { model: rawModel, messages, stream = false, tools = null } = req.body;
     const model = mapModelName(rawModel);
 
+    // Log message roles for debugging
+    console.log('Chat completions:', JSON.stringify({ model: rawModel, stream, tools: tools?.length, roles: messages.map(m => m.role) }));
+
     // Agent mode is enabled when tools are provided
     const agentMode = tools && Array.isArray(tools) && tools.length > 0;
     
@@ -111,92 +114,62 @@ router.post('/chat/completions', async (req, res) => {
       });
     }
 
-    // Use bidirectional client for agent mode (required for tool calling)
+    // Agent mode: passthrough tool calls to client (opencode, etc.)
     if (agentMode) {
-      console.log('Agent mode: using bidirectional HTTP/2 client, stream=' + stream);
-      
-      const bidiClient = new BidiCursorClient(process.cwd());
-      const prompt = messages.map(m => `${m.role}: ${m.content}`).join('\n');
       const responseId = `chatcmpl-${uuidv4()}`;
-      
-      if (stream) {
-        // Streaming response for agent mode
-        res.setHeader('Content-Type', 'text/event-stream');
-        res.setHeader('Cache-Control', 'no-cache');
-        res.setHeader('Connection', 'keep-alive');
-        
-        try {
-          const response = await bidiClient.runAgent(authToken, prompt, model, {
-            maxToolCalls: 10,
-            verbose: true,
-            timeout: 60000,
-            // Callback to stream content as it arrives
-            onContent: (content) => {
-              res.write(`data: ${JSON.stringify({
-                id: responseId,
-                object: 'chat.completion.chunk',
-                created: Math.floor(Date.now() / 1000),
-                model: model,
-                choices: [{
-                  index: 0,
-                  delta: { content },
-                  finish_reason: null,
-                }],
-              })}\n\n`);
-            },
-          });
-          
-          // Send final chunk
-          res.write(`data: ${JSON.stringify({
-            id: responseId,
-            object: 'chat.completion.chunk',
-            created: Math.floor(Date.now() / 1000),
-            model: model,
-            choices: [{
-              index: 0,
-              delta: {},
-              finish_reason: 'stop',
-            }],
-          })}\n\n`);
-          res.write('data: [DONE]\n\n');
-          res.end();
-        } catch (err) {
-          console.error('Bidi client error:', err);
-          res.write(`data: ${JSON.stringify({ error: err.message })}\n\n`);
-          res.end();
+
+      // Check for continuation: tool result messages in the conversation
+      const toolResultMsgs = messages.filter(m => m.role === 'tool');
+      let session = null;
+      if (toolResultMsgs.length > 0) {
+        console.log('Tool result messages:', toolResultMsgs.map(m => ({ tool_call_id: m.tool_call_id, name: m.name, content: (m.content||'').substring(0, 60) })));
+        for (const msg of toolResultMsgs) {
+          session = sessionManager.getByCallId(msg.tool_call_id);
+          if (session) break;
+          // Try partial match (opencode might truncate or modify the ID)
+          const cleanId = (msg.tool_call_id || '').split('\n')[0];
+          if (cleanId !== msg.tool_call_id) {
+            session = sessionManager.getByCallId(cleanId);
+            if (session) break;
+          }
         }
-      } else {
-        // Non-streaming response for agent mode
-        try {
-          const response = await bidiClient.runAgent(authToken, prompt, model, {
-            maxToolCalls: 10,
-            verbose: true,
-            timeout: 60000,
-          });
-          
-          console.log(`Agent response (${response?.length || 0} chars): "${response?.substring(0, 100)}..."`);
-          
-          return res.json({
-            id: responseId,
-            object: 'chat.completion',
-            created: Math.floor(Date.now() / 1000),
-            model: model,
-            choices: [{
-              index: 0,
-              message: {
-                role: 'assistant',
-                content: response,
-              },
-              finish_reason: 'stop',
-            }],
-            usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
-          });
-        } catch (err) {
-          console.error('Bidi client error:', err);
-          return res.status(500).json({ error: err.message });
-        }
+        console.log('Session found:', !!session, 'Active sessions:', sessionManager.count());
       }
-      return;
+
+      if (session) {
+        // --- Continuation: send tool results to Cursor ---
+        console.log('Chat completions continuation for session', session.responseId);
+        sessionManager.touch(session);
+        session.state = 'streaming';
+
+        for (const msg of toolResultMsgs) {
+          // Find the original tool call to get the Cursor tool enum
+          // The tool_call_id was registered when we emitted the tool call
+          const crushName = msg.name || 'bash';
+          const toolEnum = toolMapping.crushToCursorEnum(crushName);
+          const resultData = { success: true, data: { content: msg.content || '', contents: msg.content || '', output: msg.content || '' } };
+          console.log('Sending tool result:', msg.tool_call_id, crushName, '->', toolEnum);
+          session.client.sendToolResultOnStream(session.stream, toolEnum, msg.tool_call_id, resultData);
+        }
+
+        // Read next frames from Cursor
+        return await handleChatCompletionsAgentResponse(res, session, model, responseId, stream);
+      }
+
+      // --- Initial request: open bidi stream ---
+      console.log('Chat completions passthrough mode, model:', model);
+      const bidiClient = new BidiCursorClient(process.cwd());
+      // Filter out system messages for the prompt, keep for instruction
+      const chatMessages = messages.filter(m => m.role !== 'tool');
+      const { stream: bidiStream } = await bidiClient.openAgentStream(
+        authToken,
+        chatMessages.map(m => ({ role: m.role, content: typeof m.content === 'string' ? m.content : JSON.stringify(m.content) })),
+        model,
+        STRUCTURED_AGENT_TOOLS,
+      );
+
+      const newSession = sessionManager.create(responseId, bidiStream, bidiClient);
+      return await handleChatCompletionsAgentResponse(res, newSession, model, responseId, stream);
     }
 
     // Non-agent mode: use regular unidirectional streaming
@@ -645,6 +618,110 @@ async function handleAgentStreamResponse(res, session, model) {
   });
   res.end();
   sessionManager.destroy(session.responseId);
+}
+
+/**
+ * Shared handler for Chat Completions agent passthrough.
+ * Reads frames from Cursor bidi stream and returns OpenAI Chat Completions format.
+ * If tool calls arrive, returns finish_reason "tool_calls" with tool_calls array.
+ * If text arrives and stream ends, returns finish_reason "stop" with content.
+ */
+async function handleChatCompletionsAgentResponse(res, session, model, responseId, stream = false) {
+  const { toolCalls, textChunks, ended, buffer } = await session.client.readNextFrames(
+    session.stream, session.buffer, { batchDelayMs: 800, timeoutMs: 120000 }
+  );
+  session.buffer = buffer;
+  sessionManager.touch(session);
+
+  // Separate EDIT_FILE_V2 calls (reject back to Cursor)
+  const passThroughCalls = [];
+  for (const tc of toolCalls) {
+    if (tc.tool === 38 && (!tc.rawArgs || !tc.rawArgs.includes('@@'))) {
+      console.log(`Rejecting EDIT_FILE_V2 ${tc.toolCallId} back to Cursor`);
+      const err = { success: false, data: { content: 'Use edit_file with old_string/new_string or run_terminal_cmd with sed.' } };
+      session.client.sendToolResultOnStream(session.stream, tc.tool, tc.toolCallId, err);
+      sessionManager.registerCallId(tc.toolCallId, session.responseId);
+    } else {
+      passThroughCalls.push(tc);
+    }
+  }
+
+  // If only rejections, read next batch (model retries)
+  if (passThroughCalls.length === 0 && toolCalls.length > 0) {
+    console.log('All tool calls rejected, waiting for model retry...');
+    const next = await session.client.readNextFrames(
+      session.stream, session.buffer, { batchDelayMs: 800, timeoutMs: 120000 }
+    );
+    session.buffer = next.buffer;
+    for (const tc of next.toolCalls) {
+      if (tc.tool === 38 && (!tc.rawArgs || !tc.rawArgs.includes('@@'))) {
+        session.client.sendToolResultOnStream(session.stream, tc.tool, tc.toolCallId, { success: false, data: { content: 'Use run_terminal_cmd with sed.' } });
+        sessionManager.registerCallId(tc.toolCallId, session.responseId);
+      } else {
+        passThroughCalls.push(tc);
+      }
+    }
+    textChunks.push(...next.textChunks);
+    if (next.ended) session.state = 'ended';
+  }
+
+  // Build the response message
+  const fullText = textChunks.join('');
+
+  // Build tool calls in OpenAI format
+  const openaiToolCalls = passThroughCalls.map((tc) => {
+    const { name: crushName, arguments: crushArgs } = toolMapping.cursorToCrush(tc.tool, tc.rawArgs);
+    const callId = tc.toolCallId;
+    sessionManager.registerCallId(callId, session.responseId);
+    sessionManager.registerCallId(crushName, session.responseId);
+    if (tc.name) sessionManager.registerCallId(tc.name, session.responseId);
+    console.log(`  Tool call: ${tc.name}(${tc.tool}) -> ${crushName}`);
+    return { id: callId, type: 'function', function: { name: crushName, arguments: crushArgs } };
+  });
+
+  const hasToolCalls = openaiToolCalls.length > 0;
+  const finishReason = hasToolCalls ? 'tool_calls' : 'stop';
+  if (hasToolCalls) {
+    session.state = 'waiting_for_tool_result';
+    console.log('Returning', openaiToolCalls.length, 'tool calls to client');
+  } else {
+    sessionManager.destroy(session.responseId);
+  }
+
+  if (stream) {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    const ts = Math.floor(Date.now() / 1000);
+
+    // Stream text content
+    if (fullText) {
+      res.write(`data: ${JSON.stringify({ id: responseId, object: 'chat.completion.chunk', created: ts, model,
+        choices: [{ index: 0, delta: { role: 'assistant', content: fullText }, finish_reason: null }] })}\n\n`);
+    }
+
+    // Stream tool calls
+    for (let i = 0; i < openaiToolCalls.length; i++) {
+      const tc = openaiToolCalls[i];
+      res.write(`data: ${JSON.stringify({ id: responseId, object: 'chat.completion.chunk', created: ts, model,
+        choices: [{ index: 0, delta: { tool_calls: [{ index: i, id: tc.id, type: 'function', function: { name: tc.function.name, arguments: tc.function.arguments } }] }, finish_reason: null }] })}\n\n`);
+    }
+
+    // Final chunk with finish_reason
+    res.write(`data: ${JSON.stringify({ id: responseId, object: 'chat.completion.chunk', created: ts, model,
+      choices: [{ index: 0, delta: {}, finish_reason: finishReason }] })}\n\n`);
+    res.write('data: [DONE]\n\n');
+    res.end();
+  } else {
+    const message = { role: 'assistant', content: fullText || null };
+    if (hasToolCalls) message.tool_calls = openaiToolCalls;
+
+    return res.json({
+      id: responseId, object: 'chat.completion', created: Math.floor(Date.now() / 1000), model,
+      choices: [{ index: 0, message, finish_reason: finishReason }],
+      usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
+    });
+  }
 }
 
 /**
