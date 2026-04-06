@@ -1,0 +1,20 @@
+{
+  "provider": {
+    "cursor-bridge": {
+      "name": "Cursor via Bridge",
+      "npm": "@ai-sdk/openai-compatible",
+      "models": {
+        "default": {
+          "name": "Default (Cursor)"
+        },
+        "cursor-small": {
+          "name": "Cursor Small"
+        }
+      },
+      "options": {
+        "baseURL": "http://localhost:3010/v1"
+      }
+    }
+  },
+  "$schema": "https://opencode.ai/config.json"
+}
