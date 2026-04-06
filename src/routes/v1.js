@@ -24,17 +24,10 @@ const toolMapping = require('../utils/toolMapping.js');
 
 // Map OpenAI model names to Cursor model IDs
 // Models not in this map are passed through as-is
-const MODEL_MAP = {
-  'gpt-4o': 'gpt-4o',
-  'gpt-4o-mini': 'default',
-  'gpt-5.4': 'default',
-  'gpt-5.4-pro': 'default',
-  'gpt-5.4-mini': 'cursor-small',
-  'gpt-5.4-nano': 'cursor-small',
-};
+// Pass model names through to Cursor as-is. Cursor resolves them server-side.
+// Use /v1/models to see available names (claude-4.6-opus-high, gpt-5.4-medium, etc.)
 function mapModelName(model) {
-  if (!model) return 'default';
-  return MODEL_MAP[model] || model;
+  return model || 'default';
 }
 
 // Extract Cursor auth token: prefer stored token, fall back to Bearer header

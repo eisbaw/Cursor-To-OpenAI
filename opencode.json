@@ -4,12 +4,16 @@
       "name": "Cursor via Bridge",
       "npm": "@ai-sdk/openai-compatible",
       "models": {
-        "default": {
-          "name": "Default (Cursor)"
-        },
-        "cursor-small": {
-          "name": "Cursor Small"
-        }
+        "default": { "name": "Default" },
+        "claude-4.6-sonnet-medium": { "name": "Claude 4.6 Sonnet" },
+        "claude-4.6-sonnet-medium-thinking": { "name": "Claude 4.6 Sonnet (thinking)" },
+        "claude-4.6-opus-high": { "name": "Claude 4.6 Opus" },
+        "claude-4.6-opus-high-thinking": { "name": "Claude 4.6 Opus (thinking)" },
+        "claude-4.5-haiku": { "name": "Claude 4.5 Haiku" },
+        "gpt-5.4-medium": { "name": "GPT-5.4" },
+        "gpt-5.4-mini-medium": { "name": "GPT-5.4 Mini" },
+        "gemini-3-flash": { "name": "Gemini 3 Flash" },
+        "cursor-small": { "name": "Cursor Small" }
       },
       "options": {
         "baseURL": "http://localhost:3010/v1"
