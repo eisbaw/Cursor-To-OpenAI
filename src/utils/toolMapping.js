@@ -14,29 +14,27 @@ const CURSOR_TO_CRUSH = {
   // Opencode uses: bash, read, glob, grep, edit, write
   // We use names that match the client's tool list (detected at runtime).
   [ClientSideToolV2.LIST_DIR]: {
-    name: 'bash',
+    name: 'ls',
     mapParams(p) {
-      const dir = p.relative_workspace_path || p.directory_path || '.';
-      return { command: `ls -la ${dir}`, description: `List directory ${dir}` };
+      return { path: p.relative_workspace_path || p.directory_path || '.' };
     },
   },
   [ClientSideToolV2.READ_FILE]: {
-    name: 'read',
+    name: 'view',
     mapParams(p) {
-      const out = { filePath: p.target_file || p.relative_workspace_path || '' };
+      const filePath = p.target_file || p.relative_workspace_path || '';
+      const out = { file_path: filePath, filePath };
       if (p.start_line_one_indexed) out.offset = p.start_line_one_indexed - 1;
       if (p.end_line_one_indexed_inclusive) out.limit = p.end_line_one_indexed_inclusive - (p.start_line_one_indexed || 1) + 1;
-      // Also include crush-compatible field names
-      out.file_path = out.filePath;
       return out;
     },
   },
   [ClientSideToolV2.EDIT_FILE]: {
     name: 'edit',
     mapParams(p) {
+      const filePath = p.target_file || p.relative_workspace_path || '';
       return {
-        filePath: p.target_file || p.relative_workspace_path || '',
-        file_path: p.target_file || p.relative_workspace_path || '',
+        file_path: filePath, filePath,
         old_string: p.old_string || '',
         new_string: p.new_string || '',
       };
@@ -139,25 +137,78 @@ CRUSH_TO_CURSOR['grep'] = ClientSideToolV2.RIPGREP_SEARCH;
 CRUSH_TO_CURSOR['glob'] = ClientSideToolV2.GLOB_FILE_SEARCH;
 CRUSH_TO_CURSOR['write'] = ClientSideToolV2.EDIT_FILE;
 
+// Cursor tool -> preferred client tool name, ordered by preference.
+// The mapper picks the first name that exists in the client's tool list.
+const TOOL_NAME_CANDIDATES = {
+  [ClientSideToolV2.LIST_DIR]: ['ls', 'bash'],         // crush: ls, opencode: bash
+  [ClientSideToolV2.READ_FILE]: ['view', 'read'],      // crush: view, opencode: read
+  [ClientSideToolV2.EDIT_FILE]: ['edit'],               // both have edit
+  [ClientSideToolV2.RIPGREP_SEARCH]: ['grep'],          // both have grep
+  [ClientSideToolV2.RUN_TERMINAL_COMMAND_V2]: ['bash'], // both have bash
+  [ClientSideToolV2.FILE_SEARCH]: ['glob'],
+  [ClientSideToolV2.GLOB_FILE_SEARCH]: ['glob'],
+  [ClientSideToolV2.DELETE_FILE]: ['bash'],
+  [ClientSideToolV2.EDIT_FILE_V2]: ['edit', 'bash'],
+};
+
 /**
- * Translate a Cursor tool call to crush function call format.
+ * Translate a Cursor tool call to client function call format.
  * @param {number} toolEnum - ClientSideToolV2 enum value
  * @param {string} rawArgs - JSON string of Cursor params
+ * @param {Set<string>} [clientTools] - set of tool names the client supports
  * @returns {{ name: string, arguments: string }} OpenAI function format
  */
-function cursorToCrush(toolEnum, rawArgs) {
+function cursorToCrush(toolEnum, rawArgs, clientTools) {
   const mapping = CURSOR_TO_CRUSH[toolEnum];
   if (!mapping) {
-    // Fallback: pass raw args under a generic name
     return { name: `cursor_tool_${toolEnum}`, arguments: rawArgs || '{}' };
   }
 
-  let params = {};
-  try { params = JSON.parse(rawArgs || '{}'); } catch (e) {
-    // rawArgs might not be JSON (e.g. EDIT_FILE_V2 sends a patch string)
+  // Pick the best tool name for this client
+  let name = mapping.name;
+  if (clientTools && clientTools.size > 0) {
+    const candidates = TOOL_NAME_CANDIDATES[toolEnum] || [mapping.name];
+    const match = candidates.find(n => clientTools.has(n));
+    if (match) name = match;
+    else if (clientTools.has('bash')) name = 'bash'; // ultimate fallback
   }
+
+  let params = {};
+  try { params = JSON.parse(rawArgs || '{}'); } catch (e) {}
+
+  // If the resolved name differs from the mapping's default, adjust params
+  if (name === 'bash' && mapping.name !== 'bash') {
+    // Convert to bash command format
+    const bashParams = toBashFallback(toolEnum, params, rawArgs);
+    return { name: 'bash', arguments: JSON.stringify(bashParams) };
+  }
+
   const crushParams = mapping.mapParams(params, rawArgs || '');
-  return { name: mapping.name, arguments: JSON.stringify(crushParams) };
+  return { name, arguments: JSON.stringify(crushParams) };
+}
+
+/**
+ * Convert any tool call to a bash command fallback
+ */
+function toBashFallback(toolEnum, params, rawArgs) {
+  switch (toolEnum) {
+    case ClientSideToolV2.LIST_DIR: {
+      const dir = params.relative_workspace_path || params.directory_path || '.';
+      return { command: `ls -la ${dir}`, description: `List directory ${dir}` };
+    }
+    case ClientSideToolV2.READ_FILE: {
+      const file = params.target_file || params.relative_workspace_path || '';
+      return { command: `cat '${file}'`, description: `Read file ${file}` };
+    }
+    case ClientSideToolV2.EDIT_FILE_V2: {
+      const patch = rawArgs || '';
+      const fileMatch = patch.match(/\*\*\* Update File:\s*(.+)/);
+      const filePath = fileMatch ? fileMatch[1].trim() : '';
+      return { command: `echo 'Edit intended for ${filePath}'`, description: `Edit ${filePath}` };
+    }
+    default:
+      return { command: `echo 'Unsupported tool ${toolEnum}'`, description: 'Unsupported tool' };
+  }
 }
 
 /**

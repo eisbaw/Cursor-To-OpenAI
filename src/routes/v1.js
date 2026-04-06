@@ -114,6 +114,15 @@ router.post('/chat/completions', async (req, res) => {
       });
     }
 
+    // Build set of client tool names for mapping
+    const clientToolNames = new Set();
+    if (tools) {
+      for (const t of tools) {
+        const name = t.name || t.function?.name;
+        if (name) clientToolNames.add(name);
+      }
+    }
+
     // Agent mode: passthrough tool calls to client (opencode, etc.)
     if (agentMode) {
       const responseId = `chatcmpl-${uuidv4()}`;
@@ -169,6 +178,7 @@ router.post('/chat/completions', async (req, res) => {
       );
 
       const newSession = sessionManager.create(responseId, bidiStream, bidiClient);
+      newSession.clientTools = clientToolNames;
       return await handleChatCompletionsAgentResponse(res, newSession, model, responseId, stream);
     }
 
@@ -531,7 +541,7 @@ async function handleAgentStreamResponse(res, session, model) {
     for (const tc of rejectCalls) {
       const errorResult = {
         success: false,
-        data: { content: 'Tool not supported in this environment. Use edit_file with explicit old_string and new_string parameters, or use run_terminal_cmd with sed.' },
+        data: { content: 'apply_patch is not available. You MUST use edit_file tool instead with parameters: target_file (string), old_string (exact text to find), new_string (replacement text). Do NOT use run_terminal_cmd for edits.' },
       };
       const toolEnum = tc.tool;
       console.log(`Rejecting EDIT_FILE_V2 ${tc.toolCallId} back to Cursor`);
@@ -558,7 +568,7 @@ async function handleAgentStreamResponse(res, session, model) {
       for (const tc of next.toolCalls) {
         if (tc.tool === 38 && (!tc.rawArgs || !tc.rawArgs.includes('@@'))) {
           // Still EDIT_FILE_V2 - reject again
-          const err = { success: false, data: { content: 'Use run_terminal_cmd with sed instead of apply_patch.' } };
+          const err = { success: false, data: { content: 'apply_patch is not available. Use edit_file with target_file, old_string, new_string instead.' } };
           session.client.sendToolResultOnStream(session.stream, tc.tool, tc.toolCallId, err);
           sessionManager.registerCallId(tc.toolCallId, session.responseId);
         } else {
@@ -569,7 +579,7 @@ async function handleAgentStreamResponse(res, session, model) {
 
     console.log('Emitting', passThroughCalls.length, 'tool calls to crush');
     for (const tc of passThroughCalls) {
-      const { name: crushName, arguments: crushArgs } = toolMapping.cursorToCrush(tc.tool, tc.rawArgs);
+      const { name: crushName, arguments: crushArgs } = toolMapping.cursorToCrush(tc.tool, tc.rawArgs, session.clientTools);
       // Clean tool_call_id - Cursor sends multi-line IDs, clients can't handle newlines
       const callId = (tc.toolCallId || '').split('\n')[0];
       const fcId = `fc_${uuidv4()}`;
@@ -643,7 +653,7 @@ async function handleChatCompletionsAgentResponse(res, session, model, responseI
   for (const tc of toolCalls) {
     if (tc.tool === 38 && (!tc.rawArgs || !tc.rawArgs.includes('@@'))) {
       console.log(`Rejecting EDIT_FILE_V2 ${tc.toolCallId} back to Cursor`);
-      const err = { success: false, data: { content: 'Use edit_file with old_string/new_string or run_terminal_cmd with sed.' } };
+      const err = { success: false, data: { content: 'apply_patch is not available. You MUST use edit_file tool instead with parameters: target_file (string), old_string (exact text to find), new_string (replacement text). Do NOT use run_terminal_cmd for edits.' } };
       session.client.sendToolResultOnStream(session.stream, tc.tool, tc.toolCallId, err);
       sessionManager.registerCallId(tc.toolCallId, session.responseId);
     } else {
@@ -660,7 +670,7 @@ async function handleChatCompletionsAgentResponse(res, session, model, responseI
     session.buffer = next.buffer;
     for (const tc of next.toolCalls) {
       if (tc.tool === 38 && (!tc.rawArgs || !tc.rawArgs.includes('@@'))) {
-        session.client.sendToolResultOnStream(session.stream, tc.tool, tc.toolCallId, { success: false, data: { content: 'Use run_terminal_cmd with sed.' } });
+        session.client.sendToolResultOnStream(session.stream, tc.tool, tc.toolCallId, { success: false, data: { content: 'apply_patch is not available. Use edit_file with target_file, old_string, new_string instead.' } });
         sessionManager.registerCallId(tc.toolCallId, session.responseId);
       } else {
         passThroughCalls.push(tc);
@@ -675,7 +685,7 @@ async function handleChatCompletionsAgentResponse(res, session, model, responseI
 
   // Build tool calls in OpenAI format
   const openaiToolCalls = passThroughCalls.map((tc) => {
-    const { name: crushName, arguments: crushArgs } = toolMapping.cursorToCrush(tc.tool, tc.rawArgs);
+    const { name: crushName, arguments: crushArgs } = toolMapping.cursorToCrush(tc.tool, tc.rawArgs, session.clientTools);
     const callId = (tc.toolCallId || '').split('\n')[0];
     sessionManager.registerCallId(callId, session.responseId);
     if (tc.toolCallId !== callId) {
@@ -871,6 +881,15 @@ router.post('/responses', async (req, res) => {
       console.log('Bidi stream opened for', responseId);
 
       const session = sessionManager.create(responseId, bidiStream, bidiClient);
+      // Build client tool names from request
+      const crushTools = new Set();
+      if (req.body.tools) {
+        for (const t of req.body.tools) {
+          const n = t.name || t.function?.name;
+          if (n) crushTools.add(n);
+        }
+      }
+      session.clientTools = crushTools;
       return await handleAgentStreamResponse(res, session, model);
     }
 
