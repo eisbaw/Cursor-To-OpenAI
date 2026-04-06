@@ -91,13 +91,23 @@ const CURSOR_TO_CRUSH = {
         if (line.startsWith('@@')) { inHunk = true; continue; }
         if (line.startsWith('*** End')) break;
         if (!inHunk) continue;
-        // Cursor patch format: "- content", "+ content", " context" (prefix + space + content)
-        if (line.startsWith('- ')) oldLines.push(line.substring(2));
-        else if (line.startsWith('+ ')) newLines.push(line.substring(2));
-        else if (line.startsWith('-')) oldLines.push(line.substring(1));  // no space after prefix
+        // Cursor patch: "-"/"+"/space prefix. The model sometimes adds a space
+        // separator after -/+ and sometimes doesn't. We strip the prefix char,
+        // then collect all old/new lines. After parsing, we compare against
+        // context lines to detect and remove a consistent extra space.
+        if (line.startsWith('-')) oldLines.push(line.substring(1));
         else if (line.startsWith('+')) newLines.push(line.substring(1));
         else if (line.startsWith(' ')) { const c = line.substring(1); oldLines.push(c); newLines.push(c); }
-        else { oldLines.push(line); newLines.push(line); }
+      }
+
+      // Detect spurious leading space: if every -/+ line starts with a space
+      // but NOT every line should (i.e., the model used "- content" format
+      // with a separator space), strip that leading space from all lines.
+      const allOldHaveSpace = oldLines.length > 0 && oldLines.every(l => l.startsWith(' ') || l === '');
+      const allNewHaveSpace = newLines.length > 0 && newLines.every(l => l.startsWith(' ') || l === '');
+      if (allOldHaveSpace && allNewHaveSpace) {
+        for (let i = 0; i < oldLines.length; i++) if (oldLines[i].startsWith(' ')) oldLines[i] = oldLines[i].substring(1);
+        for (let i = 0; i < newLines.length; i++) if (newLines[i].startsWith(' ')) newLines[i] = newLines[i].substring(1);
       }
 
       const oldStr = oldLines.join('\n');
