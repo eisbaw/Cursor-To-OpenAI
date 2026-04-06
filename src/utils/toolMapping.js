@@ -1,18 +1,41 @@
 /**
  * Bidirectional tool name and parameter mapping between
- * Cursor (ClientSideToolV2) and crush (OpenAI function format).
+ * Cursor (ClientSideToolV2) and clients (crush, opencode).
+ *
+ * Client differences:
+ *
+ *   Tool names:
+ *     crush (Charm TUI, Go)    — ls, view, bash, grep, glob, edit
+ *     opencode (nixpkgs, Go)   — bash, read, glob, grep, edit, write
+ *     TOOL_NAME_CANDIDATES picks the first name the client declared.
+ *
+ *   Parameter naming:
+ *     crush uses snake_case:   file_path, old_string, new_string
+ *     opencode uses camelCase: filePath, oldString, newString
+ *     We emit BOTH so either client works (see edit mapParams).
+ *
+ *   API paths:
+ *     crush  hits /v1/responses  (OpenAI Responses API, SSE)
+ *     opencode hits /v1/chat/completions (OpenAI Chat Completions, SSE)
+ *
+ *   Conversation style:
+ *     opencode sends full message history on every request (including
+ *     old tool results). The route handler must extract only the LAST
+ *     batch of role:"tool" messages for the current session.
+ *
+ *   EDIT_FILE_V2 patch format:
+ *     Cursor sends "*** Begin Patch" / "*** Update File:" / "*** End Patch"
+ *     with unified-diff-like hunks. Lines use 1-char prefix: "-"/"+"/space.
+ *     The model sometimes adds a space separator after -/+ (e.g. "- content"
+ *     vs "-content"). We strip 1 char (the prefix) per Cursor's own parser.
+ *     Multi-line edits with context lines work correctly. Single-line edits
+ *     without context may have a 1-space offset that clients tolerate.
  */
 
 const { ClientSideToolV2 } = require('./utils');
 
-// Cursor tool enum -> crush function name + param transform
-// Crush param schemas from crush/internal/agent/tools/*.go
+// Cursor tool enum -> client function name + param transform
 const CURSOR_TO_CRUSH = {
-  // Tool names use a common subset that works for both crush and opencode:
-  // bash, read/view, glob, grep, edit, write
-  // Crush uses: ls, view, bash, grep, glob, edit
-  // Opencode uses: bash, read, glob, grep, edit, write
-  // We use names that match the client's tool list (detected at runtime).
   [ClientSideToolV2.LIST_DIR]: {
     name: 'ls',
     mapParams(p) {

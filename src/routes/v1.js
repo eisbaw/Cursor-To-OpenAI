@@ -123,7 +123,9 @@ router.post('/chat/completions', async (req, res) => {
       }
     }
 
-    // Agent mode: passthrough tool calls to client (opencode, etc.)
+    // Agent mode: passthrough tool calls to client.
+    // opencode uses this /v1/chat/completions path; crush uses /v1/responses.
+    // See toolMapping.js header for full client difference documentation.
     if (agentMode) {
       const responseId = `chatcmpl-${uuidv4()}`;
 
