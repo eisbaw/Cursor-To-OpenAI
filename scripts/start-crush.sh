@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Start proxy + crush fresh from scratch
 set -e
 cd "$(dirname "$0")"
