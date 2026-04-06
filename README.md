@@ -1,230 +1,158 @@
 # Cursor-To-OpenAI
 
-OpenAI-compatible API proxy for Cursor Editor with **full agent mode and tool calling support**.
+Use your Cursor subscription from any OpenAI-compatible tool. Agent mode with full tool calling.
 
-> **Compatible with Cursor 2.6.22** - Protocol implementation based on reverse-engineered protobuf schemas.
+> **Compatible with Cursor 2.6.22** | Protocol reverse-engineered from decompiled source (2.6.22 + 3.0.9)
 >
-> **Porting to native?** See [CURSOR-PROTOCOL-GUIDE.md](CURSOR-PROTOCOL-GUIDE.md) for the full protocol specification — authentication, HTTP/2 framing, protobuf structures, all 46+ tool enums, EDIT_FILE_V2 two-phase flow, and 25 documented pitfalls.
+> **Implementing natively?** See [CURSOR-PROTOCOL-GUIDE.md](CURSOR-PROTOCOL-GUIDE.md) for the full wire protocol spec.
 
-## Features
+## What This Does
 
-- **OpenAI API compatibility** - Works with any OpenAI client (Python, Node.js, curl, etc.)
-- **Agent mode with tool calling** - Execute local tools via bidirectional HTTP/2 streaming
-- **Supported tools**: `list_dir`, `read_file`, `edit_file`, `run_terminal_cmd`, `grep_search`, `file_search`, `glob_search`, `delete_file`
-- **Streaming responses** - SSE streaming for real-time output
-- **Multiple models** - Access Claude, GPT-4, and other models available in Cursor
+A local proxy that translates between the OpenAI API format and Cursor's proprietary ConnectRPC/protobuf protocol. Your tools talk OpenAI; the proxy talks Cursor.
+
+```
+opencode / any OpenAI client
+    |  HTTP/1.1 (OpenAI format)
+    v
+localhost:3010  (this proxy)
+    |  HTTP/2 bidirectional streaming (ConnectRPC + protobuf)
+    v
+api2.cursor.sh  ->  Claude, GPT, Gemini, Grok, etc.
+```
+
+The proxy does NOT execute tools. It translates tool calls from Cursor's format to OpenAI function calls, lets your client execute them, and passes results back.
 
 ## Quick Start
 
 ```bash
-# Install
 npm install
-
-# Get auth token (opens browser for Cursor login)
-npm run login
-
-# Start server
 npm start
-# Server runs on http://localhost:3010
+# Proxy runs on http://localhost:3010
 ```
 
-## Usage
+Authentication is automatic -- the proxy reads your Cursor token from the local SQLite storage (same token the Cursor IDE uses). No API keys to configure.
 
-### With OpenAI Python client
-
-```python
-from openai import OpenAI
-
-client = OpenAI(
-    api_key="YOUR_CURSOR_TOKEN",  # From `npm run login`
-    base_url="http://localhost:3010/v1"
-)
-
-# Simple chat
-response = client.chat.completions.create(
-    model="claude-3.5-sonnet",
-    messages=[{"role": "user", "content": "Hello!"}]
-)
-
-# Agent mode with tools
-response = client.chat.completions.create(
-    model="claude-3.5-sonnet",
-    messages=[{"role": "user", "content": "List files in /tmp"}],
-    tools=[{"type": "function", "function": {"name": "run_terminal_cmd"}}]
-)
-```
-
-### With curl
-
+If you don't have Cursor installed or need to log in fresh:
 ```bash
-# Chat completion
-curl http://localhost:3010/v1/chat/completions \
-  -H "Authorization: Bearer YOUR_CURSOR_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"model": "claude-3.5-sonnet", "messages": [{"role": "user", "content": "Hello"}]}'
-
-# With streaming
-curl http://localhost:3010/v1/chat/completions \
-  -H "Authorization: Bearer YOUR_CURSOR_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"model": "claude-3.5-sonnet", "messages": [{"role": "user", "content": "Hello"}], "stream": true}'
+npm run login   # Opens browser for Cursor OAuth
 ```
 
-### With Crush CLI
+## Usage with OpenCode
 
-[Crush](https://github.com/charmbracelet/crush) is a terminal-based AI assistant. Configure it to use this proxy:
+[OpenCode](https://opencode.ai) is a terminal-based AI coding agent. It works well with this proxy.
 
-**1. Install Crush**
-```bash
-# macOS/Linux
-brew install charmbracelet/tap/crush
+**1. Install opencode** (see [opencode.ai](https://opencode.ai) for options)
 
-# Or download from GitHub releases
-```
-
-**2. Configure provider** in `~/.local/share/crush/crush.json`:
+**2. Add `opencode.json`** to your project root:
 ```json
 {
-  "default_provider": "cursor-bridge",
-  "default_model": "claude-4.5-opus-high-thinking",
-  "providers": {
+  "provider": {
     "cursor-bridge": {
-      "kind": "openai",
-      "api_key": "YOUR_CURSOR_TOKEN",
-      "url": "http://localhost:3010/v1"
+      "name": "Cursor via Bridge",
+      "npm": "@ai-sdk/openai-compatible",
+      "models": {
+        "default": { "name": "Default" },
+        "claude-4.6-opus-high": { "name": "Claude 4.6 Opus" },
+        "claude-4.6-sonnet-medium": { "name": "Claude 4.6 Sonnet" },
+        "gpt-5.4-medium": { "name": "GPT-5.4" },
+        "gemini-3-flash": { "name": "Gemini 3 Flash" }
+      },
+      "options": {
+        "baseURL": "http://localhost:3010/v1"
+      }
     }
-  }
+  },
+  "$schema": "https://opencode.ai/config.json"
 }
 ```
 
-**3. Start the proxy** (in a separate terminal):
+**3. Start the proxy** and then opencode:
 ```bash
-cd cursor-to-openai
-npm start
+npm start &          # proxy in background
+opencode             # in your project directory
 ```
 
-**4. Run Crush**:
+Use Tab to switch to Build (agent) mode. OpenCode will read files, run commands, edit code -- all executed locally, with the model running through your Cursor subscription.
+
+### Choosing Models
+
+OpenCode doesn't auto-discover models, so you must list them in `opencode.json`. To see all available models:
+
 ```bash
-# Interactive TUI
-crush
-
-# One-shot query
-crush run "list files in current directory"
-
-# With specific model
-crush --model claude-3.5-sonnet run "explain this code"
+curl -s http://localhost:3010/v1/models | jq '.data[].id'
 ```
 
-Crush will automatically use agent mode with tool calling when appropriate, allowing the AI to execute commands, read files, and perform other tasks locally.
+There are 80+ models available including Claude 4.6 Opus/Sonnet, GPT-5.x, Gemini 3, Grok 4, and more. Add any model ID to the `models` object in your config.
+
+Some useful ones:
+
+| Model ID | Description |
+|----------|-------------|
+| `default` | Cursor's default (varies by subscription) |
+| `claude-4.6-opus-high` | Claude 4.6 Opus |
+| `claude-4.6-opus-high-thinking` | Claude 4.6 Opus with extended thinking |
+| `claude-4.6-sonnet-medium` | Claude 4.6 Sonnet |
+| `claude-4.5-haiku` | Claude 4.5 Haiku (fast, cheap) |
+| `gpt-5.4-medium` | GPT-5.4 |
+| `gpt-5.4-mini-medium` | GPT-5.4 Mini |
+| `gemini-3-flash` | Gemini 3 Flash |
+| `cursor-small` | Cursor's small model |
+
+## Usage with curl
+
+```bash
+curl http://localhost:3010/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{"model": "claude-4.6-sonnet-medium", "stream": true,
+       "messages": [{"role": "user", "content": "Hello"}]}'
+```
+
+No Authorization header needed -- the proxy uses the stored Cursor token.
 
 ## API Endpoints
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/v1/models` | GET | List available models |
-| `/v1/chat/completions` | POST | Chat completions with tool passthrough (opencode) |
-| `/v1/responses` | POST | Responses API with tool passthrough (crush) |
-| `/cursor/loginDeepControl` | GET | Get auth token via browser login |
+| `/v1/models` | GET | List available models (80+) |
+| `/v1/chat/completions` | POST | Chat Completions API with tool passthrough |
+| `/v1/responses` | POST | Responses API with tool passthrough |
 
 ## Agent Mode (Tool Passthrough)
 
-When `tools` array is provided in the request, the proxy opens a **bidirectional HTTP/2 stream** to Cursor and passes tool calls through to the client. The proxy does NOT execute tools locally — it translates between Cursor's protobuf tool format and the OpenAI function calling format, letting the client (opencode, crush, etc.) execute tools.
+When the client sends a `tools` array, the proxy opens a bidirectional HTTP/2 stream to Cursor and passes tool calls through. The client executes tools locally.
 
-**Tested clients:**
-- **[opencode](https://opencode.ai)** — via `/v1/chat/completions` (camelCase params: `filePath`, `oldString`, `newString`)
-- **[Crush](https://github.com/charmbracelet/crush)** — via `/v1/responses` (snake_case params: `file_path`, `old_string`, `new_string`)
+Cursor's tools are translated to standard OpenAI function calls:
 
-Tool mapping (Cursor `ClientSideToolV2` to client function names):
+| Cursor Tool | Function Name | What It Does |
+|-------------|--------------|--------------|
+| `read_file` (5) | `read` | Read file contents |
+| `list_dir` (6) | `bash` | List directory |
+| `edit_file_v2` (38) | `edit` | Edit file (patch-based) |
+| `run_terminal_cmd` (15) | `bash` | Run shell command |
+| `grep_search` (3) | `grep` | Search file contents |
+| `file_search` (8) | `glob` | Find files by name |
+| `glob_search` (42) | `glob` | Find files by pattern |
+| `delete_file` (11) | `bash` | Delete file |
 
-| Cursor Tool | Crush | Opencode |
-|-------------|-------|----------|
-| `read_file` (5) | `view` | `read` |
-| `list_dir` (6) | `ls` | `bash` |
-| `edit_file` (7) | `edit` | `edit` |
-| `edit_file_v2` (38) | `edit` | `edit` |
-| `run_terminal_cmd` (15) | `bash` | `bash` |
-| `grep_search` (3) | `grep` | `grep` |
-| `file_search` (8) | `glob` | `glob` |
-| `glob_search` (42) | `glob` | `glob` |
-| `delete_file` (11) | `bash` | `bash` |
+The proxy auto-detects the client's tool naming convention (camelCase for opencode, snake_case for others) and adapts parameter names accordingly.
 
-## Authentication
+## Known Limitations
 
-Get your Cursor token using one of these methods:
-
-### Method 1: CLI login
-```bash
-npm run login
-# Opens browser, returns token after login
-```
-
-### Method 2: From Cursor IDE
-Extract token from Cursor's IndexedDB or use the auth reader script.
-
-### Method 3: API endpoint
-```bash
-curl http://localhost:3010/cursor/loginDeepControl \
-  -H "Authorization: Bearer YOUR_WORKOS_SESSION_TOKEN"
-```
-
-## Architecture
-
-```
-Client (opencode/crush/SDK)
-    ↓ HTTP/1.1 (OpenAI format)
-cursor-to-openai proxy (localhost:3010)
-    ↓ HTTP/2 bidirectional streaming (ConnectRPC + protobuf)
-Cursor API (api2.cursor.sh)
-    ↓
-Claude/GPT models
-```
-
-For agent mode, the proxy:
-1. Encodes request with `isAgentic=true` and `supportedTools` (protobuf)
-2. Opens bidirectional HTTP/2 stream to Cursor API
-3. Translates Cursor tool calls to OpenAI function_call format, returns to client
-4. Client executes tool locally, sends result back to proxy
-5. Proxy translates result to Cursor protobuf, sends on the same bidi stream
-6. Repeats until model finishes (no more tool calls)
-
-## Development
-
-```bash
-# Run with auto-reload
-npm run dev
-
-# Regenerate protobuf JS
-npm run proto
-```
+- **Model selection in opencode:** Models must be listed explicitly in `opencode.json`. OpenCode does not auto-discover from `/v1/models`.
+- **EDIT_FILE_V2 whitespace:** Single-line edits without context may have a 1-space indentation offset due to ambiguity in Cursor's patch format. Multi-line edits with context are correct.
+- **Latency:** 5-10s per model response is normal -- that's Cursor's API, not the proxy. The proxy adds ~500ms per tool call round-trip for batching.
 
 ## Compatibility
 
-**Tested with Cursor 2.6.22** (also analysed against 3.0.9 decompiled source)
+Tested with Cursor 2.6.22 (also verified against 3.0.9 decompiled source).
 
-The protobuf schemas and protocol details were derived from reverse engineering Cursor's `workbench.desktop.main.js` and `extensionHostProcess.js`. Key discoveries:
-- `StreamUnifiedChatWithTools` RPC for bidirectional streaming
-- `ClientSideToolV2` enum with 46+ tool types
-- `isAgentic` (field 27) and `supportedTools` (field 29) for agent mode
-- EDIT_FILE_V2 two-phase ACK protocol with `EditFileV2Result.result_for_model`
-- Tool call/result message formats with per-tool field numbers
-
-For the full protocol specification, see [CURSOR-PROTOCOL-GUIDE.md](CURSOR-PROTOCOL-GUIDE.md).
-
-## Reverse Engineering
-
-The protocol analysis and standalone proof-of-concept implementations are available at:
-
-**[eisbaw/cursor_api_demo](https://github.com/eisbaw/cursor_api_demo)** - Python PoC with:
-- Protobuf wire format encoder/decoder
-- HTTP/2 bidirectional streaming client (h2 library)
-- Tool call detection and result encoding
-- Analysis documents (TASK-7, TASK-26, TASK-110)
+For the full protocol specification (authentication, HTTP/2 framing, protobuf structures, all 46+ tool enums, EDIT_FILE_V2 two-phase flow, 25 documented pitfalls), see [CURSOR-PROTOCOL-GUIDE.md](CURSOR-PROTOCOL-GUIDE.md).
 
 ## Credits
 
 - Fork of [JiuZ-Chn/Cursor-To-OpenAI](https://github.com/JiuZ-Chn/Cursor-To-OpenAI)
 - Based on [zhx47/cursor-api](https://github.com/zhx47/cursor-api)
-- Protocol analysis from [eisbaw/cursor_api_demo](https://github.com/eisbaw/cursor_api_demo)
+- Protocol analysis: [eisbaw/cursor_api_demo](https://github.com/eisbaw/cursor_api_demo)
 
 ## License
 
