@@ -91,9 +91,13 @@ const CURSOR_TO_CRUSH = {
         if (line.startsWith('@@')) { inHunk = true; continue; }
         if (line.startsWith('*** End')) break;
         if (!inHunk) continue;
-        if (line.startsWith('-')) oldLines.push(line.substring(1));
+        // Cursor patch format: "- content", "+ content", " context" (prefix + space + content)
+        if (line.startsWith('- ')) oldLines.push(line.substring(2));
+        else if (line.startsWith('+ ')) newLines.push(line.substring(2));
+        else if (line.startsWith('-')) oldLines.push(line.substring(1));  // no space after prefix
         else if (line.startsWith('+')) newLines.push(line.substring(1));
-        else { oldLines.push(line); newLines.push(line); } // context
+        else if (line.startsWith(' ')) { const c = line.substring(1); oldLines.push(c); newLines.push(c); }
+        else { oldLines.push(line); newLines.push(line); }
       }
 
       const oldStr = oldLines.join('\n');

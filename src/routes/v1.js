@@ -499,7 +499,7 @@ async function handleAgentStreamResponse(res, session, model) {
 
   // Read next batch of frames from Cursor
   const { toolCalls, textChunks, ended, buffer } = await session.client.readNextFrames(
-    session.stream, session.buffer, { batchDelayMs: 2000, timeoutMs: 120000 }
+    session.stream, session.buffer, { batchDelayMs: 500, timeoutMs: 120000 }
   );
   session.buffer = buffer;
   sessionManager.touch(session);
@@ -611,7 +611,7 @@ async function handleAgentStreamResponse(res, session, model) {
  */
 async function handleChatCompletionsAgentResponse(res, session, model, responseId, stream = false) {
   const { toolCalls, textChunks, ended, buffer } = await session.client.readNextFrames(
-    session.stream, session.buffer, { batchDelayMs: 2000, timeoutMs: 120000 }
+    session.stream, session.buffer, { batchDelayMs: 500, timeoutMs: 120000 }
   );
   session.buffer = buffer;
   sessionManager.touch(session);
