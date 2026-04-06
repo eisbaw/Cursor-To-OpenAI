@@ -162,11 +162,15 @@ router.post('/chat/completions', async (req, res) => {
           const toolEnum = storedTool ? storedTool.cursorToolEnum : toolMapping.crushToCursorEnum(crushName);
           const cursorCallId = sessionManager.getCursorId(msg.tool_call_id);
 
-          // For EDIT_FILE_V2 results, send is_applied=true in EditFileResult format
+          // For EDIT_FILE_V2 results, check if the edit succeeded or failed
           if (toolEnum === 38 || toolEnum === 7) {
-            console.log('Sending edit result (is_applied=true):', msg.tool_call_id);
+            const content = msg.content || '';
+            const isError = content.toLowerCase().includes('error') || content.toLowerCase().includes('not found');
+            const isApplied = !isError;
+            console.log(`Sending edit result (is_applied=${isApplied}):`, msg.tool_call_id, isError ? content.substring(0, 100) : '');
             let editResult = Buffer.alloc(0);
-            editResult = Buffer.concat([editResult, ProtobufEncoder.encodeField(2, 0, 1)]); // is_applied = true
+            editResult = Buffer.concat([editResult, ProtobufEncoder.encodeField(2, 0, isApplied ? 1 : 0)]);
+            if (isError) editResult = Buffer.concat([editResult, ProtobufEncoder.encodeField(3, 2, content)]); // field 3 = error message
             let resultMsg = Buffer.alloc(0);
             resultMsg = Buffer.concat([resultMsg, ProtobufEncoder.encodeField(1, 0, toolEnum)]);
             resultMsg = Buffer.concat([resultMsg, ProtobufEncoder.encodeField(35, 2, cursorCallId)]);
@@ -799,9 +803,12 @@ router.post('/responses', async (req, res) => {
           console.log('Sending tool result:', output.call_id, crushName, '->', toolEnum);
 
           if (toolEnum === 38 || toolEnum === 7) {
-            // Edit result: send is_applied=true
+            const content = output.output || '';
+            const isError = content.toLowerCase().includes('error') || content.toLowerCase().includes('not found');
+            const isApplied = !isError;
             let editResult = Buffer.alloc(0);
-            editResult = Buffer.concat([editResult, ProtobufEncoder.encodeField(2, 0, 1)]);
+            editResult = Buffer.concat([editResult, ProtobufEncoder.encodeField(2, 0, isApplied ? 1 : 0)]);
+            if (isError) editResult = Buffer.concat([editResult, ProtobufEncoder.encodeField(3, 2, content)]);
             let resultMsg = Buffer.alloc(0);
             resultMsg = Buffer.concat([resultMsg, ProtobufEncoder.encodeField(1, 0, toolEnum)]);
             resultMsg = Buffer.concat([resultMsg, ProtobufEncoder.encodeField(35, 2, cursorCallId)]);
