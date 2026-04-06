@@ -18,6 +18,9 @@ const sessions = new Map();
 // callId -> responseId  (reverse index for continuation lookup)
 const callIndex = new Map();
 
+// cleanCallId -> fullCursorCallId  (for sending results back with correct ID)
+const cursorIdMap = new Map();
+
 function create(responseId, stream, client) {
   const session = {
     responseId,
@@ -45,6 +48,14 @@ function getByCallId(callId) {
 
 function registerCallId(callId, responseId) {
   callIndex.set(callId, responseId);
+}
+
+function registerCursorId(cleanId, fullCursorId) {
+  cursorIdMap.set(cleanId, fullCursorId);
+}
+
+function getCursorId(cleanId) {
+  return cursorIdMap.get(cleanId) || cleanId;
 }
 
 function touch(session) {
@@ -90,4 +101,4 @@ const _timer = setInterval(() => {
 }, CLEANUP_INTERVAL_MS);
 _timer.unref(); // don't prevent process exit
 
-module.exports = { create, get, getByCallId, registerCallId, touch, destroy, count };
+module.exports = { create, get, getByCallId, registerCallId, registerCursorId, getCursorId, touch, destroy, count };

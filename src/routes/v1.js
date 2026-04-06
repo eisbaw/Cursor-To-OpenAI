@@ -122,7 +122,7 @@ router.post('/chat/completions', async (req, res) => {
       const toolResultMsgs = messages.filter(m => m.role === 'tool');
       let session = null;
       if (toolResultMsgs.length > 0) {
-        console.log('Tool result messages:', toolResultMsgs.map(m => ({ tool_call_id: m.tool_call_id, name: m.name, content: (m.content||'').substring(0, 60) })));
+        console.log('Tool result messages:', JSON.stringify(toolResultMsgs.map(m => ({ tool_call_id: m.tool_call_id, name: m.name, content: (m.content||'').substring(0, 120) }))).substring(0, 500));
         for (const msg of toolResultMsgs) {
           session = sessionManager.getByCallId(msg.tool_call_id);
           if (session) break;
@@ -143,13 +143,13 @@ router.post('/chat/completions', async (req, res) => {
         session.state = 'streaming';
 
         for (const msg of toolResultMsgs) {
-          // Find the original tool call to get the Cursor tool enum
-          // The tool_call_id was registered when we emitted the tool call
           const crushName = msg.name || 'bash';
           const toolEnum = toolMapping.crushToCursorEnum(crushName);
+          // Map clean call ID back to full Cursor ID
+          const cursorCallId = sessionManager.getCursorId(msg.tool_call_id);
           const resultData = { success: true, data: { content: msg.content || '', contents: msg.content || '', output: msg.content || '' } };
-          console.log('Sending tool result:', msg.tool_call_id, crushName, '->', toolEnum);
-          session.client.sendToolResultOnStream(session.stream, toolEnum, msg.tool_call_id, resultData);
+          console.log('Sending tool result:', msg.tool_call_id, '->', cursorCallId, crushName, '->', toolEnum);
+          session.client.sendToolResultOnStream(session.stream, toolEnum, cursorCallId, resultData);
         }
 
         // Read next frames from Cursor
@@ -570,10 +570,15 @@ async function handleAgentStreamResponse(res, session, model) {
     console.log('Emitting', passThroughCalls.length, 'tool calls to crush');
     for (const tc of passThroughCalls) {
       const { name: crushName, arguments: crushArgs } = toolMapping.cursorToCrush(tc.tool, tc.rawArgs);
-      const callId = tc.toolCallId;
+      // Clean tool_call_id - Cursor sends multi-line IDs, clients can't handle newlines
+      const callId = (tc.toolCallId || '').split('\n')[0];
       const fcId = `fc_${uuidv4()}`;
 
       sessionManager.registerCallId(callId, session.responseId);
+      if (tc.toolCallId !== callId) {
+        sessionManager.registerCallId(tc.toolCallId, session.responseId);
+        sessionManager.registerCursorId(callId, tc.toolCallId);
+      }
       // Register fallback keys crush might use
       sessionManager.registerCallId(crushName, session.responseId);
       if (tc.name) sessionManager.registerCallId(tc.name, session.responseId);
@@ -671,8 +676,12 @@ async function handleChatCompletionsAgentResponse(res, session, model, responseI
   // Build tool calls in OpenAI format
   const openaiToolCalls = passThroughCalls.map((tc) => {
     const { name: crushName, arguments: crushArgs } = toolMapping.cursorToCrush(tc.tool, tc.rawArgs);
-    const callId = tc.toolCallId;
+    const callId = (tc.toolCallId || '').split('\n')[0];
     sessionManager.registerCallId(callId, session.responseId);
+    if (tc.toolCallId !== callId) {
+      sessionManager.registerCallId(tc.toolCallId, session.responseId);
+      sessionManager.registerCursorId(callId, tc.toolCallId);
+    }
     sessionManager.registerCallId(crushName, session.responseId);
     if (tc.name) sessionManager.registerCallId(tc.name, session.responseId);
     console.log(`  Tool call: ${tc.name}(${tc.tool}) -> ${crushName}`);
