@@ -771,9 +771,8 @@ class BidiCursorClient extends EventEmitter {
       // Resolve strategy:
       // 1. Tool calls found -> settle for batchDelayMs then finish (to batch concurrent calls)
       // 2. Stream end/close -> finish immediately
-      // 3. Text idle: 15s of silence after receiving text (model done talking, no tool call coming)
-      // 4. Total timeout -> finish
-      // Key: do NOT resolve after just 2s of silence - model needs time to produce tool calls.
+      // 3. Text idle: 5s of silence after text (safety net; stream_end resolves faster in practice)
+      // 4. Total timeout (120s) -> finish
       const TEXT_IDLE_MS = 5000; // safety net; stream_end resolves faster in practice
 
       const scheduleSettleIfToolCalls = () => {

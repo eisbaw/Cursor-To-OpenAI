@@ -140,6 +140,7 @@ Connect to `api2.cursor.sh:443` via HTTP/2 with TLS.
 :scheme: https
 authorization: Bearer <access_token>
 connect-accept-encoding: gzip
+connect-content-encoding: gzip          (only when request body is gzip-compressed)
 connect-protocol-version: 1
 content-type: application/connect+proto
 user-agent: connect-es/1.6.1
@@ -208,7 +209,7 @@ def parse_frames(buffer):
     return frames, buffer[offset:]  # remaining buffer
 ```
 
-**Gotcha:** The request body MUST be gzip-compressed and framed with flag `0x01`. If you send uncompressed, the server may reject it or return unexpected errors. Always set the `connect-content-encoding: gzip` header alongside.
+**Note:** The request body can be sent either gzip-compressed (flag `0x01`) or uncompressed (flag `0x00`). The non-bidi path (unary requests) typically uses gzip with `connect-content-encoding: gzip` header. The bidi streaming path sends uncompressed frames and works fine. The server accepts both.
 
 ---
 
@@ -584,11 +585,12 @@ Field 1 (string): output     // stdout + stderr
 Field 2 (varint): exit_code  // 0 = success
 ```
 
-**EditFileResult (field 10) — legacy EDIT_FILE (enum 7):**
+**EditFileResult (field 10) — legacy EDIT_FILE (enum 7) and EDIT_FILE_V2 ACK:**
 ```
-Field 1 (bool): is_applied   // true if edit succeeded
-Field 2 (string): message    // optional status message
+Field 2 (bool): is_applied   // true if edit succeeded
 ```
+
+**Note:** EDIT_FILE (7) and EDIT_FILE_V2 (38) both use field 10 in the result `oneof`, but with different inner message schemas. The ACK for EDIT_FILE_V2 uses this legacy format (field 2 = is_applied). The final result for EDIT_FILE_V2 uses `EditFileV2Result` (field 10 = result_for_model). Don't confuse them.
 
 **EditFileV2Result (field 10) — EDIT_FILE_V2 (enum 38):**
 ```
@@ -650,11 +652,18 @@ ClientSideToolV2Result:
     Field 2 (varint): 1                   // is_applied = true
 ```
 
-**Critical:** The ACK MUST use `is_applied = true` at field 2 of the inner result. This is the legacy EditFileResult format, NOT the EditFileV2Result format. Cursor's ACK handler specifically checks this field to trigger sending the complete patch. Using `result_for_model` (field 10) for the ACK does NOT work.
+**Critical:** The ACK MUST use `is_applied = true` at field 2 of the inner result. This is NOT the `EditFileV2Result` format. Cursor's ACK handler specifically checks this field to trigger sending the complete patch. Using `result_for_model` (EditFileV2Result field 10) for the ACK does NOT work — Cursor won't send the complete patch.
 
 ### Phase 2: Complete Patch
 
-After receiving the ACK, Cursor sends a SECOND tool call (same `tool_call_id`) with the complete patch in `raw_args`:
+After receiving the ACK, Cursor sends the complete patch. This can arrive in two ways:
+
+1. **As a second tool call frame** (same `tool_call_id`, same tool enum 38) with the full patch in `raw_args`
+2. **As streamed text content** appended to the pending patch — text frames arrive with the `@@` hunks and `*** End Patch` marker
+
+Your parser must handle both. Buffer incoming data and check for `*** End Patch` to know when the patch is complete.
+
+The complete patch in `raw_args`:
 
 ```
 *** Begin Patch
@@ -742,10 +751,12 @@ The server closes the stream when the model finishes (no more tool calls or text
 
 ### Timeouts
 
-- **Model response:** Cursor typically responds within 5-15 seconds per tool call round
-- **Stream idle:** If no data arrives for 120+ seconds, the stream may have stalled. Close and retry.
-- **After sending tool result:** The model may take 5-15 seconds to process the result and produce the next response. Do not time out too early.
-- **HTTP/2 PING:** The HTTP/2 protocol sends automatic PING frames to keep the connection alive. Your HTTP/2 library should handle this.
+- **Model response:** Cursor typically responds within 5-10 seconds per tool call round. This is model inference time, not network latency.
+- **Tool call settle:** After a tool call arrives, wait ~500ms for more tool calls in the same batch before processing. Most tool calls are single, but Cursor occasionally sends 2+ concurrently.
+- **Text idle:** If only text has arrived and then 5 seconds of silence, the model is likely done. Resolve. (In practice, `stream_end` fires before this timer.)
+- **Total timeout:** 120 seconds. If nothing has resolved by then, the stream has stalled.
+- **After sending tool result:** The model takes 5-10 seconds to process the result. Do not time out too early.
+- **HTTP/2 PING:** Automatic keep-alive. Your HTTP/2 library should handle this.
 
 ---
 
