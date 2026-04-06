@@ -731,7 +731,7 @@ class BidiCursorClient extends EventEmitter {
    * Resolves with { toolCalls: [], textChunks: [], ended: bool }.
    * Waits up to batchDelayMs after last data for more tool calls in the same batch.
    */
-  readNextFrames(stream, existingBuffer = Buffer.alloc(0), { batchDelayMs = 400, timeoutMs = 120000 } = {}) {
+  readNextFrames(stream, existingBuffer = Buffer.alloc(0), { batchDelayMs = 800, timeoutMs = 120000 } = {}) {
     return new Promise((resolve) => {
       let buffer = existingBuffer;
       const toolCalls = [];
@@ -794,6 +794,12 @@ class BidiCursorClient extends EventEmitter {
           let data = payload;
           if (compressed) {
             try { data = require('zlib').gunzipSync(payload); } catch (e) { data = payload; }
+          }
+
+          // Log every frame when we have a pending patch
+          if (pendingPatchCall) {
+            const printable = data.toString('utf-8').replace(/[^\x20-\x7E\n\r\t]/g, '.');
+            console.log(`[frame after patch ${data.length}b]: ${printable.substring(0, 300)}`);
           }
 
           // Check for tool calls

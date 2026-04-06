@@ -68,14 +68,17 @@ const CURSOR_TO_CRUSH = {
     },
   },
   [ClientSideToolV2.EDIT_FILE_V2]: {
-    name: 'edit',
-    // EDIT_FILE_V2 sends a unified patch. rawArgs may have full or partial patch.
+    // EDIT_FILE_V2 is a "semantic edit" — the server sends a patch header
+    // with just the file path but no diff hunks. The actual edit is inferred
+    // from conversation context. We pass the raw patch to crush's write tool
+    // so crush can apply it or show it to the user.
+    name: 'bash',
     mapParams(p, rawArgs) {
       const patch = rawArgs || '';
       const fileMatch = patch.match(/\*\*\* Update File:\s*(.+)/);
       const filePath = fileMatch ? fileMatch[1].trim() : (p.target_file || '');
 
-      // Extract -/+ lines from @@ hunks
+      // Extract -/+ lines if present (rare — usually not in ChatService path)
       const lines = patch.split('\n');
       const oldLines = [];
       const newLines = [];
@@ -86,26 +89,24 @@ const CURSOR_TO_CRUSH = {
         if (!inHunk) continue;
         if (line.startsWith('-')) oldLines.push(line.substring(1));
         else if (line.startsWith('+')) newLines.push(line.substring(1));
-        else { oldLines.push(line); newLines.push(line); }
       }
 
-      // If we got complete hunk data, use structured edit
-      if (oldLines.length > 0 || newLines.length > 0) {
+      if (oldLines.length > 0 && newLines.length > 0) {
+        // We got actual diff data — use sed to apply it
+        const oldText = oldLines.join('\\n').replace(/'/g, "'\\''");
+        const newText = newLines.join('\\n').replace(/'/g, "'\\''");
         return {
-          file_path: filePath,
-          old_string: oldLines.join('\n'),
-          new_string: newLines.join('\n'),
+          command: `sed -i 's/${oldText}/${newText}/' '${filePath}'`,
+          description: `Apply patch to ${filePath}`,
         };
       }
 
-      // Incomplete patch (streaming truncation) - pass the raw patch
-      // as file_path so crush at least knows which file. Crush's edit
-      // tool will fail gracefully and the model can retry via bash.
+      // No hunk content (normal for ChatService path).
+      // Emit the raw patch as a description so the model/user sees what
+      // was intended, and let the model retry with explicit bash or edit.
       return {
-        file_path: filePath,
-        old_string: '',
-        new_string: '',
-        _raw_patch: patch,
+        command: `echo 'Patch intent for ${filePath}:' && echo '${patch.replace(/'/g, "'\\''")}'`,
+        description: `Show intended patch for ${filePath} (hunk data not available via ChatService)`,
       };
     },
   },
