@@ -18,7 +18,7 @@ const {
   STRUCTURED_AGENT_TOOLS,
 } = require('../utils/utils.js');
 const { ToolExecutor } = require('../utils/toolExecutor.js');
-const { BidiCursorClient } = require('../utils/bidiClient.js');
+const { BidiCursorClient, ProtobufEncoder } = require('../utils/bidiClient.js');
 const sessionManager = require('../utils/sessionManager.js');
 const toolMapping = require('../utils/toolMapping.js');
 
@@ -154,11 +154,24 @@ router.post('/chat/completions', async (req, res) => {
         for (const msg of toolResultMsgs) {
           const crushName = msg.name || 'bash';
           const toolEnum = toolMapping.crushToCursorEnum(crushName);
-          // Map clean call ID back to full Cursor ID
           const cursorCallId = sessionManager.getCursorId(msg.tool_call_id);
-          const resultData = { success: true, data: { content: msg.content || '', contents: msg.content || '', output: msg.content || '' } };
-          console.log('Sending tool result:', msg.tool_call_id, '->', cursorCallId, crushName, '->', toolEnum);
-          session.client.sendToolResultOnStream(session.stream, toolEnum, cursorCallId, resultData);
+
+          // For EDIT_FILE_V2 results, send is_applied=true in EditFileResult format
+          if (toolEnum === 38 || toolEnum === 7) {
+            console.log('Sending edit result (is_applied=true):', msg.tool_call_id);
+            let editResult = Buffer.alloc(0);
+            editResult = Buffer.concat([editResult, ProtobufEncoder.encodeField(2, 0, 1)]); // is_applied = true
+            let resultMsg = Buffer.alloc(0);
+            resultMsg = Buffer.concat([resultMsg, ProtobufEncoder.encodeField(1, 0, toolEnum)]);
+            resultMsg = Buffer.concat([resultMsg, ProtobufEncoder.encodeField(35, 2, cursorCallId)]);
+            resultMsg = Buffer.concat([resultMsg, ProtobufEncoder.encodeField(10, 2, editResult)]); // field 10 = edit_file_result
+            const wrapped = ProtobufEncoder.encodeField(2, 2, resultMsg);
+            session.stream.write(session.client.frameMessage(wrapped));
+          } else {
+            const resultData = { success: true, data: { content: msg.content || '', contents: msg.content || '', output: msg.content || '' } };
+            console.log('Sending tool result:', msg.tool_call_id, crushName, '->', toolEnum);
+            session.client.sendToolResultOnStream(session.stream, toolEnum, cursorCallId, resultData);
+          }
         }
 
         // Read next frames from Cursor
@@ -480,7 +493,7 @@ async function handleAgentStreamResponse(res, session, model) {
 
   // Read next batch of frames from Cursor
   const { toolCalls, textChunks, ended, buffer } = await session.client.readNextFrames(
-    session.stream, session.buffer, { batchDelayMs: 400, timeoutMs: 120000 }
+    session.stream, session.buffer, { batchDelayMs: 2000, timeoutMs: 120000 }
   );
   session.buffer = buffer;
   sessionManager.touch(session);
@@ -525,59 +538,9 @@ async function handleAgentStreamResponse(res, session, model) {
 
   // Emit tool calls
   if (toolCalls.length > 0) {
-    // Separate complete tool calls from incomplete EDIT_FILE_V2 calls
-    const passThroughCalls = [];
-    const rejectCalls = [];
-    for (const tc of toolCalls) {
-      if (tc.tool === 38 && (!tc.rawArgs || !tc.rawArgs.includes('@@'))) {
-        // EDIT_FILE_V2 without diff hunks - reject back to Cursor
-        rejectCalls.push(tc);
-      } else {
-        passThroughCalls.push(tc);
-      }
-    }
-
-    // Send rejections back to Cursor, asking for structured edit
-    for (const tc of rejectCalls) {
-      const errorResult = {
-        success: false,
-        data: { content: 'apply_patch is not available. You MUST use edit_file tool instead with parameters: target_file (string), old_string (exact text to find), new_string (replacement text). Do NOT use run_terminal_cmd for edits.' },
-      };
-      const toolEnum = tc.tool;
-      console.log(`Rejecting EDIT_FILE_V2 ${tc.toolCallId} back to Cursor`);
-      session.client.sendToolResultOnStream(session.stream, toolEnum, tc.toolCallId, errorResult);
-      sessionManager.registerCallId(tc.toolCallId, session.responseId);
-    }
-
-    // If we only had rejections and no pass-through calls, read next frames
-    // (the model should retry with a different tool)
-    if (passThroughCalls.length === 0 && rejectCalls.length > 0) {
-      console.log('All tool calls rejected, waiting for model retry...');
-      const next = await session.client.readNextFrames(
-        session.stream, session.buffer, { batchDelayMs: 800, timeoutMs: 120000 }
-      );
-      session.buffer = next.buffer;
-      // Recursively handle the next batch
-      // (could be more tool calls, text, or stream end)
-      toolCalls.length = 0;
-      toolCalls.push(...next.toolCalls);
-      textChunks.push(...next.textChunks);
-      if (next.ended) ended = true;
-
-      // Re-check for pass-through calls
-      for (const tc of next.toolCalls) {
-        if (tc.tool === 38 && (!tc.rawArgs || !tc.rawArgs.includes('@@'))) {
-          // Still EDIT_FILE_V2 - reject again
-          const err = { success: false, data: { content: 'apply_patch is not available. Use edit_file with target_file, old_string, new_string instead.' } };
-          session.client.sendToolResultOnStream(session.stream, tc.tool, tc.toolCallId, err);
-          sessionManager.registerCallId(tc.toolCallId, session.responseId);
-        } else {
-          passThroughCalls.push(tc);
-        }
-      }
-    }
-
-    console.log('Emitting', passThroughCalls.length, 'tool calls to crush');
+    // All tool calls pass through to client (including EDIT_FILE_V2)
+    const passThroughCalls = toolCalls.filter(tc => tc.name || tc.rawArgs);
+    console.log('Emitting', passThroughCalls.length, 'tool calls to client');
     for (const tc of passThroughCalls) {
       const { name: crushName, arguments: crushArgs } = toolMapping.cursorToCrush(tc.tool, tc.rawArgs, session.clientTools);
       // Clean tool_call_id - Cursor sends multi-line IDs, clients can't handle newlines
@@ -643,42 +606,13 @@ async function handleAgentStreamResponse(res, session, model) {
  */
 async function handleChatCompletionsAgentResponse(res, session, model, responseId, stream = false) {
   const { toolCalls, textChunks, ended, buffer } = await session.client.readNextFrames(
-    session.stream, session.buffer, { batchDelayMs: 800, timeoutMs: 120000 }
+    session.stream, session.buffer, { batchDelayMs: 2000, timeoutMs: 120000 }
   );
   session.buffer = buffer;
   sessionManager.touch(session);
 
-  // Separate EDIT_FILE_V2 calls (reject back to Cursor)
-  const passThroughCalls = [];
-  for (const tc of toolCalls) {
-    if (tc.tool === 38 && (!tc.rawArgs || !tc.rawArgs.includes('@@'))) {
-      console.log(`Rejecting EDIT_FILE_V2 ${tc.toolCallId} back to Cursor`);
-      const err = { success: false, data: { content: 'apply_patch is not available. You MUST use edit_file tool instead with parameters: target_file (string), old_string (exact text to find), new_string (replacement text). Do NOT use run_terminal_cmd for edits.' } };
-      session.client.sendToolResultOnStream(session.stream, tc.tool, tc.toolCallId, err);
-      sessionManager.registerCallId(tc.toolCallId, session.responseId);
-    } else {
-      passThroughCalls.push(tc);
-    }
-  }
-
-  // If only rejections, read next batch (model retries)
-  if (passThroughCalls.length === 0 && toolCalls.length > 0) {
-    console.log('All tool calls rejected, waiting for model retry...');
-    const next = await session.client.readNextFrames(
-      session.stream, session.buffer, { batchDelayMs: 800, timeoutMs: 120000 }
-    );
-    session.buffer = next.buffer;
-    for (const tc of next.toolCalls) {
-      if (tc.tool === 38 && (!tc.rawArgs || !tc.rawArgs.includes('@@'))) {
-        session.client.sendToolResultOnStream(session.stream, tc.tool, tc.toolCallId, { success: false, data: { content: 'apply_patch is not available. Use edit_file with target_file, old_string, new_string instead.' } });
-        sessionManager.registerCallId(tc.toolCallId, session.responseId);
-      } else {
-        passThroughCalls.push(tc);
-      }
-    }
-    textChunks.push(...next.textChunks);
-    if (next.ended) session.state = 'ended';
-  }
+  // All tool calls pass through (including EDIT_FILE_V2)
+  const passThroughCalls = toolCalls.filter(tc => tc.name || tc.rawArgs);
 
   // Build the response message
   const fullText = textChunks.join('');
@@ -860,9 +794,20 @@ router.post('/responses', async (req, res) => {
 
           console.log('Sending tool result:', output.call_id, crushName, '->', toolEnum);
 
-          // Encode result for Cursor
-          const resultData = { success: true, data: { content: output.output || '', contents: output.output || '', output: output.output || '' } };
-          session.client.sendToolResultOnStream(session.stream, toolEnum, output.call_id, resultData);
+          if (toolEnum === 38 || toolEnum === 7) {
+            // Edit result: send is_applied=true
+            let editResult = Buffer.alloc(0);
+            editResult = Buffer.concat([editResult, ProtobufEncoder.encodeField(2, 0, 1)]);
+            let resultMsg = Buffer.alloc(0);
+            resultMsg = Buffer.concat([resultMsg, ProtobufEncoder.encodeField(1, 0, toolEnum)]);
+            resultMsg = Buffer.concat([resultMsg, ProtobufEncoder.encodeField(35, 2, output.call_id)]);
+            resultMsg = Buffer.concat([resultMsg, ProtobufEncoder.encodeField(10, 2, editResult)]);
+            const wrapped = ProtobufEncoder.encodeField(2, 2, resultMsg);
+            session.stream.write(session.client.frameMessage(wrapped));
+          } else {
+            const resultData = { success: true, data: { content: output.output || '', contents: output.output || '', output: output.output || '' } };
+            session.client.sendToolResultOnStream(session.stream, toolEnum, output.call_id, resultData);
+          }
         }
 
         // Now listen for Cursor's next response (more tool calls or final text)
