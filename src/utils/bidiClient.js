@@ -744,9 +744,13 @@ class BidiCursorClient extends EventEmitter {
       let textIdleTimer = null;
       let pendingPatchCall = null;
 
-      const finish = () => {
+      const startTime = Date.now();
+
+      const finish = (reason) => {
         if (finished) return;
         finished = true;
+        const elapsed = Date.now() - startTime;
+        console.log(`[readNextFrames] resolved in ${elapsed}ms reason=${reason} tools=${toolCalls.length} text=${textChunks.length} ended=${ended}`);
         clearTimeout(settleTimer);
         clearTimeout(textIdleTimer);
         clearTimeout(totalTimer);
@@ -770,13 +774,13 @@ class BidiCursorClient extends EventEmitter {
       // 3. Text idle: 15s of silence after receiving text (model done talking, no tool call coming)
       // 4. Total timeout -> finish
       // Key: do NOT resolve after just 2s of silence - model needs time to produce tool calls.
-      const TEXT_IDLE_MS = 15000;
+      const TEXT_IDLE_MS = 5000; // safety net; stream_end resolves faster in practice
 
       const scheduleSettleIfToolCalls = () => {
         if (toolCalls.length > 0) {
           clearTimeout(settleTimer);
           clearTimeout(textIdleTimer);
-          settleTimer = setTimeout(finish, batchDelayMs);
+          settleTimer = setTimeout(() => finish('tool_settle'), batchDelayMs);
         }
       };
 
@@ -784,13 +788,13 @@ class BidiCursorClient extends EventEmitter {
         if (toolCalls.length > 0) return; // already settling on tool calls
         clearTimeout(textIdleTimer);
         if (textChunks.length > 0 && !pendingPatchCall) {
-          textIdleTimer = setTimeout(finish, TEXT_IDLE_MS);
+          textIdleTimer = setTimeout(() => finish('text_idle_15s'), TEXT_IDLE_MS);
         }
       };
 
       totalTimer = setTimeout(() => {
         ended = true;
-        finish();
+        finish('total_timeout');
       }, timeoutMs);
 
       // EDIT_FILE_V2 streams the patch: rawArgs has the header,
@@ -883,7 +887,7 @@ class BidiCursorClient extends EventEmitter {
 
       const onEnd = () => {
         ended = true;
-        finish();
+        finish('stream_end');
       };
 
       stream.on('data', onData);
