@@ -95,7 +95,7 @@ const ClientSideToolV2 = {
   GET_MCP_TOOLS: 63,
 };
 
-// Default tools for agent mode
+// Default tools for agent mode (includes bash)
 const DEFAULT_AGENT_TOOLS = [
   ClientSideToolV2.READ_FILE,
   ClientSideToolV2.LIST_DIR,
@@ -104,6 +104,20 @@ const DEFAULT_AGENT_TOOLS = [
   ClientSideToolV2.EDIT_FILE,
   ClientSideToolV2.FILE_SEARCH,
   ClientSideToolV2.GLOB_FILE_SEARCH,
+];
+
+// Structured tools only - no bash/terminal, forces model to use
+// edit_file, read_file, grep_search etc. instead of shell commands.
+// Used in passthrough mode to prevent unbounded shell execution.
+const STRUCTURED_AGENT_TOOLS = [
+  ClientSideToolV2.READ_FILE,
+  ClientSideToolV2.LIST_DIR,
+  ClientSideToolV2.RIPGREP_SEARCH,
+  ClientSideToolV2.EDIT_FILE,
+  ClientSideToolV2.EDIT_FILE_V2,
+  ClientSideToolV2.FILE_SEARCH,
+  ClientSideToolV2.GLOB_FILE_SEARCH,
+  ClientSideToolV2.DELETE_FILE,
 ];
 
 function generateCursorBody(messages, modelName, options = {}) {
@@ -453,4 +467,5 @@ module.exports = {
   refreshAccessToken,
   ClientSideToolV2,
   DEFAULT_AGENT_TOOLS,
+  STRUCTURED_AGENT_TOOLS,
 };

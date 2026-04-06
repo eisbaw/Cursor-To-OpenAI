@@ -15,6 +15,7 @@ const {
   refreshAccessToken,
   ClientSideToolV2,
   DEFAULT_AGENT_TOOLS,
+  STRUCTURED_AGENT_TOOLS,
 } = require('../utils/utils.js');
 const { ToolExecutor } = require('../utils/toolExecutor.js');
 const { BidiCursorClient } = require('../utils/bidiClient.js');
@@ -570,6 +571,7 @@ async function handleAgentStreamResponse(res, session, model) {
         call_id: callId, arguments: crushArgs, status: 'completed' });
 
       console.log(`  Tool call: ${tc.name}(${tc.tool}) -> ${crushName}(${crushArgs.substring(0, 80)})`);
+      if (tc.rawArgs) console.log(`    rawArgs: ${tc.rawArgs.substring(0, 200)}`);
       session.outputIndex++;
     }
 
@@ -720,12 +722,13 @@ router.post('/responses', async (req, res) => {
       }
 
       // --- Path A: Initial request — open new bidi stream ---
-      console.log('Agent passthrough mode, model:', cursorModel);
+      console.log('Agent passthrough mode (structured tools), model:', cursorModel);
       const bidiClient = new BidiCursorClient(process.cwd());
       const { stream: bidiStream } = await bidiClient.openAgentStream(
         authToken,
         messages.map(m => ({ role: m.role, content: m.content })),
         cursorModel,
+        STRUCTURED_AGENT_TOOLS,
       );
       console.log('Bidi stream opened for', responseId);
 

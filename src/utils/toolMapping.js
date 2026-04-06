@@ -67,6 +67,35 @@ const CURSOR_TO_CRUSH = {
       return { command: `rm ${filePath}`, description: 'Delete file' };
     },
   },
+  [ClientSideToolV2.EDIT_FILE_V2]: {
+    name: 'edit',
+    // EDIT_FILE_V2 sends a patch: *** Begin Patch / *** Update File: path / @@ / -old / +new / *** End Patch
+    mapParams(p, rawArgs) {
+      // Parse the patch format
+      const patch = rawArgs || '';
+      const fileMatch = patch.match(/\*\*\* Update File:\s*(.+)/);
+      const filePath = fileMatch ? fileMatch[1].trim() : (p.target_file || '');
+
+      // Extract -/+ lines from the @@ hunk
+      const lines = patch.split('\n');
+      const oldLines = [];
+      const newLines = [];
+      let inHunk = false;
+      for (const line of lines) {
+        if (line.startsWith('@@')) { inHunk = true; continue; }
+        if (line.startsWith('*** End')) break;
+        if (!inHunk) continue;
+        if (line.startsWith('-')) oldLines.push(line.substring(1));
+        else if (line.startsWith('+')) newLines.push(line.substring(1));
+        else { oldLines.push(line); newLines.push(line); } // context line
+      }
+      return {
+        file_path: filePath,
+        old_string: oldLines.join('\n'),
+        new_string: newLines.join('\n'),
+      };
+    },
+  },
 };
 
 // Crush function name -> Cursor tool enum (for result routing)
@@ -99,8 +128,10 @@ function cursorToCrush(toolEnum, rawArgs) {
   }
 
   let params = {};
-  try { params = JSON.parse(rawArgs || '{}'); } catch (e) {}
-  const crushParams = mapping.mapParams(params);
+  try { params = JSON.parse(rawArgs || '{}'); } catch (e) {
+    // rawArgs might not be JSON (e.g. EDIT_FILE_V2 sends a patch string)
+  }
+  const crushParams = mapping.mapParams(params, rawArgs || '');
   return { name: mapping.name, arguments: JSON.stringify(crushParams) };
 }
 
