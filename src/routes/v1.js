@@ -162,19 +162,34 @@ router.post('/chat/completions', async (req, res) => {
           const toolEnum = storedTool ? storedTool.cursorToolEnum : toolMapping.crushToCursorEnum(crushName);
           const cursorCallId = sessionManager.getCursorId(msg.tool_call_id);
 
-          // For EDIT_FILE_V2 results, check if the edit succeeded or failed
-          if (toolEnum === 38 || toolEnum === 7) {
+          // For edit results, encode the appropriate result format
+          if (toolEnum === 38) {
+            // EDIT_FILE_V2: EditFileV2Result
+            // Field 10 = result_for_model (what the model sees as tool output)
+            // Field 4 = rejected (bool, false = not rejected)
             const content = msg.content || '';
             const isError = content.toLowerCase().includes('error') || content.toLowerCase().includes('not found');
-            const isApplied = !isError;
-            console.log(`Sending edit result (is_applied=${isApplied}):`, msg.tool_call_id, isError ? content.substring(0, 100) : '');
+            const resultText = isError ? content : (content || 'Edit applied successfully.');
+            console.log(`Sending EditFileV2Result:`, msg.tool_call_id, resultText.substring(0, 80));
             let editResult = Buffer.alloc(0);
-            editResult = Buffer.concat([editResult, ProtobufEncoder.encodeField(2, 0, isApplied ? 1 : 0)]);
-            if (isError) editResult = Buffer.concat([editResult, ProtobufEncoder.encodeField(3, 2, content)]); // field 3 = error message
+            editResult = Buffer.concat([editResult, ProtobufEncoder.encodeField(10, 2, resultText)]); // result_for_model
+            if (isError) editResult = Buffer.concat([editResult, ProtobufEncoder.encodeField(4, 0, 1)]); // rejected = true
             let resultMsg = Buffer.alloc(0);
             resultMsg = Buffer.concat([resultMsg, ProtobufEncoder.encodeField(1, 0, toolEnum)]);
             resultMsg = Buffer.concat([resultMsg, ProtobufEncoder.encodeField(35, 2, cursorCallId)]);
-            resultMsg = Buffer.concat([resultMsg, ProtobufEncoder.encodeField(10, 2, editResult)]); // field 10 = edit_file_result
+            resultMsg = Buffer.concat([resultMsg, ProtobufEncoder.encodeField(10, 2, editResult)]); // edit_file_result oneof
+            const wrapped = ProtobufEncoder.encodeField(2, 2, resultMsg);
+            session.stream.write(session.client.frameMessage(wrapped));
+          } else if (toolEnum === 7) {
+            // EDIT_FILE (legacy): EditFileResult with is_applied
+            const content = msg.content || '';
+            const isError = content.toLowerCase().includes('error') || content.toLowerCase().includes('not found');
+            let editResult = Buffer.alloc(0);
+            editResult = Buffer.concat([editResult, ProtobufEncoder.encodeField(1, 0, isError ? 0 : 1)]); // is_applied
+            let resultMsg = Buffer.alloc(0);
+            resultMsg = Buffer.concat([resultMsg, ProtobufEncoder.encodeField(1, 0, toolEnum)]);
+            resultMsg = Buffer.concat([resultMsg, ProtobufEncoder.encodeField(35, 2, cursorCallId)]);
+            resultMsg = Buffer.concat([resultMsg, ProtobufEncoder.encodeField(10, 2, editResult)]);
             const wrapped = ProtobufEncoder.encodeField(2, 2, resultMsg);
             session.stream.write(session.client.frameMessage(wrapped));
           } else {
@@ -802,13 +817,24 @@ router.post('/responses', async (req, res) => {
           const cursorCallId = sessionManager.getCursorId(output.call_id);
           console.log('Sending tool result:', output.call_id, crushName, '->', toolEnum);
 
-          if (toolEnum === 38 || toolEnum === 7) {
+          if (toolEnum === 38) {
             const content = output.output || '';
             const isError = content.toLowerCase().includes('error') || content.toLowerCase().includes('not found');
-            const isApplied = !isError;
+            const resultText = isError ? content : (content || 'Edit applied successfully.');
             let editResult = Buffer.alloc(0);
-            editResult = Buffer.concat([editResult, ProtobufEncoder.encodeField(2, 0, isApplied ? 1 : 0)]);
-            if (isError) editResult = Buffer.concat([editResult, ProtobufEncoder.encodeField(3, 2, content)]);
+            editResult = Buffer.concat([editResult, ProtobufEncoder.encodeField(10, 2, resultText)]);
+            if (isError) editResult = Buffer.concat([editResult, ProtobufEncoder.encodeField(4, 0, 1)]);
+            let resultMsg = Buffer.alloc(0);
+            resultMsg = Buffer.concat([resultMsg, ProtobufEncoder.encodeField(1, 0, toolEnum)]);
+            resultMsg = Buffer.concat([resultMsg, ProtobufEncoder.encodeField(35, 2, cursorCallId)]);
+            resultMsg = Buffer.concat([resultMsg, ProtobufEncoder.encodeField(10, 2, editResult)]);
+            const wrapped = ProtobufEncoder.encodeField(2, 2, resultMsg);
+            session.stream.write(session.client.frameMessage(wrapped));
+          } else if (toolEnum === 7) {
+            const content = output.output || '';
+            const isError = content.toLowerCase().includes('error') || content.toLowerCase().includes('not found');
+            let editResult = Buffer.alloc(0);
+            editResult = Buffer.concat([editResult, ProtobufEncoder.encodeField(1, 0, isError ? 0 : 1)]);
             let resultMsg = Buffer.alloc(0);
             resultMsg = Buffer.concat([resultMsg, ProtobufEncoder.encodeField(1, 0, toolEnum)]);
             resultMsg = Buffer.concat([resultMsg, ProtobufEncoder.encodeField(35, 2, cursorCallId)]);

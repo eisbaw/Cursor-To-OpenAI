@@ -840,7 +840,10 @@ class BidiCursorClient extends EventEmitter {
                 // EDIT_FILE_V2 header only - ACK to Cursor and wait for complete patch
                 console.log('[EDIT_FILE_V2 header, ACKing and waiting for complete patch]');
                 pendingPatchCall = tc;
-                // Send is_applied=true so Cursor sends the complete patch
+                // Send ACK with is_applied=true so Cursor sends the complete patch
+                // Note: this uses the old EditFileResult format (field 2 = is_applied)
+                // because Cursor's ACK handler checks this specific field to trigger
+                // sending the complete patch with @@ hunks.
                 let er = ProtobufEncoder.encodeField(2, 0, 1); // is_applied = true
                 let rm = Buffer.concat([
                   ProtobufEncoder.encodeField(1, 0, 38),
