@@ -164,12 +164,42 @@ class ToolCallDecoder {
     return toolCalls;
   }
 
+  // Tool-specific param field numbers (from cursor_tool_manifest_v3_0_9.json)
+  static TOOL_PARAM_FIELDS = {
+    38: 12,  // EDIT_FILE_V2 -> editToolCall at field 12
+    40: 8,   // READ_FILE_V2 -> readToolCall at field 8
+    39: 14,  // LIST_DIR_V2 -> listDirToolCall at field 14
+  };
+
   static _extractToolCall(fields) {
     const tool = ProtobufDecoder.getInt(fields, this.FIELD_TOOL);
     const toolCallId = ProtobufDecoder.getString(fields, this.FIELD_TOOL_CALL_ID);
     const name = ProtobufDecoder.getString(fields, this.FIELD_NAME);
-    const rawArgs = ProtobufDecoder.getString(fields, this.FIELD_RAW_ARGS);
-    
+    let rawArgs = ProtobufDecoder.getString(fields, this.FIELD_RAW_ARGS);
+
+    // For V2 tools, the args may be in a tool-specific field, not field 10
+    if (tool !== null && this.TOOL_PARAM_FIELDS[tool]) {
+      const paramField = this.TOOL_PARAM_FIELDS[tool];
+      const paramBytes = ProtobufDecoder.getBytes(fields, paramField);
+      if (paramBytes) {
+        // Try to extract string content from nested message
+        try {
+          const paramFields = ProtobufDecoder.decodeMessage(paramBytes);
+          // Field 1 is typically the main content (patch text, file path, etc.)
+          const content = ProtobufDecoder.getString(paramFields, 1);
+          if (content && content.length > (rawArgs || '').length) {
+            rawArgs = content;
+          }
+        } catch (e) {
+          // Fall back to raw string extraction
+          const str = paramBytes.toString('utf-8');
+          if (str && str.length > (rawArgs || '').length) {
+            rawArgs = str;
+          }
+        }
+      }
+    }
+
     if (tool !== null && tool > 0 && toolCallId) {
       return { tool, toolCallId, name: name || '', rawArgs: rawArgs || '' };
     }

@@ -109,15 +109,20 @@ const DEFAULT_AGENT_TOOLS = [
 // Structured tools only - no bash/terminal, forces model to use
 // edit_file, read_file, grep_search etc. instead of shell commands.
 // Used in passthrough mode to prevent unbounded shell execution.
+// Structured tools + bash. The model needs bash for grep and other
+// operations that don't have structured equivalents. The structured
+// tools (edit_file, read_file, list_dir) are listed first to encourage
+// the model to prefer them, with bash as fallback.
 const STRUCTURED_AGENT_TOOLS = [
   ClientSideToolV2.READ_FILE,
   ClientSideToolV2.LIST_DIR,
-  ClientSideToolV2.RIPGREP_SEARCH,
   ClientSideToolV2.EDIT_FILE,
   ClientSideToolV2.EDIT_FILE_V2,
+  ClientSideToolV2.RIPGREP_SEARCH,
   ClientSideToolV2.FILE_SEARCH,
   ClientSideToolV2.GLOB_FILE_SEARCH,
   ClientSideToolV2.DELETE_FILE,
+  ClientSideToolV2.RUN_TERMINAL_COMMAND_V2,
 ];
 
 function generateCursorBody(messages, modelName, options = {}) {
