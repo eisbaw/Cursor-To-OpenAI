@@ -69,14 +69,13 @@ const CURSOR_TO_CRUSH = {
   },
   [ClientSideToolV2.EDIT_FILE_V2]: {
     name: 'edit',
-    // EDIT_FILE_V2 sends a patch: *** Begin Patch / *** Update File: path / @@ / -old / +new / *** End Patch
+    // EDIT_FILE_V2 sends a unified patch. rawArgs may have full or partial patch.
     mapParams(p, rawArgs) {
-      // Parse the patch format
       const patch = rawArgs || '';
       const fileMatch = patch.match(/\*\*\* Update File:\s*(.+)/);
       const filePath = fileMatch ? fileMatch[1].trim() : (p.target_file || '');
 
-      // Extract -/+ lines from the @@ hunk
+      // Extract -/+ lines from @@ hunks
       const lines = patch.split('\n');
       const oldLines = [];
       const newLines = [];
@@ -87,12 +86,26 @@ const CURSOR_TO_CRUSH = {
         if (!inHunk) continue;
         if (line.startsWith('-')) oldLines.push(line.substring(1));
         else if (line.startsWith('+')) newLines.push(line.substring(1));
-        else { oldLines.push(line); newLines.push(line); } // context line
+        else { oldLines.push(line); newLines.push(line); }
       }
+
+      // If we got complete hunk data, use structured edit
+      if (oldLines.length > 0 || newLines.length > 0) {
+        return {
+          file_path: filePath,
+          old_string: oldLines.join('\n'),
+          new_string: newLines.join('\n'),
+        };
+      }
+
+      // Incomplete patch (streaming truncation) - pass the raw patch
+      // as file_path so crush at least knows which file. Crush's edit
+      // tool will fail gracefully and the model can retry via bash.
       return {
         file_path: filePath,
-        old_string: oldLines.join('\n'),
-        new_string: newLines.join('\n'),
+        old_string: '',
+        new_string: '',
+        _raw_patch: patch,
       };
     },
   },

@@ -740,6 +740,7 @@ class BidiCursorClient extends EventEmitter {
       let ended = false;
       let batchTimer = null;
       let totalTimer = null;
+      let pendingPatchCall = null;
 
       const finish = () => {
         clearTimeout(batchTimer);
@@ -747,6 +748,14 @@ class BidiCursorClient extends EventEmitter {
         stream.removeListener('data', onData);
         stream.removeListener('end', onEnd);
         stream.removeListener('close', onEnd);
+        // Flush any buffered patch before finishing
+        if (pendingPatchCall) {
+          console.log('[EDIT_FILE_V2 flush on finish]:', pendingPatchCall.rawArgs.substring(0, 300));
+          let params = {};
+          try { params = JSON.parse(pendingPatchCall.rawArgs); } catch (e) {}
+          toolCalls.push({ ...pendingPatchCall, params });
+          pendingPatchCall = null;
+        }
         resolve({ toolCalls, textChunks, ended, buffer });
       };
 
@@ -765,6 +774,17 @@ class BidiCursorClient extends EventEmitter {
         finish();
       }, timeoutMs);
 
+      // EDIT_FILE_V2 streams the patch: rawArgs has the header,
+      // subsequent text frames have the hunk lines (@@, -, +, *** End Patch).
+      const flushPendingPatch = () => {
+        if (!pendingPatchCall) return;
+        console.log('[EDIT_FILE_V2 flush]:', pendingPatchCall.rawArgs.substring(0, 300));
+        let params = {};
+        try { params = JSON.parse(pendingPatchCall.rawArgs); } catch (e) {}
+        toolCalls.push({ ...pendingPatchCall, params });
+        pendingPatchCall = null;
+      };
+
       const onData = (chunk) => {
         buffer = Buffer.concat([buffer, chunk]);
         const { frames, remaining } = this.parseFrames(buffer);
@@ -778,19 +798,43 @@ class BidiCursorClient extends EventEmitter {
 
           // Check for tool calls
           const tcs = ToolCallDecoder.findToolCalls(data);
+
+          if (tcs.length > 0 && pendingPatchCall) {
+            // New tool call arrived while buffering patch - flush what we have
+            flushPendingPatch();
+          }
+
           for (const tc of tcs) {
             if (!toolCallsSeen.has(tc.toolCallId)) {
               toolCallsSeen.add(tc.toolCallId);
+              // Skip ghost frames (empty name + empty rawArgs)
+              if (!tc.name && !tc.rawArgs) continue;
+
+              if (tc.tool === 38 && tc.rawArgs && tc.rawArgs.includes('*** Begin Patch') && !tc.rawArgs.includes('*** End Patch')) {
+                // Start buffering patch - text frames will append hunk lines
+                pendingPatchCall = tc;
+                continue;
+              }
               let params = {};
               try { if (tc.rawArgs) params = JSON.parse(tc.rawArgs); } catch (e) {}
               toolCalls.push({ ...tc, params });
             }
           }
 
-          // Extract text if no tool calls in this frame
+          // Extract text content from non-tool-call frames
           if (tcs.length === 0) {
             const resp = ResponseDecoder.decode(data);
-            if (resp.text) textChunks.push(resp.text);
+            if (resp.text) {
+              if (pendingPatchCall) {
+                // Append streamed text to patch rawArgs
+                pendingPatchCall.rawArgs += resp.text;
+                if (pendingPatchCall.rawArgs.includes('*** End Patch')) {
+                  flushPendingPatch();
+                }
+              } else {
+                textChunks.push(resp.text);
+              }
+            }
           }
         }
 

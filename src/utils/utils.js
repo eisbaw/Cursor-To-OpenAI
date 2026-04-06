@@ -117,7 +117,6 @@ const STRUCTURED_AGENT_TOOLS = [
   ClientSideToolV2.READ_FILE,
   ClientSideToolV2.LIST_DIR,
   ClientSideToolV2.EDIT_FILE,
-  ClientSideToolV2.EDIT_FILE_V2,
   ClientSideToolV2.RIPGREP_SEARCH,
   ClientSideToolV2.FILE_SEARCH,
   ClientSideToolV2.GLOB_FILE_SEARCH,
