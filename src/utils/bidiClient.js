@@ -796,29 +796,41 @@ class BidiCursorClient extends EventEmitter {
             try { data = require('zlib').gunzipSync(payload); } catch (e) { data = payload; }
           }
 
-          // Log every frame when we have a pending patch
-          if (pendingPatchCall) {
-            const printable = data.toString('utf-8').replace(/[^\x20-\x7E\n\r\t]/g, '.');
-            console.log(`[frame after patch ${data.length}b]: ${printable.substring(0, 300)}`);
-          }
-
           // Check for tool calls
           const tcs = ToolCallDecoder.findToolCalls(data);
 
           if (tcs.length > 0 && pendingPatchCall) {
-            // New tool call arrived while buffering patch - flush what we have
-            flushPendingPatch();
+            // Check if follow-up has complete patch
+            for (const tc of tcs) {
+              if (tc.tool === 38 && tc.rawArgs && tc.rawArgs.includes('*** End Patch')) {
+                // Complete patch arrived! Use this one instead
+                console.log('[EDIT_FILE_V2 complete patch received]:', tc.rawArgs.substring(0, 200));
+                pendingPatchCall.rawArgs = tc.rawArgs;
+                flushPendingPatch();
+              }
+            }
+            if (pendingPatchCall) flushPendingPatch(); // flush if still pending
           }
 
           for (const tc of tcs) {
             if (!toolCallsSeen.has(tc.toolCallId)) {
               toolCallsSeen.add(tc.toolCallId);
-              // Skip ghost frames (empty name + empty rawArgs)
               if (!tc.name && !tc.rawArgs) continue;
 
               if (tc.tool === 38 && tc.rawArgs && tc.rawArgs.includes('*** Begin Patch') && !tc.rawArgs.includes('*** End Patch')) {
-                // Start buffering patch - text frames will append hunk lines
+                // EDIT_FILE_V2 header only - ACK to Cursor and wait for complete patch
+                console.log('[EDIT_FILE_V2 header, ACKing and waiting for complete patch]');
                 pendingPatchCall = tc;
+                // Send is_applied=true so Cursor sends the complete patch
+                const zlib = require('zlib');
+                let er = ProtobufEncoder.encodeField(2, 0, 1); // is_applied = true
+                let rm = Buffer.concat([
+                  ProtobufEncoder.encodeField(1, 0, 38),
+                  ProtobufEncoder.encodeField(35, 2, tc.toolCallId),
+                  ProtobufEncoder.encodeField(10, 2, er),
+                ]);
+                const wrapped = ProtobufEncoder.encodeField(2, 2, rm);
+                stream.write(this.frameMessage(wrapped));
                 continue;
               }
               let params = {};

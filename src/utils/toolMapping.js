@@ -75,17 +75,14 @@ const CURSOR_TO_CRUSH = {
     },
   },
   [ClientSideToolV2.EDIT_FILE_V2]: {
-    // EDIT_FILE_V2 is a "semantic edit" — the server sends a patch header
-    // with just the file path but no diff hunks. The actual edit is inferred
-    // from conversation context. We pass the raw patch to crush's write tool
-    // so crush can apply it or show it to the user.
-    name: 'bash',
+    // EDIT_FILE_V2 sends a unified patch. After ACK, Cursor sends the
+    // complete patch with @@ hunks. We parse -/+ lines into old_string/new_string.
+    name: 'edit',
     mapParams(p, rawArgs) {
       const patch = rawArgs || '';
       const fileMatch = patch.match(/\*\*\* Update File:\s*(.+)/);
       const filePath = fileMatch ? fileMatch[1].trim() : (p.target_file || '');
 
-      // Extract -/+ lines if present (rare — usually not in ChatService path)
       const lines = patch.split('\n');
       const oldLines = [];
       const newLines = [];
@@ -96,24 +93,14 @@ const CURSOR_TO_CRUSH = {
         if (!inHunk) continue;
         if (line.startsWith('-')) oldLines.push(line.substring(1));
         else if (line.startsWith('+')) newLines.push(line.substring(1));
+        else { oldLines.push(line); newLines.push(line); } // context
       }
 
-      if (oldLines.length > 0 && newLines.length > 0) {
-        // We got actual diff data — use sed to apply it
-        const oldText = oldLines.join('\\n').replace(/'/g, "'\\''");
-        const newText = newLines.join('\\n').replace(/'/g, "'\\''");
-        return {
-          command: `sed -i 's/${oldText}/${newText}/' '${filePath}'`,
-          description: `Apply patch to ${filePath}`,
-        };
-      }
-
-      // No hunk content (normal for ChatService path).
-      // Emit the raw patch as a description so the model/user sees what
-      // was intended, and let the model retry with explicit bash or edit.
       return {
-        command: `echo 'Patch intent for ${filePath}:' && echo '${patch.replace(/'/g, "'\\''")}'`,
-        description: `Show intended patch for ${filePath} (hunk data not available via ChatService)`,
+        file_path: filePath,
+        filePath: filePath,
+        old_string: oldLines.join('\n'),
+        new_string: newLines.join('\n'),
       };
     },
   },
