@@ -759,12 +759,23 @@ class BidiCursorClient extends EventEmitter {
         resolve({ toolCalls, textChunks, ended, buffer });
       };
 
+      let textOnlyWaits = 0;
+      const MAX_TEXT_ONLY_WAITS = 5; // wait up to 5 * batchDelayMs for tool calls after text
+
       const resetBatch = () => {
         clearTimeout(batchTimer);
         batchTimer = setTimeout(() => {
-          // No new data for batchDelayMs — emit what we have
-          if (toolCalls.length > 0 || textChunks.length > 0 || ended) {
+          if (ended || toolCalls.length > 0) {
             finish();
+          } else if (textChunks.length > 0 || pendingPatchCall) {
+            // Got text but no tool calls yet - the model may still be
+            // producing a tool call. Wait longer.
+            textOnlyWaits++;
+            if (textOnlyWaits >= MAX_TEXT_ONLY_WAITS) {
+              finish(); // give up after 5 extensions
+            } else {
+              resetBatch(); // wait another batchDelayMs
+            }
           }
         }, batchDelayMs);
       };
