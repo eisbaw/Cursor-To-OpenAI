@@ -738,12 +738,17 @@ class BidiCursorClient extends EventEmitter {
       const textChunks = [];
       const toolCallsSeen = new Set();
       let ended = false;
-      let batchTimer = null;
+      let finished = false;
+      let settleTimer = null;  // short timer to batch tool calls arriving together
       let totalTimer = null;
+      let textIdleTimer = null;
       let pendingPatchCall = null;
 
       const finish = () => {
-        clearTimeout(batchTimer);
+        if (finished) return;
+        finished = true;
+        clearTimeout(settleTimer);
+        clearTimeout(textIdleTimer);
         clearTimeout(totalTimer);
         stream.removeListener('data', onData);
         stream.removeListener('end', onEnd);
@@ -759,25 +764,28 @@ class BidiCursorClient extends EventEmitter {
         resolve({ toolCalls, textChunks, ended, buffer });
       };
 
-      let textOnlyWaits = 0;
-      const MAX_TEXT_ONLY_WAITS = 5; // wait up to 5 * batchDelayMs for tool calls after text
+      // Resolve strategy:
+      // 1. Tool calls found -> settle for batchDelayMs then finish (to batch concurrent calls)
+      // 2. Stream end/close -> finish immediately
+      // 3. Text idle: 15s of silence after receiving text (model done talking, no tool call coming)
+      // 4. Total timeout -> finish
+      // Key: do NOT resolve after just 2s of silence - model needs time to produce tool calls.
+      const TEXT_IDLE_MS = 15000;
 
-      const resetBatch = () => {
-        clearTimeout(batchTimer);
-        batchTimer = setTimeout(() => {
-          if (ended || toolCalls.length > 0) {
-            finish();
-          } else if (textChunks.length > 0 || pendingPatchCall) {
-            // Got text but no tool calls yet - the model may still be
-            // producing a tool call. Wait longer.
-            textOnlyWaits++;
-            if (textOnlyWaits >= MAX_TEXT_ONLY_WAITS) {
-              finish(); // give up after 5 extensions
-            } else {
-              resetBatch(); // wait another batchDelayMs
-            }
-          }
-        }, batchDelayMs);
+      const scheduleSettleIfToolCalls = () => {
+        if (toolCalls.length > 0) {
+          clearTimeout(settleTimer);
+          clearTimeout(textIdleTimer);
+          settleTimer = setTimeout(finish, batchDelayMs);
+        }
+      };
+
+      const resetTextIdle = () => {
+        if (toolCalls.length > 0) return; // already settling on tool calls
+        clearTimeout(textIdleTimer);
+        if (textChunks.length > 0 && !pendingPatchCall) {
+          textIdleTimer = setTimeout(finish, TEXT_IDLE_MS);
+        }
       };
 
       totalTimer = setTimeout(() => {
@@ -804,7 +812,7 @@ class BidiCursorClient extends EventEmitter {
         for (const { compressed, payload } of frames) {
           let data = payload;
           if (compressed) {
-            try { data = require('zlib').gunzipSync(payload); } catch (e) { data = payload; }
+            try { data = zlib.gunzipSync(payload); } catch (e) { data = payload; }
           }
 
           // Check for tool calls
@@ -833,7 +841,6 @@ class BidiCursorClient extends EventEmitter {
                 console.log('[EDIT_FILE_V2 header, ACKing and waiting for complete patch]');
                 pendingPatchCall = tc;
                 // Send is_applied=true so Cursor sends the complete patch
-                const zlib = require('zlib');
                 let er = ProtobufEncoder.encodeField(2, 0, 1); // is_applied = true
                 let rm = Buffer.concat([
                   ProtobufEncoder.encodeField(1, 0, 38),
@@ -867,10 +874,8 @@ class BidiCursorClient extends EventEmitter {
           }
         }
 
-        resetBatch();
-
-        // If we got tool calls, wait for the batch to settle before resolving
-        // If only text and no tool calls yet, also settle
+        scheduleSettleIfToolCalls();
+        resetTextIdle();
       };
 
       const onEnd = () => {
@@ -881,9 +886,6 @@ class BidiCursorClient extends EventEmitter {
       stream.on('data', onData);
       stream.on('end', onEnd);
       stream.on('close', onEnd);
-
-      // Start batch timer
-      resetBatch();
     });
   }
 

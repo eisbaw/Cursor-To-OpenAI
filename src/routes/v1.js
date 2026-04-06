@@ -127,8 +127,13 @@ router.post('/chat/completions', async (req, res) => {
     if (agentMode) {
       const responseId = `chatcmpl-${uuidv4()}`;
 
-      // Check for continuation: tool result messages in the conversation
-      const toolResultMsgs = messages.filter(m => m.role === 'tool');
+      // Check for continuation: only the LAST batch of tool result messages
+      // (opencode sends full history, we only want results from the most recent round)
+      const toolResultMsgs = [];
+      for (let i = messages.length - 1; i >= 0; i--) {
+        if (messages[i].role === 'tool') toolResultMsgs.unshift(messages[i]);
+        else if (toolResultMsgs.length > 0) break; // stop at first non-tool message
+      }
       let session = null;
       if (toolResultMsgs.length > 0) {
         console.log('Tool result messages:', JSON.stringify(toolResultMsgs.map(m => ({ tool_call_id: m.tool_call_id, name: m.name, content: (m.content||'').substring(0, 120) }))).substring(0, 500));
@@ -152,8 +157,9 @@ router.post('/chat/completions', async (req, res) => {
         session.state = 'streaming';
 
         for (const msg of toolResultMsgs) {
-          const crushName = msg.name || 'bash';
-          const toolEnum = toolMapping.crushToCursorEnum(crushName);
+          const storedTool = sessionManager.getCallTool(msg.tool_call_id);
+          const crushName = (storedTool && storedTool.crushName) || msg.name || 'bash';
+          const toolEnum = storedTool ? storedTool.cursorToolEnum : toolMapping.crushToCursorEnum(crushName);
           const cursorCallId = sessionManager.getCursorId(msg.tool_call_id);
 
           // For EDIT_FILE_V2 results, send is_applied=true in EditFileResult format
@@ -552,10 +558,9 @@ async function handleAgentStreamResponse(res, session, model) {
         sessionManager.registerCallId(tc.toolCallId, session.responseId);
         sessionManager.registerCursorId(callId, tc.toolCallId);
       }
-      // Register fallback keys crush might use
-      sessionManager.registerCallId(crushName, session.responseId);
-      if (tc.name) sessionManager.registerCallId(tc.name, session.responseId);
       sessionManager.registerCallId(fcId, session.responseId);
+      sessionManager.registerCallTool(callId, tc.tool, crushName);
+      sessionManager.registerCallTool(fcId, tc.tool, crushName);
 
       sse('response.output_item.added', {
         output_index: session.outputIndex,
@@ -626,8 +631,7 @@ async function handleChatCompletionsAgentResponse(res, session, model, responseI
       sessionManager.registerCallId(tc.toolCallId, session.responseId);
       sessionManager.registerCursorId(callId, tc.toolCallId);
     }
-    sessionManager.registerCallId(crushName, session.responseId);
-    if (tc.name) sessionManager.registerCallId(tc.name, session.responseId);
+    sessionManager.registerCallTool(callId, tc.tool, crushName);
     console.log(`  Tool call: ${tc.name}(${tc.tool}) -> ${crushName}`);
     return { id: callId, type: 'function', function: { name: crushName, arguments: crushArgs } };
   });
@@ -767,8 +771,6 @@ router.post('/responses', async (req, res) => {
         }
         // Fallback: if crush mangled the call_id, find the most recent waiting session
         if (!session) {
-          const allSessions = [];
-          // Try to find any session in waiting state
           for (const output of toolOutputs) {
             // call_id might contain newlines or be concatenated - try partial match
             const cleanId = (output.call_id || '').split('\n')[0];
@@ -789,9 +791,11 @@ router.post('/responses', async (req, res) => {
           const matchingCall = Array.isArray(input)
             ? input.find(item => item.type === 'function_call' && item.call_id === output.call_id)
             : null;
-          const crushName = matchingCall?.name || 'bash';
-          const toolEnum = toolMapping.crushToCursorEnum(crushName);
+          const storedTool = sessionManager.getCallTool(output.call_id);
+          const crushName = (storedTool && storedTool.crushName) || matchingCall?.name || 'bash';
+          const toolEnum = storedTool ? storedTool.cursorToolEnum : toolMapping.crushToCursorEnum(crushName);
 
+          const cursorCallId = sessionManager.getCursorId(output.call_id);
           console.log('Sending tool result:', output.call_id, crushName, '->', toolEnum);
 
           if (toolEnum === 38 || toolEnum === 7) {
@@ -800,13 +804,13 @@ router.post('/responses', async (req, res) => {
             editResult = Buffer.concat([editResult, ProtobufEncoder.encodeField(2, 0, 1)]);
             let resultMsg = Buffer.alloc(0);
             resultMsg = Buffer.concat([resultMsg, ProtobufEncoder.encodeField(1, 0, toolEnum)]);
-            resultMsg = Buffer.concat([resultMsg, ProtobufEncoder.encodeField(35, 2, output.call_id)]);
+            resultMsg = Buffer.concat([resultMsg, ProtobufEncoder.encodeField(35, 2, cursorCallId)]);
             resultMsg = Buffer.concat([resultMsg, ProtobufEncoder.encodeField(10, 2, editResult)]);
             const wrapped = ProtobufEncoder.encodeField(2, 2, resultMsg);
             session.stream.write(session.client.frameMessage(wrapped));
           } else {
             const resultData = { success: true, data: { content: output.output || '', contents: output.output || '', output: output.output || '' } };
-            session.client.sendToolResultOnStream(session.stream, toolEnum, output.call_id, resultData);
+            session.client.sendToolResultOnStream(session.stream, toolEnum, cursorCallId, resultData);
           }
         }
 

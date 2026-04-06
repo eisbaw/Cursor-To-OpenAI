@@ -35,8 +35,8 @@ const CURSOR_TO_CRUSH = {
       const filePath = p.target_file || p.relative_workspace_path || '';
       return {
         file_path: filePath, filePath,
-        old_string: p.old_string || '',
-        new_string: p.new_string || '',
+        old_string: p.old_string || '', oldString: p.old_string || '',
+        new_string: p.new_string || '', newString: p.new_string || '',
       };
     },
   },
@@ -71,7 +71,7 @@ const CURSOR_TO_CRUSH = {
     name: 'bash',
     mapParams(p) {
       const filePath = p.target_file || p.relative_workspace_path || '';
-      return { command: `rm ${filePath}`, description: 'Delete file' };
+      return { command: `rm -- ${JSON.stringify(filePath)}`, description: 'Delete file' };
     },
   },
   [ClientSideToolV2.EDIT_FILE_V2]: {
@@ -96,11 +96,12 @@ const CURSOR_TO_CRUSH = {
         else { oldLines.push(line); newLines.push(line); } // context
       }
 
+      const oldStr = oldLines.join('\n');
+      const newStr = newLines.join('\n');
       return {
-        file_path: filePath,
-        filePath: filePath,
-        old_string: oldLines.join('\n'),
-        new_string: newLines.join('\n'),
+        file_path: filePath, filePath,
+        old_string: oldStr, oldString: oldStr,
+        new_string: newStr, newString: newStr,
       };
     },
   },
@@ -181,11 +182,11 @@ function toBashFallback(toolEnum, params, rawArgs) {
   switch (toolEnum) {
     case ClientSideToolV2.LIST_DIR: {
       const dir = params.relative_workspace_path || params.directory_path || '.';
-      return { command: `ls -la ${dir}`, description: `List directory ${dir}` };
+      return { command: `ls -la -- ${JSON.stringify(dir)}`, description: `List directory` };
     }
     case ClientSideToolV2.READ_FILE: {
       const file = params.target_file || params.relative_workspace_path || '';
-      return { command: `cat '${file}'`, description: `Read file ${file}` };
+      return { command: `cat -- ${JSON.stringify(file)}`, description: `Read file` };
     }
     case ClientSideToolV2.EDIT_FILE_V2: {
       const patch = rawArgs || '';

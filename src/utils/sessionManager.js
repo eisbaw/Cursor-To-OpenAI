@@ -21,6 +21,9 @@ const callIndex = new Map();
 // cleanCallId -> fullCursorCallId  (for sending results back with correct ID)
 const cursorIdMap = new Map();
 
+// callId -> { cursorToolEnum, crushName }  (for mapping results back to correct tool type)
+const callToolMap = new Map();
+
 function create(responseId, stream, client) {
   const session = {
     responseId,
@@ -58,6 +61,14 @@ function getCursorId(cleanId) {
   return cursorIdMap.get(cleanId) || cleanId;
 }
 
+function registerCallTool(callId, cursorToolEnum, crushName) {
+  callToolMap.set(callId, { cursorToolEnum, crushName });
+}
+
+function getCallTool(callId) {
+  return callToolMap.get(callId) || null;
+}
+
 function touch(session) {
   session.lastActivity = Date.now();
 }
@@ -77,9 +88,13 @@ function destroy(responseId) {
     if (session.client) session.client.close();
   } catch (e) { /* ignore */ }
 
-  // Remove call index entries pointing to this session
+  // Remove call index entries pointing to this session, and associated maps
   for (const [cid, rid] of callIndex) {
-    if (rid === responseId) callIndex.delete(cid);
+    if (rid === responseId) {
+      callIndex.delete(cid);
+      cursorIdMap.delete(cid);
+      callToolMap.delete(cid);
+    }
   }
 
   sessions.delete(responseId);
@@ -101,4 +116,4 @@ const _timer = setInterval(() => {
 }, CLEANUP_INTERVAL_MS);
 _timer.unref(); // don't prevent process exit
 
-module.exports = { create, get, getByCallId, registerCallId, registerCursorId, getCursorId, touch, destroy, count };
+module.exports = { create, get, getByCallId, registerCallId, registerCursorId, getCursorId, registerCallTool, getCallTool, touch, destroy, count };
